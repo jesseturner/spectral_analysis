@@ -5,10 +5,9 @@ import xarray as xr
 import numpy as np
 
 cris_dir = "CrIS_data/"
-file_name = "SNDR.J1.CRIS.20240721T2354.m06.g240.L1B.std.v03_08.G.240722081402.nc"
+file_name = "SNDR.J1.CRIS.20240722T0930.m06.g096.L1B.std.v03_08.G.240722160620.nc"
 
 ds = xr.open_dataset(cris_dir+file_name)
-print(ds)
 
 
 
@@ -94,14 +93,19 @@ TB_sw = radiance_to_brightness_temp(radiance_sw, wnum_sw)  # Shortwave IR
 
 print(TB_lw)
 
+# Convert wavenumber to microns
+wl_lw = 10000/wnum_lw
+wl_mw = 10000/wnum_mw
+wl_sw = 10000/wnum_sw
+
 # Plot the brightness temperature spectra
 fig = plt.figure(figsize=(10, 5))
-plt.plot(wnum_lw, TB_lw, label="Longwave IR", color="red")
-plt.plot(wnum_mw, TB_mw, label="Midwave IR", color="blue")
-plt.plot(wnum_sw, TB_sw, label="Shortwave IR", color="green")
+plt.plot(wl_lw, TB_lw, label="Longwave IR", color="red")
+plt.plot(wl_mw, TB_mw, label="Midwave IR", color="blue")
+plt.plot(wl_sw, TB_sw, label="Shortwave IR", color="green")
 
 # Formatting the plot
-plt.xlabel("Wavenumber (cm⁻¹)")
+plt.xlabel("Wavenumber (μm)")
 plt.ylabel("Brightness Temperature (K)")
 plt.title("Brightness Temperature Spectrum from CrIS (First Observation)")
 plt.legend()

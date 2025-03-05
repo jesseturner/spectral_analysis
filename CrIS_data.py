@@ -13,6 +13,7 @@ auth = earthaccess.login()
 results = earthaccess.search_data(
     doi='10.5067/LVEKYTNSRNKP',
     temporal=("2024-07-22", "2024-07-22"), #2024-07-22
+    bounding_box=(-105.31, 39.98, -105.2, 40.062)
 )
 
 files = earthaccess.download(results, "CrIS_data")
