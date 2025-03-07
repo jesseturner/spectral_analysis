@@ -77,19 +77,27 @@ k_B = 1.380649e-23  # Boltzmann constant (J/K)
 
 # Convert radiance to brightness temperature (for each wavenumber)
 def radiance_to_brightness_temp(radiance, wavenumber):
-# Convert wavenumber from cm^-1 to Hz
-    nu = wavenumber * 1e2 * c  # cm^-1 to Hz
-
-    L = radiance * (1e-3 / 3e10)
+# Convert units
+    nu = wavenumber * 1e2 * c  # cm-1 to Hz
+    I = radiance * 1e3 # mJ m-2 to J m-2
     
 # Apply inverse Planck's law
-    TB = (h * nu / k_B) * ((np.log(((2 * h * nu**3) / (c**2 * L)) + 1))**(-1))
+    TB = (h * nu / k_B) * (np.exp(((2 * h * nu**3) / (c**2 * I)) + 1))
+    return TB
+
+def radiance_to_brightness_temp_wl(radiance, wavenumber):
+# Convert units
+    wl = 1/wavenumber / 1e2  # cm-1 to m
+    I = radiance * 1e3 # mJ m-2 to J m-2
+    
+# Apply inverse Planck's law
+    TB = (h * c / (k_B * wl)) * (np.exp(((2 * h * c**2) / (wl**5 * I)) + 1))
     return TB
 
 # Apply the conversion to each radiance spectrum
-TB_lw = radiance_to_brightness_temp(radiance_lw, wnum_lw)  # Longwave IR
-TB_mw = radiance_to_brightness_temp(radiance_mw, wnum_mw)  # Midwave IR
-TB_sw = radiance_to_brightness_temp(radiance_sw, wnum_sw)  # Shortwave IR
+TB_lw = radiance_to_brightness_temp_wl(radiance_lw, wnum_lw)  # Longwave IR
+TB_mw = radiance_to_brightness_temp_wl(radiance_mw, wnum_mw)  # Midwave IR
+TB_sw = radiance_to_brightness_temp_wl(radiance_sw, wnum_sw)  # Shortwave IR
 
 print(TB_lw)
 
