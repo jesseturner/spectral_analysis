@@ -6,6 +6,7 @@ import numpy as np
 
 cris_dir = "CrIS_data/"
 file_name = "SNDR.J1.CRIS.20240722T0930.m06.g096.L1B.std.v03_08.G.240722160620.nc"
+#file_name = "SNDR.J1.CRIS.20240722T1912.m06.g193.L1B.std.v03_08.G.240723022056.nc"
 
 ds = xr.open_dataset(cris_dir+file_name)
 
@@ -48,9 +49,14 @@ wnum_lw = ds["wnum_lw"].values  # Longwave IR
 wnum_mw = ds["wnum_mw"].values  # Midwave IR
 wnum_sw = ds["wnum_sw"].values  # Shortwave IR
 
-radiance_lw = ds["nedn_lw"].isel(fov=fov_idx).values  # Longwave radiance
-radiance_mw = ds["nedn_mw"].isel(fov=fov_idx).values  # Midwave radiance
-radiance_sw = ds["nedn_sw"].isel(fov=fov_idx).values  # Shortwave radiance
+radiance_lw = ds["rad_lw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Longwave radiance
+radiance_mw = ds["rad_mw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Midwave radiance
+radiance_sw = ds["rad_sw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Shortwave radiance
+
+# Convert wavenumber to wavelength
+wl_lw = 10000/wnum_lw # cm-1 to um
+wl_mw = 10000/wnum_mw
+wl_sw = 10000/wnum_sw
 
 # Plot the spectra
 fig = plt.figure(figsize=(10, 5))
@@ -75,36 +81,22 @@ h = 6.62607015e-34  # Planck's constant (J·s)
 c = 3e8  # Speed of light (m/s)
 k_B = 1.380649e-23  # Boltzmann constant (J/K)
 
-# Convert radiance to brightness temperature (for each wavenumber)
 def radiance_to_brightness_temp(radiance, wavenumber):
 # Convert units
-    nu = wavenumber * 1e2 * c  # cm-1 to Hz
-    I = radiance * 1e3 # mJ m-2 to J m-2
-    
-# Apply inverse Planck's law
-    TB = (h * nu / k_B) * (np.exp(((2 * h * nu**3) / (c**2 * I)) + 1))
-    return TB
-
-def radiance_to_brightness_temp_wl(radiance, wavenumber):
-# Convert units
     wl = 1 / wavenumber / 1e2 # cm-1 to m
-    I = radiance * 1000 * 10000 # this conversion hits the right ballpark, but needs unit justification
+    I = radiance / (1000*100) # mW/(m2 sr cm-1) to W/(m2 sr m)
     
 # Apply inverse Planck's law
     TB = (h * c) / (k_B * wl) / np.log((2 * h * c**2) / (wl**5 * I) + 1)
     return TB
 
 # Apply the conversion to each radiance spectrum
-TB_lw = radiance_to_brightness_temp_wl(radiance_lw, wnum_lw)  # Longwave IR
-TB_mw = radiance_to_brightness_temp_wl(radiance_mw, wnum_mw)  # Midwave IR
-TB_sw = radiance_to_brightness_temp_wl(radiance_sw, wnum_sw)  # Shortwave IR
+TB_lw = radiance_to_brightness_temp(radiance_lw, wnum_lw)  # Longwave IR
+TB_mw = radiance_to_brightness_temp(radiance_mw, wnum_mw)  # Midwave IR
+TB_sw = radiance_to_brightness_temp(radiance_sw, wnum_sw)  # Shortwave IR
 
 print(TB_lw)
 
-# Convert wavenumber to wavelength
-wl_lw = 10000/wnum_lw # cm-1 to um
-wl_mw = 10000/wnum_mw
-wl_sw = 10000/wnum_sw
 
 # Plot the brightness temperature spectra
 fig = plt.figure(figsize=(10, 5))
