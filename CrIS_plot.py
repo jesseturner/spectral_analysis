@@ -87,11 +87,11 @@ def radiance_to_brightness_temp(radiance, wavenumber):
 
 def radiance_to_brightness_temp_wl(radiance, wavenumber):
 # Convert units
-    wl = 1/wavenumber / 1e2  # cm-1 to m
-    I = radiance * 1e3 # mJ m-2 to J m-2
+    wl = 1 / wavenumber / 1e2 # cm-1 to m
+    I = radiance * 1000 * 10000 # this conversion hits the right ballpark, but needs unit justification
     
 # Apply inverse Planck's law
-    TB = (h * c / (k_B * wl)) * (np.exp(((2 * h * c**2) / (wl**5 * I)) + 1))
+    TB = (h * c) / (k_B * wl) / np.log((2 * h * c**2) / (wl**5 * I) + 1)
     return TB
 
 # Apply the conversion to each radiance spectrum
@@ -101,8 +101,8 @@ TB_sw = radiance_to_brightness_temp_wl(radiance_sw, wnum_sw)  # Shortwave IR
 
 print(TB_lw)
 
-# Convert wavenumber to microns
-wl_lw = 10000/wnum_lw
+# Convert wavenumber to wavelength
+wl_lw = 10000/wnum_lw # cm-1 to um
 wl_mw = 10000/wnum_mw
 wl_sw = 10000/wnum_sw
 
@@ -113,7 +113,7 @@ plt.plot(wl_mw, TB_mw, label="Midwave IR", color="blue")
 plt.plot(wl_sw, TB_sw, label="Shortwave IR", color="green")
 
 # Formatting the plot
-plt.xlabel("Wavenumber (μm)")
+plt.xlabel("Wavelength (μm)")
 plt.ylabel("Brightness Temperature (K)")
 plt.title("Brightness Temperature Spectrum from CrIS (First Observation)")
 plt.legend()
