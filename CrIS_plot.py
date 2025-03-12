@@ -75,20 +75,31 @@ fig.savefig("CrIS_figures/spectra_example", dpi=200, bbox_inches='tight')
 plt.close()
 
 
-#--- Plot the brightness temperature
-# Constants
-h = 6.62607015e-34  # Planck's constant (J·s)
-c = 3e8  # Speed of light (m/s)
-k_B = 1.380649e-23  # Boltzmann constant (J/K)
 
 def radiance_to_brightness_temp(radiance, wavenumber):
-# Convert units
+
+    # Convert units
     wl = 1 / wavenumber / 1e2 # cm-1 to m
-    I = radiance / (1000*100) # mW/(m2 sr cm-1) to W/(m2 sr m)
+    B = radiance / (1000/100) # mW/(m2 sr cm-1) to W/(m2 sr m)
+
+
+    # Constants
+    # h = 6.62607015e-34  # Planck's constant (J·s)
+    # c = 3e8  # Speed of light (m/s)
+    # k_B = 1.380649e-23  # Boltzmann constant (J/K)
+
+    c = 299792458 #m/s
+    h = 6.6260755e-34 #Js
+    k = 1.380658e-23 #J/K
+
+    c1 = 2*h*c*c  #W m2
+    c2 = h*c/k    #K m
+
+    # Apply inverse Planck's law
+    T_B = c2 / ( wl * np.log( c1/( (wl**5) * B ) + 1 ) )
+    #T_B = (h * c) / (k_B * wl) / np.log((2 * h * c**2) / (wl**5 * I) + 1)
     
-# Apply inverse Planck's law
-    TB = (h * c) / (k_B * wl) / np.log((2 * h * c**2) / (wl**5 * I) + 1)
-    return TB
+    return T_B
 
 # Apply the conversion to each radiance spectrum
 TB_lw = radiance_to_brightness_temp(radiance_lw, wnum_lw)  # Longwave IR
