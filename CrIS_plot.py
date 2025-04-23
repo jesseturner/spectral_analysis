@@ -6,36 +6,45 @@ import numpy as np
 import os
 
 cris_dir = "CrIS_data/"
-file_name = "SNDR.J1.CRIS.20240722T0930.m06.g096.L1B.std.v03_08.G.240722160620.nc"
-#file_name = "SNDR.J1.CRIS.20240722T1912.m06.g193.L1B.std.v03_08.G.240723022056.nc"
+#file_name = "SNDR.J1.CRIS.20240722T0930.m06.g096.L1B.std.v03_08.G.240722160620.nc"
+file_name = "SNDR.J1.CRIS.20240722T1912.m06.g193.L1B.std.v03_08.G.240723022056.nc"
 save_path = "CrIS_figures/"
+
+#--- Boulder CO
+target_lat = 40.02
+target_lon = -105.3
 
 ds = xr.open_dataset(cris_dir+file_name)
 os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
 
+#--- Isolating the Boulder CO point
+abs_diff = np.abs(ds['lat'] - target_lat) + np.abs(ds['lon'] - target_lon).values
+atrack_idx, xtrack_idx, fov_idx = np.unravel_index(abs_diff.argmin(), abs_diff.shape)
+ds_boulder = ds.isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx)
 
-#--- Plot satellite track
-lat = ds["lat"].values  # (atrack, xtrack, fov)
-lon = ds["lon"].values  # (atrack, xtrack, fov)
-# Reduce dimensions (e.g., take the central FOV for a simpler plot)
-central_fov = lat.shape[2] // 2  # Middle FOV index
+
+#--- Satellite track
+lat = ds["lat"].values
+lon = ds["lon"].values
+central_fov = 5  # Middle FOV index
 lat = lat[:, :, central_fov]  # Shape (atrack, xtrack)
 lon = lon[:, :, central_fov]
-# Create the figure and map projection
-fig, ax = plt.subplots(figsize=(10, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-# Add coastlines and features
-ax.add_feature(cfeature.COASTLINE, linewidth=0.8)
-ax.add_feature(cfeature.BORDERS, linewidth=0.5, linestyle="dotted")
-ax.add_feature(cfeature.LAND, facecolor="lightgray")
-ax.gridlines(draw_labels=True, linestyle="--")
-#ax.set_extent([np.min(lon)-50, np.max(lon)+50, np.min(lat)-10, np.max(lat)+10], crs=ccrs.PlateCarree())
-ax.set_extent([-180, 180, -90, 90], crs=ccrs.PlateCarree())
 
-# Plot the satellite track
-ax.scatter(lon, lat, s=1, color="red", transform=ccrs.PlateCarree(), label="Satellite Track")
-# Add a title and legend
-ax.set_title("Satellite Track from CrIS Instrument")
+
+fig, ax = plt.subplots(figsize=(10, 5), subplot_kw={"projection": ccrs.PlateCarree()})
+
+ax.scatter(lon, lat, s=3, alpha=0.5, color="#274060", transform=ccrs.PlateCarree(), label="Satellite Track (FOV = 5)")
+ax.scatter(ds_boulder['lon'], ds_boulder['lat'], s=9, color="red", transform=ccrs.PlateCarree(), label="Boulder CO")
+
+ax.add_feature(cfeature.COASTLINE, linewidth=0.8)
+ax.add_feature(cfeature.BORDERS, linewidth=0.5)
+ax.add_feature(cfeature.LAND, facecolor="none")
+ax.add_feature(cfeature.STATES, linewidth=0.5, edgecolor='grey')
+
+ax.set_extent([-125, -66.5, 24, 49], crs=ccrs.PlateCarree())
+
+ax.set_title("Satellite Track from CrIS Instrument \n 2024-07-22 19:12 - 19:18 UTC")
 ax.legend()
 
 fig.savefig(save_path+"satellite_track", dpi=200, bbox_inches='tight')
@@ -46,17 +55,16 @@ plt.close()
 #--- Plot example spectra
 #------ First observation is atrack=0, xtrack=0
 #------ Straight down is fov=5
-atrack_idx, xtrack_idx, fov_idx = 20, 20, 5
 
 #--- Wavenumbers for each CrIS range
-wnum_lw = ds["wnum_lw"].values  # Longwave IR
-wnum_mw = ds["wnum_mw"].values  # Midwave IR
-wnum_sw = ds["wnum_sw"].values  # Shortwave IR
+wnum_lw = ds_boulder["wnum_lw"].values  # Longwave IR
+wnum_mw = ds_boulder["wnum_mw"].values  # Midwave IR
+wnum_sw = ds_boulder["wnum_sw"].values  # Shortwave IR
 
 #------ Radiance in mW/(m² sr cm⁻¹)
-radiance_lw = ds["rad_lw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Longwave radiance
-radiance_mw = ds["rad_mw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Midwave radiance
-radiance_sw = ds["rad_sw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Shortwave radiance
+radiance_lw = ds_boulder["rad_lw"]
+radiance_mw = ds_boulder["rad_mw"]
+radiance_sw = ds_boulder["rad_sw"]
 
 #------ Convert wavenumber (cm⁻¹) to wavelength (um)
 wl_lw = 10000/wnum_lw
@@ -84,19 +92,22 @@ def planck_radiance(wnum, T):
 
 #------ Plot the spectra
 fig = plt.figure(figsize=(10, 5))
-plt.plot(wnum_lw, radiance_lw, label="Longwave IR", color="red")
-plt.plot(wnum_mw, radiance_mw, label="Midwave IR", color="blue")
-plt.plot(wnum_sw, radiance_sw, label="Shortwave IR", color="green")
+plt.plot(wnum_lw, radiance_lw, label="Longwave IR", color="black", linewidth=0.5)
+plt.plot(wnum_mw, radiance_mw, label="Midwave IR", color="black", linewidth=0.5)
+plt.plot(wnum_sw, radiance_sw, label="Shortwave IR", color="black", linewidth=0.5)
 
-plt.plot(wnum_lw, planck_radiance(wnum_lw, 290), label="290 K", color="grey")
-plt.plot(wnum_mw, planck_radiance(wnum_mw, 290), color="grey")
-plt.plot(wnum_sw, planck_radiance(wnum_sw, 290), color="grey")
+plt.plot(wnum_lw, planck_radiance(wnum_lw, 290), color="blue", linewidth=1)
+plt.plot(wnum_mw, planck_radiance(wnum_mw, 290), color="blue", linewidth=1)
+plt.plot(wnum_sw, planck_radiance(wnum_sw, 290), color="blue", linewidth=1)
+
+label_x = 1500
+label_y = np.interp(label_x, wnum_mw, planck_radiance(wnum_mw, 290))
+plt.text(label_x, label_y, "290 K Blackbody", color="blue", fontsize=10, va='center', rotation=-30)
 
 plt.xlabel("Wavenumber (cm⁻¹)")
 plt.ylabel("Radiance (mW/m²/sr/cm⁻¹)")
-plt.title("Infrared Spectrum from CrIS (First Observation)")
-plt.legend()
-plt.grid()
+plt.title("Infrared Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
+plt.grid(color='#d3d3d3')
 
 fig.savefig(save_path+"/spectra_rad_example", dpi=200, bbox_inches='tight')
 plt.close()
@@ -136,15 +147,14 @@ TB_sw = radiance_to_brightness_temp(radiance_sw, wnum_sw)
 
 #------ Plot brightness temperature by wavenumber
 fig = plt.figure(figsize=(10, 5))
-plt.plot(wnum_lw, TB_lw, label="Longwave IR", color="red")
-plt.plot(wnum_mw, TB_mw, label="Midwave IR", color="blue")
-plt.plot(wnum_sw, TB_sw, label="Shortwave IR", color="green")
+plt.plot(wnum_lw, TB_lw, label="Longwave IR", color="black", linewidth=0.5)
+plt.plot(wnum_mw, TB_mw, label="Midwave IR", color="black", linewidth=0.5)
+plt.plot(wnum_sw, TB_sw, label="Shortwave IR", color="black", linewidth=0.5)
 
 plt.xlabel("Wavenumber (cm-1)")
 plt.ylabel("Brightness Temperature (K)")
-plt.title("Brightness Temperature Spectrum from CrIS (First Observation)")
-plt.legend()
-plt.grid()
+plt.title("Brightness Temperature Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
+plt.grid(color='#d3d3d3')
 
 fig.savefig(save_path+"spectra_bt_example_wn", dpi=200, bbox_inches='tight')
 plt.close()
@@ -152,15 +162,14 @@ plt.close()
 
 #------ Plot brightness temperature by wavelength
 fig = plt.figure(figsize=(10, 5))
-plt.plot(wl_lw, TB_lw, label="Longwave IR", color="red")
-plt.plot(wl_mw, TB_mw, label="Midwave IR", color="blue")
-plt.plot(wl_sw, TB_sw, label="Shortwave IR", color="green")
+plt.plot(wl_lw, TB_lw, label="Longwave IR", color="black", linewidth=0.5)
+plt.plot(wl_mw, TB_mw, label="Midwave IR", color="black", linewidth=0.5)
+plt.plot(wl_sw, TB_sw, label="Shortwave IR", color="black", linewidth=0.5)
 
 plt.xlabel("Wavelength (μm)")
 plt.ylabel("Brightness Temperature (K)")
-plt.title("Brightness Temperature Spectrum from CrIS (First Observation)")
-plt.legend()
-plt.grid()
+plt.title("Brightness Temperature Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
+plt.grid(color='#d3d3d3')
 
 fig.savefig(save_path+"spectra_bt_example_wl", dpi=200, bbox_inches='tight')
 plt.close()
