@@ -43,113 +43,124 @@ plt.close()
 
 
 
-#--- Plot first spectra in dataset
-# Select the first observation (atrack=0, xtrack=0, fov=0)
+#--- Plot example spectra
+#------ First observation is atrack=0, xtrack=0
+#------ Straight down is fov=5
 atrack_idx, xtrack_idx, fov_idx = 20, 20, 5
 
-# Extract wavenumbers and corresponding radiance values
+#--- Wavenumbers for each CrIS range
 wnum_lw = ds["wnum_lw"].values  # Longwave IR
 wnum_mw = ds["wnum_mw"].values  # Midwave IR
 wnum_sw = ds["wnum_sw"].values  # Shortwave IR
 
+#------ Radiance in mW/(m² sr cm⁻¹)
 radiance_lw = ds["rad_lw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Longwave radiance
 radiance_mw = ds["rad_mw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Midwave radiance
 radiance_sw = ds["rad_sw"].isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).values  # Shortwave radiance
 
-print(ds["rad_lw"])
-
-# Convert wavenumber to wavelength
-wl_lw = 10000/wnum_lw # cm-1 to um
+#------ Convert wavenumber (cm⁻¹) to wavelength (um)
+wl_lw = 10000/wnum_lw
 wl_mw = 10000/wnum_mw
 wl_sw = 10000/wnum_sw
 
-# Plot the spectra
+#------ Create a comparison radiance for a reasonable surface temperature (using T = 290 K)
+def planck_radiance(wnum, T):
+    c = 2.99792458e8       # speed of light in m/s
+    h = 6.62607015e-34     # Planck's constant in J*s
+    k = 1.380649e-23       # Boltzmann constant in J/K
+    wnum_m = wnum * 100    # convert cm⁻¹ to m⁻¹
+    wl = 1 / wnum_m        # wavelength in m
+
+    # Planck function
+    rad = (2 * h * c**2 / wl**5) / (np.exp(h * c / (wl * k * T)) - 1)
+
+    # Convert to W/(m² sr cm⁻¹) from W/(m² sr m⁻¹)
+    rad_per_cm = rad / 100
+
+    # Convert to mW/(m² sr cm⁻¹)
+    rad_mW = rad_per_cm / 1000
+    return rad_mW
+
+
+#------ Plot the spectra
 fig = plt.figure(figsize=(10, 5))
 plt.plot(wnum_lw, radiance_lw, label="Longwave IR", color="red")
 plt.plot(wnum_mw, radiance_mw, label="Midwave IR", color="blue")
 plt.plot(wnum_sw, radiance_sw, label="Shortwave IR", color="green")
 
-# Formatting the plot
+plt.plot(wnum_lw, planck_radiance(wnum_lw, 290), label="290 K", color="grey")
+plt.plot(wnum_mw, planck_radiance(wnum_mw, 290), color="grey")
+plt.plot(wnum_sw, planck_radiance(wnum_sw, 290), color="grey")
+
 plt.xlabel("Wavenumber (cm⁻¹)")
 plt.ylabel("Radiance (mW/m²/sr/cm⁻¹)")
 plt.title("Infrared Spectrum from CrIS (First Observation)")
 plt.legend()
 plt.grid()
 
-fig.savefig(save_path+"/spectra_example", dpi=200, bbox_inches='tight')
+fig.savefig(save_path+"/spectra_rad_example", dpi=200, bbox_inches='tight')
 plt.close()
 
-
-
-# def radiance_to_brightness_temp(radiance, wavenumber):
-
-#     # Convert units
-#     wl = 1 / wavenumber / 1e2 # cm-1 to m
-#     B = radiance / (1000/100) # mW/(m2 sr cm-1) to W/(m2 sr m)
-
-
-#     # Constants
-#     # h = 6.62607015e-34  # Planck's constant (J·s)
-#     # c = 3e8  # Speed of light (m/s)
-#     # k_B = 1.380649e-23  # Boltzmann constant (J/K)
-
-#     c = 299792458 #m/s
-#     h = 6.6260755e-34 #Js
-#     k = 1.380658e-23 #J/K
-
-#     c1 = 2*h*c*c  #W m2
-#     c2 = h*c/k    #K m
-
-#     # Apply inverse Planck's law
-#     T_B = c2 / ( wl * np.log( c1/( (wl**5) * B ) + 1 ) )
-#     #T_B = (h * c) / (k_B * wl) / np.log((2 * h * c**2) / (wl**5 * I) + 1)
-    
-#     return T_B
-
+#------ Get brightness temperature
 def radiance_to_brightness_temp(radiance, wavenumber):
-
-    # Convert units
-    wl = (10000 / wavenumber) * 1e-6 # cm-1 to m
-    B = radiance/1000 # mW/(m2 sr cm-1) to W/(m2 sr m)
-
+    # Convert wavenumber (cm^-1) to wavelength (meters)
+    wl = (1 / (wavenumber*100))  # cm^-1 to m
+    
+    # Convert radiance to W/(m²·sr·m)
+    B = radiance * 100 * 1000  # mW/(m²·sr·cm^-1) to W/(m²·sr·m)
+    
     # Constants
-    c = 2.99792458e8       # m/s
-    h = 6.62607015e-34     # J*s
-    k = 1.380649e-23       # J/K
-
+    c = 2.99792458e8       # speed of light in m/s
+    h = 6.62607015e-34     # Planck's constant in J·s
+    k = 1.380649e-23       # Boltzmann constant in J/K
+    
     # Planck constants
     c1 = 2 * h * c**2      # W·m²·sr⁻¹
     c2 = h * c / k         # K·m
-
-    # Apply inverse Planck's law
+    
+    # Apply inverse Planck's law to get brightness temperature
     T_B = c2 / (wl * np.log(c1 / (wl**5 * B) + 1))
     
     return T_B
 
-# Apply the conversion to each radiance spectrum
-TB_lw = radiance_to_brightness_temp(radiance_lw, wnum_lw)  # Longwave IR
-TB_mw = radiance_to_brightness_temp(radiance_mw, wnum_mw)  # Midwave IR
-TB_sw = radiance_to_brightness_temp(radiance_sw, wnum_sw)  # Shortwave IR
+#------ Get brightness temperature from CrIS radiance data
+TB_lw = radiance_to_brightness_temp(radiance_lw, wnum_lw)
+TB_mw = radiance_to_brightness_temp(radiance_mw, wnum_mw)
+TB_sw = radiance_to_brightness_temp(radiance_sw, wnum_sw)
 
-print(TB_lw)
+#--- Examples used for debugging
+#------ Set temperature to 290 K and radiance calculation
+# print(f"wavenumber: {wnum_lw[10]}, radiance {planck_radiance(wnum_lw[10], 290):.2f}, brightness temperature: {radiance_to_brightness_temp(planck_radiance(wnum_lw[10], 290), wnum_lw[10]):.2f}")
+#------ Using index=10 CrIS radiance
+# print(f"wavenumber: {wnum_lw[10]}, radiance {radiance_lw[10]:.2f}, brightness temperature: {radiance_to_brightness_temp(radiance_lw[10], wnum_lw[10]):.2f}")
 
-
-# Plot the brightness temperature spectra
+#------ Plot brightness temperature by wavenumber
 fig = plt.figure(figsize=(10, 5))
-# plt.plot(wl_lw, TB_lw, label="Longwave IR", color="red")
-# plt.plot(wl_mw, TB_mw, label="Midwave IR", color="blue")
-# plt.plot(wl_sw, TB_sw, label="Shortwave IR", color="green")
 plt.plot(wnum_lw, TB_lw, label="Longwave IR", color="red")
 plt.plot(wnum_mw, TB_mw, label="Midwave IR", color="blue")
 plt.plot(wnum_sw, TB_sw, label="Shortwave IR", color="green")
 
-# Formatting the plot
-#plt.xlabel("Wavelength (μm)")
 plt.xlabel("Wavenumber (cm-1)")
 plt.ylabel("Brightness Temperature (K)")
 plt.title("Brightness Temperature Spectrum from CrIS (First Observation)")
 plt.legend()
 plt.grid()
 
-fig.savefig(save_path+"spectra_bt_example", dpi=200, bbox_inches='tight')
+fig.savefig(save_path+"spectra_bt_example_wn", dpi=200, bbox_inches='tight')
+plt.close()
+
+
+#------ Plot brightness temperature by wavelength
+fig = plt.figure(figsize=(10, 5))
+plt.plot(wl_lw, TB_lw, label="Longwave IR", color="red")
+plt.plot(wl_mw, TB_mw, label="Midwave IR", color="blue")
+plt.plot(wl_sw, TB_sw, label="Shortwave IR", color="green")
+
+plt.xlabel("Wavelength (μm)")
+plt.ylabel("Brightness Temperature (K)")
+plt.title("Brightness Temperature Spectrum from CrIS (First Observation)")
+plt.legend()
+plt.grid()
+
+fig.savefig(save_path+"spectra_bt_example_wl", dpi=200, bbox_inches='tight')
 plt.close()
