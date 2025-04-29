@@ -12,7 +12,7 @@ auth = earthaccess.login()
 #------ NOAA-20 / JPSS-1 Full Spectral Resolution 10.5067/LVEKYTNSRNKP
 results = earthaccess.search_data(
     doi='10.5067/LVEKYTNSRNKP',
-    temporal=("2024-07-22", "2024-07-22"), #2024-07-22
+    temporal=("2024-08-18", "2024-08-18"), 
     bounding_box=(-105.31, 39.98, -105.2, 40.062)
 )
 
