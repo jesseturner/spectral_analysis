@@ -6,19 +6,14 @@ import numpy as np
 import matplotlib.patches as patches
 
 cris_dir = "CrIS_data/"
-file_name = "SNDR.J1.CRIS.20240722T0930.m06.g096.L1B.std.v03_08.G.240722160620.nc"
+file_name = "SNDR.J1.CRIS.20240722T1912.m06.g193.L1B.std.v03_08.G.240723022056.nc"
+wnum_sel = 900 #cm-1 (~ 11um)
 
 ds = xr.open_dataset(cris_dir+file_name)
 
 #--- Subset to wavenumber of 900 cm-1 (~ 11um)
-#------- Selecting the first field of view (chosen arbitrarily, I don't know what this means)
-ds_wn_900 = ds.sel(wnum_lw=900, fov=0)
-
-#--- Boulder CO
-# latitude_north = 40.062
-# latitude_south = 39.98
-# longitude_west = -105.31
-# longitude_east = -105.2
+#------- Selecting the first field of view, which I believe is the one used for the spectra
+ds_wn_900 = ds.sel(wnum_lw=wnum_sel, fov=1)
 
 #--- Colorado
 latitude_north = 41.0
@@ -26,37 +21,52 @@ latitude_south = 37.0
 longitude_west = -109.05
 longitude_east = -102.04
 
-print("rad LW:", np.shape(ds_wn_900['rad_lw'].values))
-print("nedn LW:", np.shape(ds_wn_900['nedn_lw'].values))
+print("shape of LW radiation data:", np.shape(ds_wn_900['rad_lw'].values))
 
-#--- Plot the radiance
+#--- Calculate the brightness temperature
+
+def radiance_to_brightness_temp(radiance, wavenumber):
+    # Convert wavenumber (cm^-1) to wavelength (meters)
+    wl = (1 / (wavenumber*100))  # cm^-1 to m
+    
+    # Convert radiance to W/(m²·sr·m)
+    B = radiance * 100 * 1000  # mW/(m²·sr·cm^-1) to W/(m²·sr·m)
+    
+    # Constants
+    c = 2.99792458e8       # speed of light in m/s
+    h = 6.62607015e-34     # Planck's constant in J·s
+    k = 1.380649e-23       # Boltzmann constant in J/K
+    
+    # Planck constants
+    c1 = 2 * h * c**2      # W·m²·sr⁻¹
+    c2 = h * c / k         # K·m
+    
+    # Apply inverse Planck's law to get brightness temperature
+    T_B = c2 / (wl * np.log(c1 / (wl**5 * B) + 1))
+    
+    return T_B
+
+b_temp_900 = radiance_to_brightness_temp(ds_wn_900['rad_lw'].values, wnum_sel)
+
+#--- Plot the brightness temperature
 projection=ccrs.PlateCarree(central_longitude=0)
 fig,ax=plt.subplots(1, figsize=(12,12),subplot_kw={'projection': projection})
-levels = np.linspace(np.min(ds_wn_900['rad_lw'].values), np.max(ds_wn_900['rad_lw'].values), 30)
 
-c = ax.pcolormesh(ds_wn_900['lon'], ds_wn_900['lat'], ds_wn_900['rad_lw'], cmap='Greys', shading='auto')
-#c=ax.contourf(ds_wn_900['lon'], ds_wn_900['lat'], ds_wn_900['rad_lw'], cmap='Greys', extend='both', levels=levels)
+c = ax.pcolormesh(ds_wn_900['lon'], ds_wn_900['lat'], b_temp_900, cmap='Greys', shading='auto')
 
 clb = plt.colorbar(c, shrink=0.4, pad=0.02, ax=ax)
 clb.ax.tick_params(labelsize=15)
-clb.set_label('Radiance (mW/m²/sr/cm⁻¹)', fontsize=15)
+clb.set_label('(K)', fontsize=15)
 
-#--- Set the geographical limits of the figure
 ax.set_extent([longitude_west, longitude_east, latitude_south, latitude_north], crs=ccrs.PlateCarree())
-
-#--- Coastlines
 ax.coastlines(resolution='50m', color='gray', linewidth=1)
-
-#--- Counties
 counties = cfeature.NaturalEarthFeature(
     category='cultural',
     name='admin_2_counties',
     scale='10m',
     facecolor='none')
-#ax.add_feature(counties, edgecolor='gray', linewidth=1)
-
-#--- States
-ax.add_feature(cfeature.STATES, edgecolor='gray', linewidth=1, zorder=6)
+ax.add_feature(counties, edgecolor='white', linewidth=1)
+ax.add_feature(cfeature.STATES, edgecolor='white', linewidth=1, zorder=6)
 
 
 #--- Boulder CO bounding box
@@ -82,14 +92,14 @@ ax.text(
 )
 
 #--- Lat and Lon lines
-gl = ax.gridlines(draw_labels=True, linewidth=1, color='gray', linestyle='--', zorder=5)
-gl.top_labels = False
-gl.right_labels = False
-ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f'{x:.1f}°E' if x >= 0 else f'{-x:.1f}°W'))
-ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, pos: f'{y:.1f}°N' if y >= 0 else f'{-y:.1f}°S'))
+#gl = ax.gridlines(draw_labels=True, linewidth=1, color='gray', linestyle='--', zorder=5)
+#gl.top_labels = False
+#gl.right_labels = False
+#ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f'{x:.1f}°E' if x >= 0 else f'{-x:.1f}°W'))
+#ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, pos: f'{y:.1f}°N' if y >= 0 else f'{-y:.1f}°S'))
 
 #--- Title
-ax.set_title("Boulder, CO at 900 cm$^{-1}$ (~11 μm)", fontsize=20, pad=10)
+ax.set_title("CrIS Brightness Temperature (900 cm$^{-1}$, ~11 μm) \n (2024-07-22 ~19:17 UTC)", fontsize=20, pad=10)
 
 fig.savefig("CrIS_figures/spatial_20240722", dpi=200, bbox_inches='tight')
 plt.close()
