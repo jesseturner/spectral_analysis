@@ -92,17 +92,21 @@ def planck_radiance(wnum, T):
 
 #------ Plot the spectra
 fig = plt.figure(figsize=(10, 5))
-plt.plot(wnum_lw, radiance_lw, label="Longwave IR", color="black", linewidth=0.5)
-plt.plot(wnum_mw, radiance_mw, label="Midwave IR", color="black", linewidth=0.5)
-plt.plot(wnum_sw, radiance_sw, label="Shortwave IR", color="black", linewidth=0.5)
+
 
 plt.plot(wnum_lw, planck_radiance(wnum_lw, 290), color="blue", linewidth=1)
 plt.plot(wnum_mw, planck_radiance(wnum_mw, 290), color="blue", linewidth=1)
 plt.plot(wnum_sw, planck_radiance(wnum_sw, 290), color="blue", linewidth=1)
+plt.xlim(500, 2500)
+plt.ylim(-5, 160)
 
 label_x = 1500
 label_y = np.interp(label_x, wnum_mw, planck_radiance(wnum_mw, 290))
 plt.text(label_x, label_y, "290 K Blackbody", color="blue", fontsize=10, va='center', rotation=-30)
+
+plt.plot(wnum_lw, radiance_lw, label="Longwave IR", color="black", linewidth=0.5)
+plt.plot(wnum_mw, radiance_mw, label="Midwave IR", color="black", linewidth=0.5)
+plt.plot(wnum_sw, radiance_sw, label="Shortwave IR", color="black", linewidth=0.5)
 
 plt.xlabel("Wavenumber (cm⁻¹)")
 plt.ylabel("Radiance (mW/m²/sr/cm⁻¹)")
@@ -165,6 +169,8 @@ fig = plt.figure(figsize=(10, 5))
 plt.plot(wl_lw, TB_lw, label="Longwave IR", color="black", linewidth=0.5)
 plt.plot(wl_mw, TB_mw, label="Midwave IR", color="black", linewidth=0.5)
 plt.plot(wl_sw, TB_sw, label="Shortwave IR", color="black", linewidth=0.5)
+plt.xlim(4, 15)
+plt.ylim(150, 400)
 
 plt.xlabel("Wavelength (μm)")
 plt.ylabel("Brightness Temperature (K)")

@@ -111,9 +111,36 @@ plt.plot(wnum_sw, TB_sw_null, color="blue", linewidth=0.5)
 
 plt.xlabel("Wavenumber (cm-1)")
 plt.ylabel("Brightness Temperature (K)")
-plt.title("Brightness Temperature Spectrum from CrIS (Boulder CO) \n ~19:00 UTC")
+plt.title("Brightness Temperature Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
 plt.grid(color='#d3d3d3')
 plt.legend()
 
 fig.savefig(save_path+"spectra_bt_multiple_wn", dpi=200, bbox_inches='tight')
+plt.close()
+
+#------ Convert wavenumber (cm⁻¹) to wavelength (um)
+wl_lw = 10000/wnum_lw
+wl_mw = 10000/wnum_mw
+wl_sw = 10000/wnum_sw
+
+#------ Plot brightness temperature by wavelength
+fig = plt.figure(figsize=(10, 5))
+plt.plot(wl_lw, TB_lw_smoky, label="Smoky (2024-07-22)", color="black", linewidth=0.5)
+plt.plot(wl_mw, TB_mw_smoky, color="black", linewidth=0.5)
+plt.plot(wl_sw, TB_sw_smoky, color="black", linewidth=0.5)
+
+plt.plot(wl_lw, TB_lw_null, label="No smoke (2024-08-18)", color="blue", linewidth=0.5)
+plt.plot(wl_mw, TB_mw_null, color="blue", linewidth=0.5)
+plt.plot(wl_sw, TB_sw_null, color="blue", linewidth=0.5)
+
+plt.xlim(4, 15)
+plt.ylim(150, 400)
+
+plt.xlabel("Wavenumber (cm-1)")
+plt.ylabel("Brightness Temperature (K)")
+plt.title("Brightness Temperature Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
+plt.grid(color='#d3d3d3')
+plt.legend()
+
+fig.savefig(save_path+"spectra_bt_multiple_wl", dpi=200, bbox_inches='tight')
 plt.close()
