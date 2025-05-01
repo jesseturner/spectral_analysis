@@ -5,7 +5,7 @@ import xarray as xr
 import numpy as np
 import os
 
-cris_dir = "ASSIST_data/"
+assist_dir = "ASSIST_data/"
 file_name = "20240722_191700.nc"
 save_path = "ASSIST_figures/"
 
@@ -111,7 +111,7 @@ plt.ylim(150, 400)
 
 plt.xlabel("Wavelength (μm)")
 plt.ylabel("Brightness Temperature (K)")
-plt.title("Brightness Temperature Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
+plt.title("Brightness Temperature Spectrum from ASSIST (Boulder CO) \n 2024-07-22 19:17 UTC")
 plt.grid(color='#d3d3d3')
 
 fig.savefig(save_path+"spectra_ground_bt_wl", dpi=200, bbox_inches='tight')

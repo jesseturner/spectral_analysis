@@ -125,13 +125,14 @@ wl_sw = 10000/wnum_sw
 
 #------ Plot brightness temperature by wavelength
 fig = plt.figure(figsize=(10, 5))
-plt.plot(wl_lw, TB_lw_smoky, label="Smoky (2024-07-22)", color="black", linewidth=0.5)
-plt.plot(wl_mw, TB_mw_smoky, color="black", linewidth=0.5)
-plt.plot(wl_sw, TB_sw_smoky, color="black", linewidth=0.5)
 
-plt.plot(wl_lw, TB_lw_null, label="No smoke (2024-08-18)", color="blue", linewidth=0.5)
-plt.plot(wl_mw, TB_mw_null, color="blue", linewidth=0.5)
-plt.plot(wl_sw, TB_sw_null, color="blue", linewidth=0.5)
+plt.plot(wl_lw, TB_lw_null, label="No smoke (2024-08-18)", color="#04879C", linewidth=0.5)
+plt.plot(wl_mw, TB_mw_null, color="#04879C", linewidth=0.5)
+plt.plot(wl_sw, TB_sw_null, color="#04879C", linewidth=0.5)
+
+plt.plot(wl_lw, TB_lw_smoky, label="Smoky (2024-07-22)", color="red", linewidth=0.5)
+plt.plot(wl_mw, TB_mw_smoky, color="red", linewidth=0.5)
+plt.plot(wl_sw, TB_sw_smoky, color="red", linewidth=0.5)
 
 plt.xlim(4, 15)
 plt.ylim(150, 400)
