@@ -50,24 +50,22 @@ radiance_sw_null = ds_boulder_null["rad_sw"]
 
 
 #------ Get brightness temperature
-def radiance_to_brightness_temp(radiance, wavenumber):
-    # Convert wavenumber (cm^-1) to wavelength (meters)
-    wl = (1 / (wavenumber*100))  # cm^-1 to m
+def radiance_to_brightness_temp(radiance, wnum):
     
-    # Convert radiance to W/(m²·sr·m)
-    B = radiance * 100 * 1000  # mW/(m²·sr·cm^-1) to W/(m²·sr·m)
+    B = radiance / (1000 * 100)  # mW/(m²·sr·cm^-1) to W/(m²·sr·m^-1)
     
     # Constants
     c = 2.99792458e8       # speed of light in m/s
     h = 6.62607015e-34     # Planck's constant in J·s
     k = 1.380649e-23       # Boltzmann constant in J/K
     
-    # Planck constants
-    c1 = 2 * h * c**2      # W·m²·sr⁻¹
-    c2 = h * c / k         # K·m
+    nu_bar = wnum * 100  # now in m⁻¹
+
+    numerator = h * c * nu_bar
+    denominator = k * np.log((2 * h * c**2 * nu_bar**3) / B + 1)
     
-    # Apply inverse Planck's law to get brightness temperature
-    T_B = c2 / (wl * np.log(c1 / (wl**5 * B) + 1))
+    T_B = numerator / denominator
+    print(T_B)
     
     return T_B
 
