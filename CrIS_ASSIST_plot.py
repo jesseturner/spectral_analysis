@@ -32,23 +32,14 @@ cris_wnum_lw = cris_ds_boulder["wnum_lw"].values  # Longwave IR
 cris_wnum_mw = cris_ds_boulder["wnum_mw"].values  # Midwave IR
 cris_wnum_sw = cris_ds_boulder["wnum_sw"].values  # Shortwave IR
 
-#------ Create a comparison radiance for a reasonable surface temperature (using T = 290 K)
 def planck_radiance(wnum, T):
-    c = 2.99792458e8       # speed of light in m/s
-    h = 6.62607015e-34     # Planck's constant in J*s
-    k = 1.380649e-23       # Boltzmann constant in J/K
-    wnum_m = wnum * 100    # convert cm⁻¹ to m⁻¹
-    wl = 1 / wnum_m        # wavelength in m
-
-    # Planck function
-    rad = (2 * h * c**2 / wl**5) / (np.exp(h * c / (wl * k * T)) - 1)
-
-    # Convert to W/(m² sr cm⁻¹) from W/(m² sr m⁻¹)
-    rad_per_cm = rad / 100
-
-    # Convert to mW/(m² sr cm⁻¹)
-    rad_mW = rad_per_cm / 1000
-    return rad_mW
+    
+    C1 = 1.191042722E-12		
+    C2 = 1.4387752			# units are [K cm]
+    C1 = C1 * 1e7			# units are now [mW/m2/ster/cm-4]
+    rad = C1 * wnum * wnum * wnum / (np.exp(C2 * wnum / T)-1)
+    
+    return rad
 
 #--- Get ASSIST data
 assist_dir = "ASSIST_data/"
@@ -67,12 +58,12 @@ fig = plt.figure(figsize=(10, 5))
 plt.xlim(500, 2500)
 plt.ylim(-5, 160)
 
-plt.plot(assist_wnum_lw, planck_radiance(assist_wnum_lw, 290), color="blue", linewidth=1)
-plt.plot(assist_wnum_sw, planck_radiance(assist_wnum_sw, 290), color="blue", linewidth=1)
+plt.plot(assist_wnum_lw, planck_radiance(assist_wnum_lw, 300), color="blue", linewidth=1)
+plt.plot(assist_wnum_sw, planck_radiance(assist_wnum_sw, 300), color="blue", linewidth=1)
 
 label_x = 1500
-label_y = np.interp(label_x, assist_wnum_lw, planck_radiance(assist_wnum_lw, 290))
-plt.text(label_x, label_y, "290 K Blackbody", color="blue", fontsize=10, va='bottom', rotation=-25)
+label_y = np.interp(label_x, assist_wnum_lw, planck_radiance(assist_wnum_lw, 300))
+plt.text(label_x, label_y, "300 K Blackbody", color="blue", fontsize=10, va='bottom', rotation=-25)
 
 plt.plot(assist_wnum_lw, assist_radiance_lw, label="ASSIST", color="black", linewidth=0.5)
 plt.plot(assist_wnum_sw, assist_radiance_sw, color="black", linewidth=0.5)

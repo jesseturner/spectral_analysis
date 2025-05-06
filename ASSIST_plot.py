@@ -9,7 +9,7 @@ assist_dir = "ASSIST_data/"
 file_name = "20240722_191700.nc"
 save_path = "ASSIST_figures/"
 
-ds = xr.open_dataset(cris_dir+file_name)
+ds = xr.open_dataset(assist_dir+file_name)
 os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
 #--- Pull out the radiance and wavenumber values
@@ -42,21 +42,13 @@ def radiance_to_brightness_temp(radiance, wavenumber):
 
 #------ Create a comparison radiance for a reasonable surface temperature (using T = 290 K)
 def planck_radiance(wnum, T):
-    c = 2.99792458e8       # speed of light in m/s
-    h = 6.62607015e-34     # Planck's constant in J*s
-    k = 1.380649e-23       # Boltzmann constant in J/K
-    wnum_m = wnum * 100    # convert cm⁻¹ to m⁻¹
-    wl = 1 / wnum_m        # wavelength in m
-
-    # Planck function
-    rad = (2 * h * c**2 / wl**5) / (np.exp(h * c / (wl * k * T)) - 1)
-
-    # Convert to W/(m² sr cm⁻¹) from W/(m² sr m⁻¹)
-    rad_per_cm = rad / 100
-
-    # Convert to mW/(m² sr cm⁻¹)
-    rad_mW = rad_per_cm / 1000
-    return rad_mW
+    
+    C1 = 1.191042722E-12		
+    C2 = 1.4387752			# units are [K cm]
+    C1 = C1 * 1e7			# units are now [mW/m2/ster/cm-4]
+    rad = C1 * wnum * wnum * wnum / (np.exp(C2 * wnum / T)-1)
+    
+    return rad
 
 #------ Plot the spectra
 fig = plt.figure(figsize=(10, 5))
