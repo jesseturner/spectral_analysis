@@ -1,70 +1,50 @@
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
+#--- Libraries used
+#------ Use spectral_analysis.yml in repo to create a compatible conda environment, if desired
 import matplotlib.pyplot as plt
 import xarray as xr
 import numpy as np
 import os
+import sys
 
+#--- Path to CrIS data and figure save directory
+#------ CrIS data can be downloaded using CrIS_data.py in repo
 cris_dir = "CrIS_data/"
-#file_name = "SNDR.J1.CRIS.20240722T0930.m06.g096.L1B.std.v03_08.G.240722160620.nc"
 file_name = "SNDR.J1.CRIS.20240722T1912.m06.g193.L1B.std.v03_08.G.240723022056.nc"
-save_path = "CrIS_figures/"
+save_path = "CrIS_figures_fresh/"
 
-#--- Boulder CO
+#--- Target location within the CrIS swath
+#------ Boulder CO
 target_lat = 40.02
 target_lon = -105.3
 
+#===========================No inputs below here===========================
+
+#--- Checking if data is available
+cris_path = cris_dir + file_name
+if not os.path.isfile(cris_path):
+    print(f"Error: File not found.")
+    sys.exit(1)
+
+#--- Opening CrIS file
 ds = xr.open_dataset(cris_dir+file_name)
 os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-
-#--- Isolating the Boulder CO point
+#--- Isolating the targeted point
 abs_diff = np.abs(ds['lat'] - target_lat) + np.abs(ds['lon'] - target_lon).values
 atrack_idx, xtrack_idx, fov_idx = np.unravel_index(abs_diff.argmin(), abs_diff.shape)
-ds_boulder = ds.isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx)
+ds_target = ds.isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx)
 
-
-#--- Satellite track
-lat = ds["lat"].values
-lon = ds["lon"].values
-central_fov = 5  # Middle FOV index
-lat = lat[:, :, central_fov]  # Shape (atrack, xtrack)
-lon = lon[:, :, central_fov]
-
-
-fig, ax = plt.subplots(figsize=(10, 5), subplot_kw={"projection": ccrs.PlateCarree()})
-
-ax.scatter(lon, lat, s=3, alpha=0.5, color="#274060", transform=ccrs.PlateCarree(), label="Satellite Track (FOV = 5)")
-ax.scatter(ds_boulder['lon'], ds_boulder['lat'], s=9, color="red", transform=ccrs.PlateCarree(), label="Boulder CO")
-
-ax.add_feature(cfeature.COASTLINE, linewidth=0.8)
-ax.add_feature(cfeature.BORDERS, linewidth=0.5)
-ax.add_feature(cfeature.LAND, facecolor="none")
-ax.add_feature(cfeature.STATES, linewidth=0.5, edgecolor='grey')
-
-ax.set_extent([-125, -66.5, 24, 49], crs=ccrs.PlateCarree())
-
-ax.set_title("Satellite Track from CrIS Instrument \n 2024-07-22 19:12 - 19:18 UTC")
-ax.legend()
-
-fig.savefig(save_path+"satellite_track", dpi=200, bbox_inches='tight')
-plt.close()
-
-
-
-#--- Plot example spectra
-#------ First observation is atrack=0, xtrack=0
-#------ Straight down is fov=5
+print(f"Using lat/lon of {ds_target["lat"].values:.2f}, {ds_target["lon"].values:.2f}, fov of {fov_idx}")
 
 #--- Wavenumbers for each CrIS range
-wnum_lw = ds_boulder["wnum_lw"].values  # Longwave IR
-wnum_mw = ds_boulder["wnum_mw"].values  # Midwave IR
-wnum_sw = ds_boulder["wnum_sw"].values  # Shortwave IR
+wnum_lw = ds_target["wnum_lw"].values  # Longwave IR
+wnum_mw = ds_target["wnum_mw"].values  # Midwave IR
+wnum_sw = ds_target["wnum_sw"].values  # Shortwave IR
 
 #------ Radiance in mW/(m² sr cm⁻¹)
-radiance_lw = ds_boulder["rad_lw"]
-radiance_mw = ds_boulder["rad_mw"]
-radiance_sw = ds_boulder["rad_sw"]
+radiance_lw = ds_target["rad_lw"]
+radiance_mw = ds_target["rad_mw"]
+radiance_sw = ds_target["rad_sw"]
 
 #------ Convert wavenumber (cm⁻¹) to wavelength (um)
 wl_lw = 10000/wnum_lw
@@ -81,20 +61,15 @@ def planck_radiance(wnum, T):
     
     return rad
 
-
-#------ Plot the spectra
+#------ Plot the randiance spectra
 fig = plt.figure(figsize=(10, 5))
 
-
-plt.plot(wnum_lw, planck_radiance(wnum_lw, 290), color="blue", linewidth=1)
+plt.plot(wnum_lw, planck_radiance(wnum_lw, 290), color="blue", linewidth=1, label="290 K Blackbody")
 plt.plot(wnum_mw, planck_radiance(wnum_mw, 290), color="blue", linewidth=1)
 plt.plot(wnum_sw, planck_radiance(wnum_sw, 290), color="blue", linewidth=1)
 plt.xlim(500, 2500)
 plt.ylim(-5, 160)
-
-label_x = 1500
-label_y = np.interp(label_x, wnum_mw, planck_radiance(wnum_mw, 290))
-plt.text(label_x, label_y, "290 K Blackbody", color="blue", fontsize=10, va='center', rotation=-30)
+plt.legend()
 
 plt.plot(wnum_lw, radiance_lw, label="Longwave IR", color="black", linewidth=0.5)
 plt.plot(wnum_mw, radiance_mw, label="Midwave IR", color="black", linewidth=0.5)
@@ -123,21 +98,13 @@ def radiance_to_brightness_temp(radiance, wnum):
     numerator = h * c * nu_bar
     denominator = k * np.log((2 * h * c**2 * nu_bar**3) / B + 1)
     
-    T_B = numerator / denominator
-    print(T_B)
-    
+    T_B = numerator / denominator    
     return T_B
 
 #------ Get brightness temperature from CrIS radiance data
 TB_lw = radiance_to_brightness_temp(radiance_lw, wnum_lw)
 TB_mw = radiance_to_brightness_temp(radiance_mw, wnum_mw)
 TB_sw = radiance_to_brightness_temp(radiance_sw, wnum_sw)
-
-#--- Examples used for debugging
-#------ Set temperature to 290 K and radiance calculation
-# print(f"wavenumber: {wnum_lw[10]}, radiance {planck_radiance(wnum_lw[10], 290):.2f}, brightness temperature: {radiance_to_brightness_temp(planck_radiance(wnum_lw[10], 290), wnum_lw[10]):.2f}")
-#------ Using index=10 CrIS radiance
-# print(f"wavenumber: {wnum_lw[10]}, radiance {radiance_lw[10]:.2f}, brightness temperature: {radiance_to_brightness_temp(radiance_lw[10], wnum_lw[10]):.2f}")
 
 #------ Plot brightness temperature by wavenumber
 fig = plt.figure(figsize=(10, 5))
