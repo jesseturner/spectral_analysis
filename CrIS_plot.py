@@ -3,19 +3,22 @@
 import matplotlib.pyplot as plt
 import xarray as xr
 import numpy as np
-import os
-import sys
+import os, sys
+from datetime import datetime
 
 #--- Path to CrIS data and figure save directory
 #------ CrIS data can be downloaded using CrIS_data.py in repo
 cris_dir = "CrIS_data/"
-file_name = "SNDR.J1.CRIS.20240722T1912.m06.g193.L1B.std.v03_08.G.240723022056.nc"
-save_path = "CrIS_figures_fresh/"
+file_name = "SNDR.J2.CRIS.20250625T0624.m06.g065.L1B.beta.v03_27.G.250625141539.nc"
+save_path = "CrIS_figures/"
+location_name = "Gulf of Maine"
+save_name = location_name.lower().replace(" ", "_")
+datetime_str = file_name.split('.')[3]
+dt = datetime.strptime(datetime_str, "%Y%m%dT%H%M")
 
 #--- Target location within the CrIS swath
-#------ Boulder CO
-target_lat = 40.02
-target_lon = -105.3
+target_lat = 42.27
+target_lon = -66.25
 
 #===========================No inputs below here===========================
 
@@ -34,7 +37,7 @@ abs_diff = np.abs(ds['lat'] - target_lat) + np.abs(ds['lon'] - target_lon).value
 atrack_idx, xtrack_idx, fov_idx = np.unravel_index(abs_diff.argmin(), abs_diff.shape)
 ds_target = ds.isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx)
 
-print(f"Using lat/lon of {ds_target["lat"].values:.2f}, {ds_target["lon"].values:.2f}, fov of {fov_idx}")
+print(f"Using lat/lon of {ds_target['lat'].values:.2f}, {ds_target['lon'].values:.2f}, fov of {fov_idx}")
 
 #--- Wavenumbers for each CrIS range
 wnum_lw = ds_target["wnum_lw"].values  # Longwave IR
@@ -77,10 +80,10 @@ plt.plot(wnum_sw, radiance_sw, label="Shortwave IR", color="black", linewidth=0.
 
 plt.xlabel("Wavenumber (cm⁻¹)")
 plt.ylabel("Radiance (mW/m²/sr/cm⁻¹)")
-plt.title("Infrared Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
+plt.title(f"Infrared Spectrum from CrIS ({location_name}) \n {dt.strftime('%Y %b %d, %H:%M UTC')}")
 plt.grid(color='#d3d3d3')
 
-fig.savefig(save_path+"/spectra_rad_example", dpi=200, bbox_inches='tight')
+fig.savefig(f"{save_path}/{save_name}_spectra_rad_example", dpi=200, bbox_inches='tight')
 plt.close()
 
 #------ Get brightness temperature
@@ -114,10 +117,10 @@ plt.plot(wnum_sw, TB_sw, label="Shortwave IR", color="black", linewidth=0.5)
 
 plt.xlabel("Wavenumber (cm-1)")
 plt.ylabel("Brightness Temperature (K)")
-plt.title("Brightness Temperature Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
+plt.title(f"Brightness Temperature Spectrum from CrIS ({location_name}) \n {dt.strftime('%Y %b %d, %H:%M UTC')}")
 plt.grid(color='#d3d3d3')
 
-fig.savefig(save_path+"spectra_bt_example_wn", dpi=200, bbox_inches='tight')
+fig.savefig(f"{save_path}/{save_name}_spectra_bt_example_wn", dpi=200, bbox_inches='tight')
 plt.close()
 
 
@@ -131,8 +134,8 @@ plt.ylim(150, 400)
 
 plt.xlabel("Wavelength (μm)")
 plt.ylabel("Brightness Temperature (K)")
-plt.title("Brightness Temperature Spectrum from CrIS (Boulder CO) \n 2024-07-22 19:17 UTC")
+plt.title(f"Brightness Temperature Spectrum from CrIS ({location_name}) \n {dt.strftime('%Y %b %d, %H:%M UTC')}")
 plt.grid(color='#d3d3d3')
 
-fig.savefig(save_path+"spectra_bt_example_wl", dpi=200, bbox_inches='tight')
+fig.savefig(f"{save_path}/{save_name}_spectra_bt_example_wl", dpi=200, bbox_inches='tight')
 plt.close()
