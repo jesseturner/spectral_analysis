@@ -1,5 +1,7 @@
 # spectral_analysis
 
+*In process: Converting the CrIS and ASSIST scripts into functions in utils, then deleting scripts.* 
+
 Instructions: 
 * Download the CrIS data with `CrIS_data.py`
 * Create the CrIS spectrum with `CrIS_plot.py`
