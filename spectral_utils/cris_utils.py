@@ -2,6 +2,8 @@ import earthaccess, os
 import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 
 def download_cris_data(date_start, date_end, lon_west, lat_south, lon_east, lat_north, cris_dir="CrIS_data"):
     #--- Earthaccess docs: https://earthaccess.readthedocs.io/en/latest/quick-start/
@@ -119,3 +121,5 @@ def plot_brightness_temperature(ds, fig_dir="CrIS_plot", fig_name="CrIS_Tb"):
     fig.savefig(f"{fig_dir}/{fig_name}", dpi=200, bbox_inches='tight')
     plt.close()
     return
+
+
