@@ -15,22 +15,25 @@ def open_tp7_file(filepath):
     col_widths = [8, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 9, 6, 7, 11, 11]
 
     df = pd.read_fwf(filepath, widths=col_widths, names=col_names, skiprows=11)
+
     return df
 
-def plot_brightness_temperature(df, fig_dir, fig_name):
-    x = df['FREQ']
-    y = df['BBODY_T[K]']
-
+def plot_brightness_temperature(df1, df2=None, fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
+    df1_name='', df2_name=''):
     fig, ax = plt.subplots(figsize=(10, 5))
 
-    ax.plot(x, y, color='blue', linewidth=1)
+    ax.plot(10000/df1['FREQ'], df1['BBODY_T[K]'], color='blue', linewidth=1, label=df1_name)
+    if isinstance(df2, pd.DataFrame): ax.plot(10000/df2['FREQ'], df2['BBODY_T[K]'], color='red', linewidth=1, label=df2_name)
 
     #ax.set_title(f"MODTRAN {fig_name}")
-    ax.set_xlabel("Wavenumber (cm$^{-1}$)")
+    ax.set_xlabel("Wavelength (μm)")
     ax.set_ylabel("Temperature (K)")
+
+    if df1_name or df2_name: ax.legend(loc="upper right")
 
     os.makedirs(f"{fig_dir}", exist_ok=True)
     plt.savefig(f"{fig_dir}/{fig_name}.png", dpi=200, bbox_inches='tight')
     plt.close()
 
-    return df
+    return
+
