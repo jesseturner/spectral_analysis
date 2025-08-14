@@ -6,6 +6,8 @@ ds = c_utils.open_cris_data("CrIS_data/SNDR.J1.CRIS.20250625T0854.m06.g090.L1B.s
 
 ds = c_utils.isolate_target_point(ds, target_lat=42.27, target_lon=-66.25)
 
-c_utils.plot_radiance_spectra(ds, fig_dir="CrIS_plot", fig_name="CrIS_plot_rad")
+c_utils.plot_radiance_spectra(ds, fig_dir="CrIS_plot", fig_name="CrIS_rad")
+
+c_utils.plot_brightness_temperature(ds, fig_dir="CrIS_plot", fig_name="CrIS_Tb")
 
 print(ds)

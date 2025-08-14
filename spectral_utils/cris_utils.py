@@ -44,7 +44,24 @@ def planck_radiance(wnum, T):
     
     return rad
 
-def plot_radiance_spectra(ds, fig_dir="CrIS_plot", fig_name="CrIS_plot"):
+def radiance_to_brightness_temp(radiance, wnum):
+    
+    B = radiance / (1000 * 100)  # mW/(m²·sr·cm^-1) to W/(m²·sr·m^-1)
+    
+    # Constants
+    c = 2.99792458e8       # speed of light in m/s
+    h = 6.62607015e-34     # Planck's constant in J·s
+    k = 1.380649e-23       # Boltzmann constant in J/K
+    
+    nu_bar = wnum * 100  # now in m⁻¹
+
+    numerator = h * c * nu_bar
+    denominator = k * np.log((2 * h * c**2 * nu_bar**3) / B + 1)
+    
+    T_B = numerator / denominator    
+    return T_B
+
+def plot_radiance_spectra(ds, fig_dir="CrIS_plot", fig_name="CrIS_rad"):
     fig = plt.figure(figsize=(10, 5))
 
     wnum_lw = ds['wnum_lw'].values
@@ -68,6 +85,34 @@ def plot_radiance_spectra(ds, fig_dir="CrIS_plot", fig_name="CrIS_plot"):
     plt.xlabel("Wavenumber (cm⁻¹)")
     plt.ylabel("Radiance (mW/m²/sr/cm⁻¹)")
     plt.title(f"Infrared Spectrum from CrIS")
+    plt.grid(color='#d3d3d3')
+
+    os.makedirs(f"{fig_dir}", exist_ok=True)
+    fig.savefig(f"{fig_dir}/{fig_name}", dpi=200, bbox_inches='tight')
+    plt.close()
+    return
+
+
+def plot_brightness_temperature(ds, fig_dir="CrIS_plot", fig_name="CrIS_Tb"):
+
+    wnum_lw = ds['wnum_lw'].values
+    wnum_mw = ds['wnum_mw'].values
+    wnum_sw = ds['wnum_sw'].values
+    
+    TB_lw = radiance_to_brightness_temp(ds['rad_lw'], wnum_lw)
+    TB_mw = radiance_to_brightness_temp(ds['rad_mw'], wnum_mw)
+    TB_sw = radiance_to_brightness_temp(ds['rad_sw'], wnum_sw)
+
+    fig = plt.figure(figsize=(10, 5))
+    plt.plot(10000/wnum_lw, TB_lw, label="Longwave IR", color="black", linewidth=0.5)
+    plt.plot(10000/wnum_mw, TB_mw, label="Midwave IR", color="black", linewidth=0.5)
+    plt.plot(10000/wnum_sw, TB_sw, label="Shortwave IR", color="black", linewidth=0.5)
+    plt.xlim(4, 15)
+    plt.ylim(150, 400)
+
+    plt.xlabel("Wavelength (μm)")
+    plt.ylabel("Brightness Temperature (K)")
+    plt.title(f"Brightness Temperature Spectrum from CrIS")
     plt.grid(color='#d3d3d3')
 
     os.makedirs(f"{fig_dir}", exist_ok=True)
