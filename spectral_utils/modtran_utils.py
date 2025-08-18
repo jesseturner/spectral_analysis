@@ -18,22 +18,60 @@ def open_tp7_file(filepath):
 
     return df
 
-def plot_brightness_temperature(df1, df2=None, fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
-    df1_name='', df2_name=''):
+def plot_bt(df, df_name='', fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot'):
+    
     fig, ax = plt.subplots(figsize=(10, 5))
 
-    ax.plot(10000/df1['FREQ'], df1['BBODY_T[K]'], color='blue', linewidth=1, label=df1_name)
-    if isinstance(df2, pd.DataFrame): ax.plot(10000/df2['FREQ'], df2['BBODY_T[K]'], color='red', linewidth=1, label=df2_name)
+    _plot_continuous(ax, df, df_name, color='black')
 
+    _plt_labels(ax)
+    _plt_save(fig_dir, fig_name)
+
+    return
+
+def plot_bt_dual(df1, df2, df1_name='', df2_name='', fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot'):
+    
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    _plot_continuous(ax, df1, df1_name, color='blue')
+    _plot_continuous(ax, df2, df2_name, color='red')
+
+    _plt_labels(ax)
+    _plt_save(fig_dir, fig_name)
+
+    return
+
+def _plot_continuous(ax, df, df_name, color='black'):
+    x = 10000/df['FREQ']
+    y = df['BBODY_T[K]']
+    ax.plot(x, y, color=color, linewidth=1, label=df_name)
+    return
+
+def _plt_labels(ax):
     #ax.set_title(f"MODTRAN {fig_name}")
     ax.set_xlabel("Wavelength (μm)")
     ax.set_ylabel("Temperature (K)")
+    ax.legend(loc="upper right")
+    return
 
-    if df1_name or df2_name: ax.legend(loc="upper right")
-
+def _plt_save(fig_dir, fig_name):
     os.makedirs(f"{fig_dir}", exist_ok=True)
     plt.savefig(f"{fig_dir}/{fig_name}.png", dpi=200, bbox_inches='tight')
     plt.close()
 
-    return
+def filter_freq_to_range(df, range_start, range_end):
+    filtered_df = df[((df["FREQ"] >= range_start) & (df["FREQ"] <= range_end))]
+    return filtered_df
 
+def plot_bt_dual_ranges(df1, df2=None, fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
+    df1_name='', df2_name='', range1=None, range2=None):
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    _plot_continuous(ax, df1, df1_name, color='blue')
+    _plot_continuous(ax, df2, df2_name, color='red')
+
+    _plt_labels(ax)
+    _plt_save(fig_dir, fig_name)
+
+    return
