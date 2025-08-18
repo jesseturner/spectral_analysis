@@ -78,3 +78,23 @@ def plot_bt_dual_freq_range(df1, df2=None, df1_name='', df2_name='',
     _plt_save(fig_dir, fig_name)
 
     return
+
+def plot_btd_freq_range(df, df_name='', 
+    fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
+    freq_range1=None, freq_range2=None, ):
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    df_range1 = _filter_freq_to_range(df, freq_range1[0], freq_range1[1])
+    _plot_continuous(ax, df_range1, df_name, color='black')
+
+    ax2 = ax.twiny()
+    df_range2 = _filter_freq_to_range(df, freq_range2[0], freq_range2[1])
+    _plot_continuous(ax2, df_range2, df_name=None, color='black')
+    
+    
+
+    _plt_labels(ax)
+    _plt_save(fig_dir, fig_name)
+
+    return
