@@ -59,17 +59,20 @@ def _plt_save(fig_dir, fig_name):
     plt.savefig(f"{fig_dir}/{fig_name}.png", dpi=200, bbox_inches='tight')
     plt.close()
 
-def filter_freq_to_range(df, range_start, range_end):
+def _filter_freq_to_range(df, range_start, range_end):
     filtered_df = df[((df["FREQ"] >= range_start) & (df["FREQ"] <= range_end))]
     return filtered_df
 
-def plot_bt_dual_ranges(df1, df2=None, fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
-    df1_name='', df2_name='', range1=None, range2=None):
+def plot_bt_dual_freq_range(df1, df2=None, df1_name='', df2_name='', 
+    fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
+    freq_range=None):
 
     fig, ax = plt.subplots(figsize=(10, 5))
 
-    _plot_continuous(ax, df1, df1_name, color='blue')
-    _plot_continuous(ax, df2, df2_name, color='red')
+    df1_range = _filter_freq_to_range(df1, freq_range[0], freq_range[1])
+    _plot_continuous(ax, df1_range, df1_name, color='blue')
+    df2_range = _filter_freq_to_range(df2, freq_range[0], freq_range[1])
+    _plot_continuous(ax, df2_range, df2_name, color='red')
 
     _plt_labels(ax)
     _plt_save(fig_dir, fig_name)
