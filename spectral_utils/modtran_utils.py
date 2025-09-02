@@ -2,6 +2,7 @@ import pandas as pd
 import re, os
 from io import StringIO
 import matplotlib.pyplot as plt
+import json
 
 
 #--- MODTRAN utils
@@ -71,8 +72,9 @@ def plot_bt_dual_freq_range(df1, df2=None, df1_name='', df2_name='',
 
     df1_range = _filter_freq_to_range(df1, freq_range[0], freq_range[1])
     _plot_continuous(ax, df1_range, df1_name, color='blue')
-    df2_range = _filter_freq_to_range(df2, freq_range[0], freq_range[1])
-    _plot_continuous(ax, df2_range, df2_name, color='red')
+    if df2:
+        df2_range = _filter_freq_to_range(df2, freq_range[0], freq_range[1])
+        _plot_continuous(ax, df2_range, df2_name, color='red')
 
     _plt_labels(ax)
     _plt_save(fig_dir, fig_name)
@@ -81,7 +83,7 @@ def plot_bt_dual_freq_range(df1, df2=None, df1_name='', df2_name='',
 
 def plot_btd_freq_range(df, df_name='', 
     fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
-    freq_range1=None, freq_range2=None, ):
+    freq_range1=None, freq_range2=None):
 
     fig, ax = plt.subplots(figsize=(10, 5))
 
@@ -93,8 +95,49 @@ def plot_btd_freq_range(df, df_name='',
     _plot_continuous(ax2, df_range2, df_name=None, color='black')
     
     
-
     _plt_labels(ax)
     _plt_save(fig_dir, fig_name)
 
     return
+
+def read_wyo_radiosonde_rtf_file(filepath):
+    #--- Set up for a fixed-width file
+    col_names = ['PRES', 'HGHT', 'TEMP', 'DWPT', 'RELH', 'MIXR', 'DRCT', 'SKNT', 'THTA', 'THTE', 'THTV']
+    col_widths = [7]*len(col_names)
+
+    df = pd.read_fwf(filepath, widths=col_widths, names=col_names, skiprows=16, skipfooter=32)
+    return df
+
+def build_modtran_custom_json(df):
+    press_json = df["PRES"].tolist()
+    temp_k_json = (round(df["TEMP"] + 273.15, 2)).tolist()
+    water_vapor_ppmv_json = (round(df["MIXR"]* 1.607e3, 2)).tolist()
+    return press_json, temp_k_json, water_vapor_ppmv_json
+
+def plot_custom_json(filepath):
+    with open(filepath, "r") as f:
+        data = json.load(f)
+
+    profiles = data["MODTRAN"][0]["MODTRANINPUT"]["ATMOSPHERE"]["PROFILES"]
+
+    pressure = profiles[0]["PROFILE"]  # millibar
+    temperature = profiles[1]["PROFILE"]  # Kelvin
+    h2o = profiles[2]["PROFILE"]  # ppmv
+
+    fig, ax1 = plt.subplots(figsize=(6, 8))
+
+    ax1.plot(temperature, pressure, "r-", label="Temperature (K)")
+    ax1.set_xlabel("Temperature (K)", color="r")
+    ax1.tick_params(axis="x", labelcolor="r")
+    ax1.set_ylabel("Pressure (mbar)")
+    ax1.invert_yaxis()  # Pressure decreasing with altitude
+
+    ax2 = ax1.twiny()
+    ax2.plot(h2o, pressure, "b-", label="H2O (ppmv)")
+    ax2.set_xlabel("H2O (ppmv)", color="b")
+    ax2.tick_params(axis="x", labelcolor="b")
+
+    plt.title("MODTRAN Format Temperature & H2O")
+    ax1.grid(True, linestyle="--", alpha=0.6)
+
+    _plt_save("MODTRAN_json", "custom_atmosphere")

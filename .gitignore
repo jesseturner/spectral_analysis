@@ -1,3 +1,5 @@
 *.nc
 *.png
 *__pycache__*
+Radiosonde_data/
+MODTRAN_json/
