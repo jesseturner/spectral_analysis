@@ -28,11 +28,11 @@ from spectral_utils import modtran_utils as m_utils
 #     fig_dir='MODTRAN_plot', fig_name='btd_true_low_cloud',
 #     freq_range1=[833, 952], freq_range2=[2430, 2555])
 
-df = m_utils.read_wyo_radiosonde_rtf_file("Radiosonde_data/sounding_yqi_text_2024_06_20_00z.rtf")
-press, temp, water_vapor = m_utils.build_modtran_custom_json(df)
-m_utils.plot_custom_json("/home/jturner/MODTRAN6/flc_atm.json")
+# df = m_utils.read_wyo_radiosonde_rtf_file("Radiosonde_data/sounding_yqi_text_2024_06_20_00z.rtf")
+# press, temp, water_vapor = m_utils.build_modtran_custom_json(df)
+# m_utils.plot_custom_json("/home/jturner/MODTRAN6/flc_atm.json")
 
-df1 = m_utils.open_tp7_file("/home/jturner/MODTRAN6/flc_custom.tp7")
+df1 = m_utils.open_tp7_file("/home/jturner/flc_custom1.tp7")
 print(df1)
 
 m_utils.plot_bt(df1, df_name='', fig_dir='MODTRAN_plot', fig_name='flc_custom')
