@@ -3,3 +3,9 @@
 *__pycache__*
 Radiosonde_data/
 MODTRAN_json/
+*._pth
+*.7sc
+*.plt
+*.psc
+*.tp6
+*.tp7

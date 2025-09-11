@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import json
 import xarray as xr
 import numpy as np
-
+import subprocess
 
 #--- MODTRAN utils
 
@@ -146,13 +146,15 @@ def plot_custom_json(filepath):
     return 
 
 def profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon):
-    gfs_t, gfs_q = _read_gfs_point(gfs_filepath, lat, lon)
+    gfs_t, gfs_q, gfs_p = _read_gfs_point(gfs_filepath, lat, lon)
     sst = _read_sst_point(sst_filepath, lat, lon)
 
+    profile_p = np.insert(gfs_p, 0, 1020) #--- Lower pressure level added
     profile_t = np.insert(gfs_t, 0, sst)
     profile_q = np.insert(gfs_q, 0, gfs_q[0]) #--- Repeated because lengths must match
 
     data = {
+        "Pressure (hPa)": profile_p, 
         "Temperature (K)": profile_t,
         "Specific Humidity (kg/kg)": profile_q,
     }
@@ -170,13 +172,16 @@ def _read_gfs_point(filepath, lat, lon):
     gfs_2m = xr.open_dataset(filepath, engine="cfgrib",backend_kwargs={'filter_by_keys':{'typeOfLevel': 'heightAboveGround','level':2}})
     point_2m = gfs_2m.sel(latitude=lat, longitude=lat, method='nearest')
 
+    gfs_p = point.isobaricInhPa.values
+    gfs_p = np.insert(gfs_p, 0, 1010)
+
     gfs_t = point.t.values
     gfs_t = np.insert(gfs_t, 0, point_2m.t2m.values)
 
     gfs_q = point.q.values
     gfs_q = np.insert(gfs_q, 0, point_2m.sh2.values)
 
-    return gfs_t, gfs_q
+    return gfs_t, gfs_q, gfs_p
 
 def _read_sst_point(filepath, lat, lon):
     sst_ds = xr.open_dataset(filepath)
@@ -185,3 +190,108 @@ def _read_sst_point(filepath, lat, lon):
     surface = sst_ds.sel(lat=lat, lon=lon+360, method='nearest')
     print(f"SST coordinates selected: {surface.lat.values}, {surface.lon.values}")
     return surface.sst.values
+
+def create_modtran_json_from_df(df, json_path):
+    water_vapor = _q_to_ppmv(df["Specific Humidity (kg/kg)"]).tolist()
+    temperature = df["Temperature (K)"].tolist()
+    pressure = df["Pressure (hPa)"].tolist()
+
+    n_layers = len(pressure)
+
+    modtran_dict = {
+        "MODTRAN": [
+            {
+                "MODTRANINPUT": {
+                    "NAME": "flc_custom1",
+                    "DESCRIPTION": "",
+                    "CASE": 0,
+                    "RTOPTIONS": {
+                        "MODTRN": "RT_MODTRAN",
+                        "LYMOLC": False,
+                        "T_BEST": False,
+                        "IEMSCT": "RT_THERMAL_ONLY",
+                        "IMULT": "RT_NO_MULTIPLE_SCATTER"
+                    },
+                    "ATMOSPHERE": {
+                        "MODEL": "ATM_USER_PRESS_PROFILE",
+                        "MDEF": 1,
+                        "CO2MX": 0.0,
+                        "HMODEL": "New Atm Profile",
+                        "NPROF": 3,
+                        "NLAYERS": n_layers,
+                        "PROFILES": [
+                            {
+                                "TYPE": "PROF_PRESSURE",
+                                "UNITS": "UNT_PMILLIBAR",
+                                "PROFILE": pressure
+                            },
+                            {
+                                "TYPE": "PROF_TEMPERATURE",
+                                "UNITS": "UNT_TKELVIN",
+                                "PROFILE": temperature
+                            },
+                            {
+                                "TYPE": "PROF_H2O",
+                                "UNITS": "UNT_DPPMV",
+                                "PROFILE": water_vapor
+                            }
+                        ]
+                    },
+                    "AEROSOLS": {
+                        "IHAZE": "AER_MARITIME",
+                        "VIS": 0.0
+                    },
+                    "GEOMETRY": {},
+                    "SURFACE": {
+                        "SURFTYPE": "REFL_CONSTANT",
+                        "NSURF": 1,
+                        "SALBFL": ""
+                    },
+                    "SPECTRAL": {
+                        "V1": 650.0,
+                        "V2": 2550.0,
+                        "DV": 1.0,
+                        "FWHM": 2.0,
+                        "YFLAG": "R",
+                        "MLFLX": -1
+                    },
+                    "FILEOPTIONS": {}
+                }
+            }
+        ]
+    }
+
+    # --- write JSON file ---
+    with open(json_path, "w") as f:
+        json.dump(modtran_dict, f, indent=2)
+
+    print(f"MODTRAN JSON saved to {json_path}")
+
+    return
+
+def _q_to_ppmv(q):
+    """
+    Convert specific humidity (kg/kg) to ppmv for water vapor.
+    
+    Parameters
+    ----------
+    q : float or array
+        Specific humidity in kg/kg.
+    
+    Returns
+    -------
+    ppmv : float or array
+        Water vapor concentration in ppmv.
+    """
+    eps = 0.622  # ratio of molar masses (Mv / Md)
+    w = q / (1 - q)                  # mixing ratio (kg/kg dry air)
+    x_v = (w / eps) / (1 + w / eps)  # mole fraction of water vapor
+    ppmv = x_v * 1e6
+    return ppmv
+
+def run_modtran(json_path):
+    result = subprocess.run(["/home/jturner/modtran6/bin/linux/mod6c_cons", json_path])
+    print(result.stdout)
+    print(result.stderr)
+    print(result.returncode)
+    return
