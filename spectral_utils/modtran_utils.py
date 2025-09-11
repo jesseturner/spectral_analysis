@@ -3,6 +3,8 @@ import re, os
 from io import StringIO
 import matplotlib.pyplot as plt
 import json
+import xarray as xr
+import numpy as np
 
 
 #--- MODTRAN utils
@@ -141,3 +143,45 @@ def plot_custom_json(filepath):
     ax1.grid(True, linestyle="--", alpha=0.6)
 
     _plt_save("MODTRAN_json", "custom_atmosphere")
+    return 
+
+def profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon):
+    gfs_t, gfs_q = _read_gfs_point(gfs_filepath, lat, lon)
+    sst = _read_sst_point(sst_filepath, lat, lon)
+
+    profile_t = np.insert(gfs_t, 0, sst)
+    profile_q = np.insert(gfs_q, 0, gfs_q[0]) #--- Repeated because lengths must match
+
+    data = {
+        "Temperature (K)": profile_t,
+        "Specific Humidity (kg/kg)": profile_q,
+    }
+
+    df = pd.DataFrame(data)
+    return df
+
+
+def _read_gfs_point(filepath, lat, lon):
+    gfs_ds = xr.open_dataset(filepath, engine="cfgrib",backend_kwargs={'filter_by_keys': {'typeOfLevel':'isobaricInhPa'}})
+    point = gfs_ds.sel(latitude=lat, longitude=lon+360, method='nearest')
+    print(f"GFS coordinates selected: {point.latitude.values}, {point.longitude.values}")
+    
+    #---GFS 2m height (opened separately)
+    gfs_2m = xr.open_dataset(filepath, engine="cfgrib",backend_kwargs={'filter_by_keys':{'typeOfLevel': 'heightAboveGround','level':2}})
+    point_2m = gfs_2m.sel(latitude=lat, longitude=lat, method='nearest')
+
+    gfs_t = point.t.values
+    gfs_t = np.insert(gfs_t, 0, point_2m.t2m.values)
+
+    gfs_q = point.q.values
+    gfs_q = np.insert(gfs_q, 0, point_2m.sh2.values)
+
+    return gfs_t, gfs_q
+
+def _read_sst_point(filepath, lat, lon):
+    sst_ds = xr.open_dataset(filepath)
+    sst_ds =  sst_ds.squeeze()
+    sst_ds.sst.values = sst_ds.sst.values+273.15
+    surface = sst_ds.sel(lat=lat, lon=lon+360, method='nearest')
+    print(f"SST coordinates selected: {surface.lat.values}, {surface.lon.values}")
+    return surface.sst.values
