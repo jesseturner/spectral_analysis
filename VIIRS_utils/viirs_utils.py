@@ -72,8 +72,8 @@ def replace_viirs_fill_values(da):
     summary = {}
 
     for code, desc in fill_value_dict.items():
-        mask = (da == code) | np.isclose(da.Latitude, code) | np.isclose(da.Longitude, code)
-        clean_da = clean_da.where(~mask, 0)
+        mask = (da == code) | np.isclose(da["Latitude"], code) | np.isclose(da["Longitude"], code)
+        clean_da = clean_da.where(~mask, np.nan)
         summary[desc] = int(mask.sum())
 
     for desc, count in summary.items():
@@ -88,13 +88,20 @@ def plot_viirs_data(da):
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
     cmap = plt.cm.coolwarm
 
-    #pcm = ax.imshow(da["Brightness Temperature"], cmap=cmap)
-    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da["Brightness Temperature"], shading='auto', cmap=cmap)
+    #pcm = ax.imshow(da, cmap=cmap)
+    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, shading='auto', cmap=cmap)
 
     # clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
     # clb.ax.tick_params(labelsize=15)
     # clb.set_label('(K)', fontsize=15)
 
+    #--- Maybe incorporate this into the validation function?
+    #------ However, need to make sure shapes still line up
+    valid_mask = np.isfinite(da)
+    lat_valid = da["Latitude"].where(valid_mask)
+    lon_valid = da["Longitude"].where(valid_mask)
+
+    ax.set_extent([np.min(lon_valid), np.max(lon_valid), np.min(lat_valid), np.max(lat_valid)], crs=ccrs.PlateCarree())
     ax.set_title("VIIRS brightness temperature", fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
