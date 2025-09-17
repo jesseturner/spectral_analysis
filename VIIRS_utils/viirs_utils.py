@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 from spectral_utils import modtran_utils as m_utils
 import numpy as np
-import pandas as pd
 
 def print_viirs_file_metadata(file_path):
     with h5py.File(file_path, "r") as f:
@@ -37,16 +36,19 @@ def open_viirs_file(file_path):
         lat = f['All_Data']['VIIRS-MOD-GEO-TC_All']['Latitude'][()]
         lon = f['All_Data']['VIIRS-MOD-GEO-TC_All']['Longitude'][()]
 
-        data = {
-            "Latitude": np.array(lat).flatten(), 
-            "Longitude": np.array(lon).flatten(),
-            "Brightness Temperature": np.array(bt).flatten(),
-            }
-        df = pd.DataFrame(data)
-    
-    return df
+        da = xr.DataArray(
+            bt,
+            dims=["y", "x"],
+            coords={
+                "Latitude": (("y", "x"), lat),
+                "Longitude": (("y", "x"), lon)
+            },
+            name="Brightness Temperature"
+        )
 
-def replace_viirs_fill_values(df):
+    return da
+
+def replace_viirs_fill_values(da):
     fill_value_dict = {
         65535: "N/A (16-bit)",
         65534: "MISS (16-bit)",
@@ -66,37 +68,32 @@ def replace_viirs_fill_values(df):
         -999.2: "SOUB (32-bit)"
     }
 
-    clean_df = df.copy()
+    clean_da = da.copy()
     summary = {}
 
     for code, desc in fill_value_dict.items():
-        mask = (df["Brightness Temperature"] == code) | np.isclose(df["Latitude"], code) | np.isclose(df["Longitude"], code)
-        clean_df[mask] = np.nan
-        count = np.sum(mask)
-        summary[desc] = count
+        mask = (da == code) | np.isclose(da.Latitude, code) | np.isclose(da.Longitude, code)
+        clean_da = clean_da.where(~mask, 0)
+        summary[desc] = int(mask.sum())
 
     for desc, count in summary.items():
-        print(f"{desc}: {count} occurrences")
+        if count > 0:
+            print(f"{desc}: {count} occurrences")
 
-    return clean_df
+    return clean_da
 
 
-def plot_viirs_data(df):
+def plot_viirs_data(da):
     projection=ccrs.PlateCarree(central_longitude=0)
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
     cmap = plt.cm.coolwarm
 
-    mask = (lat == -999.3) | (lon == -999.3)
-    data = np.ma.array(data, mask=mask) 
-    print(np.max(data), np.min(data))
+    #pcm = ax.imshow(da["Brightness Temperature"], cmap=cmap)
+    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da["Brightness Temperature"], shading='auto', cmap=cmap)
 
-    #--- Can handle 2D lat lon coordinates
-    pcm = plt.pcolormesh(lon, lat, data, shading='auto', cmap=cmap)
-    #pcm = ax.imshow(data)
-
-    clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
-    clb.ax.tick_params(labelsize=15)
-    clb.set_label('(K)', fontsize=15)
+    # clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
+    # clb.ax.tick_params(labelsize=15)
+    # clb.set_label('(K)', fontsize=15)
 
     ax.set_title("VIIRS brightness temperature", fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)

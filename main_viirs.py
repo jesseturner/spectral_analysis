@@ -7,9 +7,10 @@ file_path = os.path.join(viirs_dir, viirs_file)
 
 v_utils.print_viirs_file_metadata(file_path)
 v_utils.print_viirs_file_attrs(file_path)
-df = v_utils.open_viirs_file(file_path)
-print(df)
-print(df.dtypes)
-df = v_utils.replace_viirs_fill_values(df)
-print(df)
-#v_utils.plot_viirs_data(df)
+
+da = v_utils.open_viirs_file(file_path)
+print(da)
+da = v_utils.replace_viirs_fill_values(da)
+print(da)
+
+v_utils.plot_viirs_data(da)
