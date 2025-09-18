@@ -44,17 +44,20 @@ def plot_bt_dual(df1, df2, df1_name='', df2_name='', fig_dir='MODTRAN_plot', fig
 
     return
 
-def _plot_continuous(ax, df, df_name, color='black'):
+def _plot_continuous(ax, df, df_name=None, color='black'):
     x = 10000/df['FREQ']
     y = df['BBODY_T[K]']
     ax.plot(x, y, color=color, linewidth=1, label=df_name)
+        
     return
 
 def _plt_labels(ax):
-    #ax.set_title(f"MODTRAN {fig_name}")
     ax.set_xlabel("Wavelength (μm)")
     ax.set_ylabel("Temperature (K)")
-    ax.legend(loc="upper right")
+    #--- Only create legend if the labels are defined
+    handles, labels = ax.get_legend_handles_labels()
+    if handles:
+        ax.legend(loc="upper right")
     return
 
 def _plt_save(fig_dir, fig_name):
@@ -69,7 +72,9 @@ def _filter_freq_to_range(df, range_start, range_end):
 def plot_bt_dual_freq_range(df1, df2=None, df1_name='', df2_name='', 
     fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
     freq_range=None):
-
+    """
+    Comparing two different cases of the same spectra range.
+    """
     fig, ax = plt.subplots(figsize=(10, 5))
 
     df1_range = _filter_freq_to_range(df1, freq_range[0], freq_range[1])
@@ -86,17 +91,24 @@ def plot_bt_dual_freq_range(df1, df2=None, df1_name='', df2_name='',
 def plot_btd_freq_range(df, df_name='', 
     fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
     freq_range1=None, freq_range2=None):
+    """
+    Visualizing the brightness temperature difference between two different spectra ranges.
+    """
 
     fig, ax = plt.subplots(figsize=(10, 5))
 
     df_range1 = _filter_freq_to_range(df, freq_range1[0], freq_range1[1])
-    _plot_continuous(ax, df_range1, df_name, color='black')
+    _plot_continuous(ax, df_range1, df_name=None, color="blue")
+    ax.xaxis.label.set_color("blue")
+    ax.tick_params(axis="x", colors="blue")
 
     ax2 = ax.twiny()
     df_range2 = _filter_freq_to_range(df, freq_range2[0], freq_range2[1])
-    _plot_continuous(ax2, df_range2, df_name=None, color='black')
+    _plot_continuous(ax2, df_range2, df_name=None, color="red")
+    ax2.xaxis.label.set_color("red")
+    ax2.tick_params(axis="x", colors="red")
     
-    
+    ax.set_title(f"MODTRAN {df_name}")
     _plt_labels(ax)
     _plt_save(fig_dir, fig_name)
 
