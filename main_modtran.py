@@ -49,14 +49,15 @@ from spectral_utils import modtran_utils as m_utils
 #     fig_dir='MODTRAN_plot', fig_name='flc_custom_btd',
 #     freq_range1=[833, 952], freq_range2=[2430, 2555])
 
-gfs_filepath = "/home/jturner/FLC_data/gfs_20250312_06z"
-sst_filepath = "/home/jturner/FLC_data/sst_20250312"
+#--- Running FLC case
+gfs_filepath = "/home/jturner/FLC_data/model_data/gfs_20250312_06z"
+sst_filepath = "/home/jturner/FLC_data/model_data/sst_20250312"
 lat, lon = 40.75, -67.75
 
 df = m_utils.profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon)
 print(df)
 
-json_path = "/home/jturner/spectral_analysis/2025031206_40-75_67-75.json"
+json_path = "/home/jturner/spectral_analysis/MODTRAN_json/2025031206_40-75_67-75.json"
 m_utils.create_modtran_json_from_df(df, json_path)
 m_utils.run_modtran(json_path)
 
@@ -65,3 +66,22 @@ df1 = m_utils.open_tp7_file("/home/jturner/spectral_analysis/flc_custom1.tp7")
 m_utils.plot_btd_freq_range(df1, df_name='2025-03-12 (40.75, -67.75)', 
     fig_dir='MODTRAN_plot', fig_name='2025031206_40-75_67-75',
     freq_range1=[833, 952], freq_range2=[2430, 2555])
+
+#--- Running clear sky case
+lat, lon = 35.75, -69.25
+df = m_utils.profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon)
+print(df)
+
+json_path = "/home/jturner/spectral_analysis/MODTRAN_json/2025031206_35-75_69-25.json"
+m_utils.create_modtran_json_from_df(df, json_path)
+m_utils.run_modtran(json_path)
+
+#--- Make a version of this for skew-t plot
+#m_utils.plot_custom_json(json_path)
+
+df1 = m_utils.open_tp7_file("/home/jturner/spectral_analysis/flc_custom1.tp7")
+
+m_utils.plot_btd_freq_range(df1, df_name='2025-03-12 (35.75, -69.25)', 
+    fig_dir='MODTRAN_plot', fig_name='2025031206_35-75_69-25',
+    freq_range1=[833, 952], freq_range2=[2430, 2555])
+
