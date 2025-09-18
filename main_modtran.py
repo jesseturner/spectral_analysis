@@ -57,31 +57,21 @@ lat, lon = 40.75, -67.75
 df = m_utils.profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon)
 print(df)
 
-json_path = "/home/jturner/spectral_analysis/MODTRAN_json/2025031206_40-75_67-75.json"
-m_utils.create_modtran_json_from_df(df, json_path)
-m_utils.run_modtran(json_path)
+m_utils.plot_skew_t_from_profile(df, title="GFS and SST vertical profile (2025-03-12)", fig_dir="/home/jturner/spectral_analysis", fig_name="gfs_vertical_profile_20250312")
 
-df1 = m_utils.open_tp7_file("/home/jturner/spectral_analysis/flc_custom1.tp7")
+# json_path = "/home/jturner/spectral_analysis/MODTRAN_json/2025031206_40-75_67-75.json"
+# m_utils.create_modtran_json_from_df(df, json_path)
+# m_utils.run_modtran(json_path)
 
-m_utils.plot_btd_freq_range(df1, df_name='2025-03-12 (40.75, -67.75)', 
-    fig_dir='MODTRAN_plot', fig_name='2025031206_40-75_67-75',
-    freq_range1=[833, 952], freq_range2=[2430, 2555])
+# df1 = m_utils.open_tp7_file("/home/jturner/spectral_analysis/flc_custom1.tp7")
 
-#--- Running clear sky case
+# m_utils.plot_btd_freq_range(df1, df_name='2025-03-12 (40.75, -67.75)', 
+#     fig_dir='MODTRAN_plot', fig_name='2025031206_40-75_67-75',
+#     freq_range1=[833, 952], freq_range2=[2430, 2555])
+
 lat, lon = 35.75, -69.25
+
 df = m_utils.profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon)
 print(df)
 
-json_path = "/home/jturner/spectral_analysis/MODTRAN_json/2025031206_35-75_69-25.json"
-m_utils.create_modtran_json_from_df(df, json_path)
-m_utils.run_modtran(json_path)
-
-#--- Make a version of this for skew-t plot
-#m_utils.plot_custom_json(json_path)
-
-df1 = m_utils.open_tp7_file("/home/jturner/spectral_analysis/flc_custom1.tp7")
-
-m_utils.plot_btd_freq_range(df1, df_name='2025-03-12 (35.75, -69.25)', 
-    fig_dir='MODTRAN_plot', fig_name='2025031206_35-75_69-25',
-    freq_range1=[833, 952], freq_range2=[2430, 2555])
-
+m_utils.plot_skew_t_from_profile(df, title="GFS and SST vertical profile (2025-03-12)", fig_dir="/home/jturner/spectral_analysis", fig_name="gfs_vertical_profile_20250312_1")

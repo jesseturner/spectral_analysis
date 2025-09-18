@@ -174,6 +174,46 @@ def profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon):
     df = pd.DataFrame(data)
     return df
 
+def plot_skew_t_from_profile(df, title, fig_dir, fig_name):
+    """
+    Using the result from profile_from_gfs_and_sst(), plot the skew-t. 
+    """
+    from metpy.plots import SkewT
+    from metpy.units import units
+    from metpy.calc import dewpoint
+
+    pressure = df["Pressure (hPa)"].to_numpy() * units.hPa
+    #--- Converting from specific humidity to dewpoint
+    specific_humidity = df["Specific Humidity (kg/kg)"].to_numpy()
+    mixing_ratio = specific_humidity / (1 - specific_humidity)
+    vapor_pressure = (mixing_ratio * pressure) / (0.622 + mixing_ratio)
+    dewpoints = dewpoint(vapor_pressure)
+    #--- Temperature in C
+    temps_K = df["Temperature (K)"].to_numpy() * units.degK
+    temps_C = temps_K.to(units.degC)    
+
+
+    fig = plt.figure(figsize=(9, 9))
+    skew = SkewT(fig, aspect=220, rotation=0)
+
+    skew.plot(pressure, temps_C, 'k', label='Temperature')
+    skew.plot(pressure, dewpoints, 'k', label='Dewpoint')
+
+    skew.plot_dry_adiabats(colors='lightgray')
+    skew.plot_moist_adiabats(colors='lightgray')
+    skew.plot_mixing_lines(colors='lightgray')
+
+    skew.ax.set_ylim(1050, 700)
+    skew.ax.set_yticks(np.arange(1000, 700 - 1, -50))
+    skew.ax.set_xlim(-20, 30)
+    skew.ax.set_xlabel('Temperature (C)', size=18, labelpad=10)
+    skew.ax.set_ylabel('Pressure (hPa)', size=18)
+    skew.ax.tick_params(axis='both', which='major', labelsize=14)
+
+    skew.ax.set_title(title, size=18, pad=10)
+    _plt_save(fig_dir, fig_name)
+    return
+
 
 def _read_gfs_point(filepath, lat, lon):
     gfs_ds = xr.open_dataset(filepath, engine="cfgrib",backend_kwargs={'filter_by_keys': {'typeOfLevel':'isobaricInhPa'}})
