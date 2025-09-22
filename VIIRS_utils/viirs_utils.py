@@ -100,10 +100,12 @@ def _apply_scale_and_offset(file_path, band, da):
 def plot_viirs_data(da, plot_dir, plot_name, plot_title):
     projection=ccrs.PlateCarree(central_longitude=0)
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
-    cmap = plt.cm.bwr_r
-
-    # Normalize with 0 as center
-    norm = mcolors.TwoSlopeNorm(vmin=-15, vcenter=0, vmax=3)
+    
+    cmap = mcolors.LinearSegmentedColormap.from_list(
+        "blue_white_grey",
+        [(0, "#A9A9A9"), (0.5, "white"), (1, "#1167b1")]
+    )
+    norm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=1.5)
 
     #pcm = ax.imshow(da, cmap=cmap)
     pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, norm=norm, shading="auto")
