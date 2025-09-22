@@ -1,3 +1,11 @@
-# spectral_analysis
+# CrIS Analysis
 
-*In process: Converting the CrIS and ASSIST scripts (labeled with z) into functions in utils, then deleting scripts.* 
+# VIIRS Analysis
+- SDR data downloaded from CLASS
+- Utils available to open and plot VIIRS on lat/lon grid
+
+# MODTRAN Analysis
+- MODTRAN is set up on jpss-cloud6 machine
+- Utils available to create input JSON file from GFS and OISST data
+- Utils available to run MODTRAN from the command line
+
