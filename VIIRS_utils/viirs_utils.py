@@ -103,7 +103,6 @@ def plot_viirs_data(da, plot_dir, plot_name, plot_title):
     cmap = plt.cm.bwr_r
 
     # Normalize with 0 as center
-    print(np.nanmin(da), np.nanmax(da))
     norm = mcolors.TwoSlopeNorm(vmin=np.nanmin(da), vcenter=0, vmax=np.nanmax(da))
 
     #pcm = ax.imshow(da, cmap=cmap)
