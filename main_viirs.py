@@ -2,7 +2,7 @@ from VIIRS_utils import viirs_utils as v_utils
 import os
 
 viirs_dir = "/local/home/jturner/FLC_data/VIIRS_data/"
-viirs_file = "GMTCO-SVM12-SVM15_j02_d20250312_t0548401_e0554207_b12101_c20250912032128788664_oebc_ops.h5"
+viirs_file = "GMTCO-SVM12-SVM15_npp_d20250312_t0617070_e0622474_b69290_c20250912025002661194_oebc_ops.h5"
 file_path = os.path.join(viirs_dir, viirs_file)
 
 # v_utils.print_viirs_file_metadata(file_path)

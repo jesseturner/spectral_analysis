@@ -103,7 +103,7 @@ def plot_viirs_data(da, plot_dir, plot_name, plot_title):
     cmap = plt.cm.bwr_r
 
     # Normalize with 0 as center
-    norm = mcolors.TwoSlopeNorm(vmin=np.nanmin(da), vcenter=0, vmax=np.nanmax(da))
+    norm = mcolors.TwoSlopeNorm(vmin=-15, vcenter=0, vmax=3)
 
     #pcm = ax.imshow(da, cmap=cmap)
     pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, norm=norm, shading="auto")
