@@ -30,9 +30,9 @@ def print_viirs_file_attrs(file_path):
         else: print("No attributes found")
     return
 
-def open_viirs_file(file_path):
+def open_viirs_file(file_path, band):
     with h5py.File(file_path, 'r') as f:
-        bt = f['All_Data']['VIIRS-M12-SDR_All']['BrightnessTemperature'][()]
+        bt = f['All_Data'][f'VIIRS-{band.upper()}-SDR_All']['BrightnessTemperature'][()]
         lat = f['All_Data']['VIIRS-MOD-GEO-TC_All']['Latitude'][()]
         lon = f['All_Data']['VIIRS-MOD-GEO-TC_All']['Longitude'][()]
 
