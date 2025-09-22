@@ -2,6 +2,7 @@ import os
 import xarray as xr
 import h5py
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import cartopy.crs as ccrs
 from spectral_utils import modtran_utils as m_utils
 import numpy as np
@@ -30,7 +31,7 @@ def print_viirs_file_attrs(file_path):
         else: print("No attributes found")
     return
 
-def open_viirs_file(file_path, band):
+def open_viirs_brightness_temp(file_path, band):
     with h5py.File(file_path, 'r') as f:
         bt = f['All_Data'][f'VIIRS-{band.upper()}-SDR_All']['BrightnessTemperature'][()]
         lat = f['All_Data']['VIIRS-MOD-GEO-TC_All']['Latitude'][()]
@@ -46,9 +47,12 @@ def open_viirs_file(file_path, band):
             name="Brightness Temperature"
         )
 
+    da = _replace_viirs_fill_values(da)
+    da = _apply_scale_and_offset(file_path, band, da)
+
     return da
 
-def replace_viirs_fill_values(da):
+def _replace_viirs_fill_values(da):
     fill_value_dict = {
         65535: "N/A (16-bit)",
         65534: "MISS (16-bit)",
@@ -76,24 +80,38 @@ def replace_viirs_fill_values(da):
         clean_da = clean_da.where(~mask, np.nan)
         summary[desc] = int(mask.sum())
 
+    print("--- Following error codes removed ---")
     for desc, count in summary.items():
         if count > 0:
             print(f"{desc}: {count} occurrences")
 
     return clean_da
 
+def _apply_scale_and_offset(file_path, band, da):
 
-def plot_viirs_data(da):
+    with h5py.File(file_path, "r") as f:
+        scale, offset = f['All_Data'][f'VIIRS-{band.upper()}-SDR_All']['BrightnessTemperatureFactors'][()][0:2]
+        print(f"Identified scale and offset as {scale}, {offset}")
+        clean_da = da * scale + offset
+    
+    return clean_da
+
+
+def plot_viirs_data(da, plot_dir, plot_name, plot_title):
     projection=ccrs.PlateCarree(central_longitude=0)
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
-    cmap = plt.cm.coolwarm
+    cmap = plt.cm.bwr_r
+
+    # Normalize with 0 as center
+    print(np.nanmin(da), np.nanmax(da))
+    norm = mcolors.TwoSlopeNorm(vmin=np.nanmin(da), vcenter=0, vmax=np.nanmax(da))
 
     #pcm = ax.imshow(da, cmap=cmap)
-    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, shading='auto', cmap=cmap)
+    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, norm=norm, shading="auto")
 
-    # clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
-    # clb.ax.tick_params(labelsize=15)
-    # clb.set_label('(K)', fontsize=15)
+    clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
+    clb.ax.tick_params(labelsize=15)
+    clb.set_label('(K)', fontsize=15)
 
     #--- Maybe incorporate this into the validation function?
     #------ However, need to make sure shapes still line up
@@ -102,9 +120,9 @@ def plot_viirs_data(da):
     lon_valid = da["Longitude"].where(valid_mask)
 
     ax.set_extent([np.min(lon_valid), np.max(lon_valid), np.min(lat_valid), np.max(lat_valid)], crs=ccrs.PlateCarree())
-    ax.set_title("VIIRS brightness temperature", fontsize=20, pad=10)
+    ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
-    m_utils._plt_save("VIIRS_plot", "viirs_example")
+    m_utils._plt_save(plot_dir, plot_name)
     return
 
