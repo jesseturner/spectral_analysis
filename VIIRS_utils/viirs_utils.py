@@ -120,10 +120,10 @@ def plot_viirs_data(da, plot_dir, plot_name, plot_title, extent=None):
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
     
     cmap = mcolors.LinearSegmentedColormap.from_list(
-        "blue_white_grey",
-        [(0, "#A9A9A9"), (0.5, "white"), (1, "#1167b1")]
+        "custom_cmap",
+        [(0, "#06BA63"), (0.5, "black"), (1, "white")]
     )
-    norm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=1.5)
+    norm = mcolors.TwoSlopeNorm(vmin=-6, vcenter=0, vmax=1.5)
 
     pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, norm=norm, shading="nearest")
 
