@@ -154,8 +154,8 @@ def plot_dnb_radiance(da, plot_dir, plot_name, plot_title):
     projection=ccrs.PlateCarree(central_longitude=0)
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
     
-    cmap = "twilight"
-    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, shading="auto")
+    cmap = "binary_r"
+    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, shading="auto", vmin=0.5e-9, vmax=9e-9,)
 
     clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
     clb.ax.tick_params(labelsize=15)

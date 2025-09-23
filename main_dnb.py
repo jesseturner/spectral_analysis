@@ -1,7 +1,7 @@
 from VIIRS_utils import viirs_utils as v_utils
 import os
 
-dnb_dir = "/local/home/jturner/FLC_data/DNB_data/"
+dnb_dir = "/local/home/jturner/FLC_data/DNB_data/" 
 dnb_file = "GDNBO-SVDNB_j01_d20250312_t0639527_e0645327_b37894_c20250912025655090196_oebc_ops.h5"
 file_path = os.path.join(dnb_dir, dnb_file)
 
