@@ -20,9 +20,12 @@ def _print_h5_structure(name, obj):
         print(f"Group: {name}")
     return
 
-def print_viirs_file_attrs(file_path):
+def print_viirs_file_attrs(file_path, dataset):
+    """
+    dataset should look like: "Data_Products/VIIRS-M12-SDR/VIIRS-M12-SDR_Gran_0"
+    """
     with h5py.File(file_path, "r") as f:
-        obj = f["Data_Products/VIIRS-M12-SDR/VIIRS-M12-SDR_Gran_0"]
+        obj = f[dataset]
 
         if len(obj.attrs) > 0:
             print(f"Attributes of {obj.name}:")
@@ -114,16 +117,59 @@ def plot_viirs_data(da, plot_dir, plot_name, plot_title):
     clb.ax.tick_params(labelsize=15)
     clb.set_label('(K)', fontsize=15)
 
-    #--- Maybe incorporate this into the validation function?
-    #------ However, need to make sure shapes still line up
+    #--- Used to crop out the edge error
+    #------ This can be deleted once that is fixed
     valid_mask = np.isfinite(da)
     lat_valid = da["Latitude"].where(valid_mask)
     lon_valid = da["Longitude"].where(valid_mask)
-
     ax.set_extent([np.min(lon_valid), np.max(lon_valid), np.min(lat_valid), np.max(lat_valid)], crs=ccrs.PlateCarree())
+    
     ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
     m_utils._plt_save(plot_dir, plot_name)
     return
 
+def open_dnb_radiance(file_path):
+    with h5py.File(file_path, 'r') as f:
+        bt = f['All_Data']['VIIRS-DNB-SDR_All']['Radiance'][()]
+        lat = f['All_Data']['VIIRS-DNB-GEO_All']['Latitude'][()]
+        lon = f['All_Data']['VIIRS-DNB-GEO_All']['Longitude'][()]
+
+        da = xr.DataArray(
+            bt,
+            dims=["y", "x"],
+            coords={
+                "Latitude": (("y", "x"), lat),
+                "Longitude": (("y", "x"), lon)
+            },
+            name="Radiance"
+        )
+
+    da = _replace_viirs_fill_values(da)
+
+    return da
+
+def plot_dnb_radiance(da, plot_dir, plot_name, plot_title):
+    projection=ccrs.PlateCarree(central_longitude=0)
+    fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
+    
+    cmap = "twilight"
+    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, shading="auto")
+
+    clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
+    clb.ax.tick_params(labelsize=15)
+    clb.set_label('Radiance (W cm$^{-2}$ sr$^{-1}$)', fontsize=15)
+
+    #--- Used to crop out the edge error
+    #------ This can be deleted once that is fixed
+    valid_mask = np.isfinite(da)
+    lat_valid = da["Latitude"].where(valid_mask)
+    lon_valid = da["Longitude"].where(valid_mask)
+    ax.set_extent([np.min(lon_valid), np.max(lon_valid), np.min(lat_valid), np.max(lat_valid)], crs=ccrs.PlateCarree())
+    
+    ax.set_title(plot_title, fontsize=20, pad=10)
+    ax.coastlines(resolution='50m', color='black', linewidth=1)
+
+    m_utils._plt_save(plot_dir, plot_name)
+    return

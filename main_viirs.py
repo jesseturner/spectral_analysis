@@ -6,7 +6,7 @@ viirs_file = "GMTCO-SVM12-SVM15_j02_d20250312_t0554219_e0600007_b12101_c20250912
 file_path = os.path.join(viirs_dir, viirs_file)
 
 # v_utils.print_viirs_file_metadata(file_path)
-# v_utils.print_viirs_file_attrs(file_path)
+# v_utils.print_viirs_file_attrs(file_path, dataset="Data_Products/VIIRS-M12-SDR/VIIRS-M12-SDR_Gran_0")
 
 da_m12 = v_utils.open_viirs_brightness_temp(file_path, "M12")
 da_m15 = v_utils.open_viirs_brightness_temp(file_path, "M15")
