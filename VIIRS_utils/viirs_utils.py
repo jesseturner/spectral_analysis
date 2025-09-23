@@ -78,10 +78,22 @@ def _replace_viirs_fill_values(da):
     clean_da = da.copy()
     summary = {}
 
+    #--- Remove the error codes in data and coordinates
     for code, desc in fill_value_dict.items():
-        mask = (da == code) | np.isclose(da["Latitude"], code) | np.isclose(da["Longitude"], code)
-        clean_da = clean_da.where(~mask, np.nan)
-        summary[desc] = int(mask.sum())
+        coord_mask = (
+            np.isclose(clean_da["Latitude"], code) |
+            np.isclose(clean_da["Longitude"], code)
+        )
+        clean_da = clean_da.where(~coord_mask, np.nan)
+        clean_da = clean_da.assign_coords(
+            Latitude=clean_da["Latitude"].where(~coord_mask, np.nan),
+            Longitude=clean_da["Longitude"].where(~coord_mask, np.nan),
+        )
+        summary[desc] = int(coord_mask.sum())
+
+    #--- Drop the NaN values, pcolormesh doesn't work with them
+    valid = np.isfinite(clean_da["Latitude"]) & np.isfinite(clean_da["Longitude"])
+    clean_da = clean_da.where(valid, drop=True)
 
     print("--- Following error codes removed ---")
     for desc, count in summary.items():
@@ -110,19 +122,11 @@ def plot_viirs_data(da, plot_dir, plot_name, plot_title):
     )
     norm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=1.5)
 
-    #pcm = ax.imshow(da, cmap=cmap)
-    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, norm=norm, shading="auto")
+    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, norm=norm, shading="nearest")
 
     clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
     clb.ax.tick_params(labelsize=15)
     clb.set_label('(K)', fontsize=15)
-
-    #--- Used to crop out the edge error
-    #------ This can be deleted once that is fixed
-    valid_mask = np.isfinite(da)
-    lat_valid = da["Latitude"].where(valid_mask)
-    lon_valid = da["Longitude"].where(valid_mask)
-    ax.set_extent([np.min(lon_valid), np.max(lon_valid), np.min(lat_valid), np.max(lat_valid)], crs=ccrs.PlateCarree())
     
     ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
@@ -155,19 +159,12 @@ def plot_dnb_radiance(da, plot_dir, plot_name, plot_title):
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
     
     cmap = "binary_r"
-    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, shading="auto", vmin=0.5e-9, vmax=9e-9,)
+    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, shading="nearest", vmin=0.5e-9, vmax=9e-9)
 
     clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
     clb.ax.tick_params(labelsize=15)
     clb.set_label('Radiance (W cm$^{-2}$ sr$^{-1}$)', fontsize=15)
 
-    #--- Used to crop out the edge error
-    #------ This can be deleted once that is fixed
-    valid_mask = np.isfinite(da)
-    lat_valid = da["Latitude"].where(valid_mask)
-    lon_valid = da["Longitude"].where(valid_mask)
-    ax.set_extent([np.min(lon_valid), np.max(lon_valid), np.min(lat_valid), np.max(lat_valid)], crs=ccrs.PlateCarree())
-    
     ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
