@@ -8,12 +8,12 @@ file_path = os.path.join(dnb_dir, dnb_file)
 v_utils.print_viirs_file_metadata(file_path)
 v_utils.print_viirs_file_attrs(file_path, dataset="Data_Products/VIIRS-DNB-GEO/VIIRS-DNB-GEO_Gran_0")
 
-da = v_utils.open_dnb_radiance(file_path)
-print(da)
+# da = v_utils.open_dnb_radiance(file_path)
+# print(da)
 
 description = f"{dnb_file.split("_")[1]} {dnb_file.split("_")[2]} {dnb_file.split("_")[3]}"
 save_name = f"dnb_{description.replace(" ", "_")}"
 plot_title = f"VIIRS Day/Night Band \n {description}"
 
 #--- This currently seems to have fill values or scaling, or both
-v_utils.plot_dnb_radiance(da, "VIIRS_plot", save_name, plot_title)
+v_utils.plot_dnb_radiance(da, "VIIRS_plot", save_name, plot_title, extent=[-73, -57, 33, 46])

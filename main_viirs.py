@@ -17,4 +17,4 @@ print(da_btd)
 description = f"{viirs_file.split("_")[1]} {viirs_file.split("_")[2]} {viirs_file.split("_")[3]}"
 save_name = f"btd_{description.replace(" ", "_")}"
 plot_title = f"VIIRS M15 - M12 (10.76 μm - 3.7 μm) BTD \n {description}"
-v_utils.plot_viirs_data(da_btd, "VIIRS_plot", save_name, plot_title)
+v_utils.plot_viirs_data(da_btd, "VIIRS_plot", save_name, plot_title, extent=[-73, -57, 33, 46])

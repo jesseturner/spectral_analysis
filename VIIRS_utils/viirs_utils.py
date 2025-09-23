@@ -112,7 +112,10 @@ def _apply_scale_and_offset(file_path, band, da):
     return clean_da
 
 
-def plot_viirs_data(da, plot_dir, plot_name, plot_title):
+def plot_viirs_data(da, plot_dir, plot_name, plot_title, extent=None):
+    """
+    extent: [west, east, south, north]
+    """
     projection=ccrs.PlateCarree(central_longitude=0)
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
     
@@ -128,6 +131,7 @@ def plot_viirs_data(da, plot_dir, plot_name, plot_title):
     clb.ax.tick_params(labelsize=15)
     clb.set_label('(K)', fontsize=15)
     
+    if extent: ax.set_extent(extent, crs=ccrs.PlateCarree())
     ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
@@ -154,7 +158,10 @@ def open_dnb_radiance(file_path):
 
     return da
 
-def plot_dnb_radiance(da, plot_dir, plot_name, plot_title):
+def plot_dnb_radiance(da, plot_dir, plot_name, plot_title, extent=None):
+    """
+    extent: [west, east, south, north]
+    """
     projection=ccrs.PlateCarree(central_longitude=0)
     fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
     
@@ -165,6 +172,7 @@ def plot_dnb_radiance(da, plot_dir, plot_name, plot_title):
     clb.ax.tick_params(labelsize=15)
     clb.set_label('Radiance (W cm$^{-2}$ sr$^{-1}$)', fontsize=15)
 
+    if extent: ax.set_extent(extent, crs=ccrs.PlateCarree())
     ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
