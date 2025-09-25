@@ -93,6 +93,7 @@ def plot_btd_freq_range(df, df_name='',
     freq_range1=None, freq_range2=None):
     """
     Visualizing the brightness temperature difference between two different spectra ranges.
+    freq_range format: [2430, 2555]
     """
 
     fig, ax = plt.subplots(figsize=(10, 5))

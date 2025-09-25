@@ -4,8 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import pandas as pd
 
 def download_cris_data(date_start, date_end, lon_west, lat_south, lon_east, lat_north, cris_dir="CrIS_data"):
+    """
+    date_start and date_end format: "2025-06-25"
+    coordinate format: -105.31
+    """
     #--- Earthaccess docs: https://earthaccess.readthedocs.io/en/latest/quick-start/
     auth = earthaccess.login()
 
@@ -63,63 +68,85 @@ def radiance_to_brightness_temp(radiance, wnum):
     T_B = numerator / denominator    
     return T_B
 
-def plot_radiance_spectra(ds, fig_dir="CrIS_plot", fig_name="CrIS_rad"):
-    fig = plt.figure(figsize=(10, 5))
-
+def get_brightness_temperature(ds):
     wnum_lw = ds['wnum_lw'].values
     wnum_mw = ds['wnum_mw'].values
     wnum_sw = ds['wnum_sw'].values
-    radiance_lw = ds["rad_lw"]
-    radiance_mw = ds["rad_mw"]
-    radiance_sw = ds["rad_sw"]
 
-    plt.plot(wnum_lw, planck_radiance(wnum_lw, 290), color="blue", linewidth=1, label="290 K Blackbody")
-    plt.plot(wnum_mw, planck_radiance(wnum_mw, 290), color="blue", linewidth=1)
-    plt.plot(wnum_sw, planck_radiance(wnum_sw, 290), color="blue", linewidth=1)
-    plt.xlim(500, 2500)
-    plt.ylim(-5, 160)
-    plt.legend()
-
-    plt.plot(wnum_lw, radiance_lw, label="Longwave IR", color="black", linewidth=0.5)
-    plt.plot(wnum_mw, radiance_mw, label="Midwave IR", color="black", linewidth=0.5)
-    plt.plot(wnum_sw, radiance_sw, label="Shortwave IR", color="black", linewidth=0.5)
-
-    plt.xlabel("Wavenumber (cm⁻¹)")
-    plt.ylabel("Radiance (mW/m²/sr/cm⁻¹)")
-    plt.title(f"Infrared Spectrum from CrIS")
-    plt.grid(color='#d3d3d3')
-
-    os.makedirs(f"{fig_dir}", exist_ok=True)
-    fig.savefig(f"{fig_dir}/{fig_name}", dpi=200, bbox_inches='tight')
-    plt.close()
-    return
-
-
-def plot_brightness_temperature(ds, fig_dir="CrIS_plot", fig_name="CrIS_Tb"):
-
-    wnum_lw = ds['wnum_lw'].values
-    wnum_mw = ds['wnum_mw'].values
-    wnum_sw = ds['wnum_sw'].values
+    wnum = np.concatenate((wnum_lw, wnum_mw, wnum_sw))
+    wl = 10000 / wnum
     
     TB_lw = radiance_to_brightness_temp(ds['rad_lw'], wnum_lw)
     TB_mw = radiance_to_brightness_temp(ds['rad_mw'], wnum_mw)
     TB_sw = radiance_to_brightness_temp(ds['rad_sw'], wnum_sw)
+    TB = np.concatenate((TB_lw, TB_mw, TB_sw))
+
+    data = {
+        "Wavenumber (cm-1)": wnum, 
+        "Wavelength (um)": wl, 
+        "Brightness Temperature (K)": TB
+    }
+
+    df = pd.DataFrame(data)
+
+    return df
+
+def plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name="CrIS_Tb", fig_title="Brightness Temperature Spectrum from CrIS"):
+
 
     fig = plt.figure(figsize=(10, 5))
-    plt.plot(10000/wnum_lw, TB_lw, label="Longwave IR", color="black", linewidth=0.5)
-    plt.plot(10000/wnum_mw, TB_mw, label="Midwave IR", color="black", linewidth=0.5)
-    plt.plot(10000/wnum_sw, TB_sw, label="Shortwave IR", color="black", linewidth=0.5)
+    plt.plot(df["Wavelength (um)"], df["Brightness Temperature (K)"], color="black", linewidth=0.5)
     plt.xlim(4, 15)
     plt.ylim(150, 400)
 
     plt.xlabel("Wavelength (μm)")
     plt.ylabel("Brightness Temperature (K)")
-    plt.title(f"Brightness Temperature Spectrum from CrIS")
+    plt.title(fig_title)
     plt.grid(color='#d3d3d3')
 
-    os.makedirs(f"{fig_dir}", exist_ok=True)
-    fig.savefig(f"{fig_dir}/{fig_name}", dpi=200, bbox_inches='tight')
-    plt.close()
+    _plt_save(fig_dir, fig_name)
     return
 
+def plot_btd_freq_range(df,
+    fig_dir='CrIS_plot', fig_name='CrIS_btd_range', fig_title='CrIS Brightness Temperature',
+    freq_range1=None, freq_range2=None):
+    """
+    Visualizing the brightness temperature difference between two different spectra ranges.
+    freq_range format: [2430, 2555]
+    """
 
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    df_range1 = _filter_freq_to_range(df, freq_range1[0], freq_range1[1])
+    _plot_continuous(ax, df_range1, color="blue")
+    ax.xaxis.label.set_color("blue")
+    ax.tick_params(axis="x", colors="blue")
+
+    ax2 = ax.twiny()
+    df_range2 = _filter_freq_to_range(df, freq_range2[0], freq_range2[1])
+    _plot_continuous(ax2, df_range2, color="red")
+    ax2.xaxis.label.set_color("red")
+    ax2.tick_params(axis="x", colors="red")
+    
+    ax.set_title(fig_title)
+    ax.set_xlabel("Wavelength (μm)")
+    ax.set_ylabel("Temperature (K)")
+
+    _plt_save(fig_dir, fig_name)
+    return
+
+def _filter_freq_to_range(df, freq_start, freq_end):
+    filtered_df = df[((df["Wavenumber (cm-1)"] >= freq_start) & (df["Wavenumber (cm-1)"] <= freq_end))]
+    return filtered_df
+
+def _plot_continuous(ax, df, color='black'):
+    x = df["Wavelength (um)"]
+    y = df["Brightness Temperature (K)"]
+    ax.plot(x, y, color=color, linewidth=1)
+        
+    return
+
+def _plt_save(fig_dir, fig_name):
+    os.makedirs(f"{fig_dir}", exist_ok=True)
+    plt.savefig(f"{fig_dir}/{fig_name}.png", dpi=200, bbox_inches='tight')
+    plt.close()
