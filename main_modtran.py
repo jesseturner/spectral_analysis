@@ -1,15 +1,15 @@
 from MODTRAN_utils import modtran_utils as m_utils
 
-json_path = "MODTRAN_json/2025031206_40-75_67-75_high_res.json"
+json_path = "MODTRAN_json/2025031206_35-75_69-25_high_res.json"
 
 m_utils.run_modtran(json_path)
 
 df1 = m_utils.open_tp7_file("flc_custom1.tp7")
 print(df1)
 
-m_utils.plot_btd_freq_range(df1, df_name='2025-03-12 (40.75, -67.75)', 
-    fig_dir='MODTRAN_plot', fig_name='2025031206_40-75_67-75_high_res',
-    freq_range1=[833, 952], freq_range2=[2430, 2555])
+m_utils.plot_btd_freq_range(df1, df_name='2025-03-12 (35.75, -69.25)', 
+    fig_dir='MODTRAN_plot', fig_name='2025031206_35-75_69-25_high_res',
+    freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=(282, 291))
 
 #--- Running FLC case
 # gfs_filepath = "/home/jturner/FLC_data/model_data/gfs_20250312_06z"

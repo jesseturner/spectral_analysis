@@ -6,11 +6,12 @@
         "DESCRIPTION": "",
         "CASE": 0,
         "RTOPTIONS": {
-          "MODTRN": "RT_MODTRAN",
+          "MODTRN": "RT_LINE_BY_LINE",
           "LYMOLC": false,
           "T_BEST": false,
           "IEMSCT": "RT_THERMAL_ONLY",
-          "IMULT": "RT_NO_MULTIPLE_SCATTER"
+          "IMULT": "RT_NO_MULTIPLE_SCATTER",
+          "NLBL": 1
         },
         "ATMOSPHERE": {
           "MODEL": "ATM_USER_PRESS_PROFILE",
@@ -158,10 +159,10 @@
         "SPECTRAL": {
           "V1": 650.0,
           "V2": 2550.0,
-          "DV": 0.1,
-          "FWHM": 0.2,
+          "DV": 1,
+          "FWHM": 1,
           "LBMNAM": "T",
-          "BMNAME": "p1_2013"
+          "BMNAME": "LBL2013"
         },
         "FILEOPTIONS": {}
       }

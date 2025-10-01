@@ -51,13 +51,18 @@ def _plot_continuous(ax, df, df_name=None, color='black'):
         
     return
 
-def _plt_labels(ax):
+def _plt_labels(ax, ylim=None):
+    '''
+    ylim: tuple like (270, 291)
+    '''
     ax.set_xlabel("Wavelength (μm)")
     ax.set_ylabel("Temperature (K)")
     #--- Only create legend if the labels are defined
     handles, labels = ax.get_legend_handles_labels()
     if handles:
         ax.legend(loc="upper right")
+    if ylim:
+        ax.set_ylim(ylim)
     return
 
 def _plt_save(fig_dir, fig_name):
@@ -90,10 +95,11 @@ def plot_bt_dual_freq_range(df1, df2=None, df1_name='', df2_name='',
 
 def plot_btd_freq_range(df, df_name='', 
     fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
-    freq_range1=None, freq_range2=None):
+    freq_range1=None, freq_range2=None, ylim=None):
     """
     Visualizing the brightness temperature difference between two different spectra ranges.
     freq_range format: [2430, 2555]
+    ylim: tuple like (271, 280)
     """
 
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -110,7 +116,7 @@ def plot_btd_freq_range(df, df_name='',
     ax2.tick_params(axis="x", colors="red")
     
     ax.set_title(f"MODTRAN {df_name}")
-    _plt_labels(ax)
+    _plt_labels(ax, ylim=ylim)
     _plt_save(fig_dir, fig_name)
 
     return
