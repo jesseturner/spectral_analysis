@@ -109,10 +109,11 @@ def plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name="CrIS_Tb", fig
 
 def plot_btd_freq_range(df,
     fig_dir='CrIS_plot', fig_name='CrIS_btd_range', fig_title='CrIS Brightness Temperature',
-    freq_range1=None, freq_range2=None):
+    freq_range1=None, freq_range2=None, ylim=None):
     """
     Visualizing the brightness temperature difference between two different spectra ranges.
     freq_range format: [2430, 2555]
+    ylim: tuple like (271, 280)
     """
 
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -131,6 +132,8 @@ def plot_btd_freq_range(df,
     ax.set_title(fig_title)
     ax.set_xlabel("Wavelength (μm)")
     ax.set_ylabel("Temperature (K)")
+    if ylim:
+        ax.set_ylim(ylim)
 
     _plt_save(fig_dir, fig_name)
     return

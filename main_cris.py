@@ -9,18 +9,18 @@ file_path = os.path.join(cris_dir, cris_file)
 
 ds = c_utils.open_cris_data(file_path)
 
-ds = c_utils.isolate_target_point(ds, target_lat=35.75, target_lon=-69.25)
+ds = c_utils.isolate_target_point(ds, target_lat=40.75, target_lon=-67.75)
 print(ds)
 
 df = c_utils.get_brightness_temperature(ds)
 print(df)
 
 save_name = f"{cris_file.split(".")[1]}_{cris_file.split(".")[3]}"
-plot_title = f"CrIS 2025-03-12 (35.69, -69.21) \n j01 d20250312 t0642"
+plot_title = f"CrIS 2025-03-12 (40.83, -67.74) \n j01 d20250312 t0642"
 
 c_utils.plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name=save_name, fig_title=plot_title)
 
 c_utils.plot_btd_freq_range(df,
     fig_dir='CrIS_plot', fig_name=f'btd_{save_name}', fig_title=plot_title,
-    freq_range1=[833, 952], freq_range2=[2430, 2555])
+    freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=(271, 280))
 
