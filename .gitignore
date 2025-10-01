@@ -2,7 +2,6 @@
 *.png
 *__pycache__*
 Radiosonde_data/
-MODTRAN_json/
 *._pth
 *.7sc
 *.plt

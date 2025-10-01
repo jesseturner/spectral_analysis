@@ -1,0 +1,23 @@
+
+                    *************************************************************
+                    *                                                           *
+                    *   MODTRAN(R) 6.0.2r3                                      *
+                    *                                                           *
+                    *   MODTRAN is an atmospheric radiative transfer model      *
+                    *   developed collaboratively by SPECTRAL SCIENCES, INC.    *
+                    *   (SSI) [www.spectral.com] and the AIR FORCE RESEARCH     *
+                    *   LABORATORY (AFRL) [www.kirtland.af.mil/afrl_vs/]        *
+                    *                                                           *
+                    *      Please address questions and/or comments to          *
+                    *      SSI at modtran@spectral.com and/or to AFRL           *
+                    *      at jeannette.van_den_bosch@us.af.mil                 *
+                    *                                                           *
+                    *   WARNING:  Versions of MODTRAN acquired via a            *
+                    *             "GOVERNMENT PURPOSE USE" agreement can        *
+                    *             only be used for Government Purposes.         *
+                    *                                                           *
+                    *   I/O file root name: flc_custom1                         *
+                    *                                                           *
+                    *************************************************************
+
+Warning from routine mbmInit:  LBL RT is specified, but the model file root name, "" , is not for an LBL file.  The default LBL file will be used.
