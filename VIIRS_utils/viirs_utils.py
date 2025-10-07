@@ -184,12 +184,12 @@ def plot_viirs_srf(srf_file):
     Using sensor response function file downloaded from https://ncc.nesdis.noaa.gov/VIIRS/VIIRSSpectralResponseFunctions.php
     """
     srf = np.loadtxt(srf_file)
-    x = 10000 / srf[:, 0]
+    x = srf[:, 0]/1000
     y = srf[:, 1]
     band_str = f'VIIRS Band {srf_file.split("_")[7]}'
 
     plt.plot(x, y, color='black', linewidth=1)
-    plt.xlabel('Wavelength (um)')
+    plt.xlabel('Wavelength (µm)')
     plt.ylabel('Response')
     plt.title(f'{band_str} \n NG Band-Averaged RSRs')
 

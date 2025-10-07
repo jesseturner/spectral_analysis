@@ -19,5 +19,5 @@ file_path = os.path.join(viirs_dir, viirs_file)
 # plot_title = f"VIIRS M15 - M12 (10.76 μm - 3.7 μm) BTD \n {description}"
 # v_utils.plot_viirs_data(da_btd, "VIIRS_plot", save_name, plot_title, extent=[-73, -57, 33, 46])
 
-srf_file = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_I4_filtered_Oct2011f_BA.dat"
+srf_file = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
 v_utils.plot_viirs_srf(srf_file)
