@@ -4,7 +4,7 @@ import h5py
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import cartopy.crs as ccrs
-from spectral_utils import modtran_utils as m_utils
+from MODTRAN_utils import modtran_utils as m_utils
 import numpy as np
 
 def print_viirs_file_metadata(file_path):
@@ -177,4 +177,21 @@ def plot_dnb_radiance(da, plot_dir, plot_name, plot_title, extent=None):
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
     m_utils._plt_save(plot_dir, plot_name)
+    return
+
+def plot_viirs_srf(srf_file):
+    """
+    Using sensor response function file downloaded from https://ncc.nesdis.noaa.gov/VIIRS/VIIRSSpectralResponseFunctions.php
+    """
+    srf = np.loadtxt(srf_file)
+    x = 10000 / srf[:, 0]
+    y = srf[:, 1]
+    band_str = f'VIIRS Band {srf_file.split("_")[7]}'
+
+    plt.plot(x, y, color='black', linewidth=1)
+    plt.xlabel('Wavelength (um)')
+    plt.ylabel('Response')
+    plt.title(f'{band_str} \n NG Band-Averaged RSRs')
+
+    m_utils._plt_save("VIIRS_spectral_response_functions", f'srf_{band_str.lower().replace(" ", "_")}')
     return
