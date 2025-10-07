@@ -363,3 +363,24 @@ def run_modtran(json_path):
     print(result.stderr)
     print(result.returncode)
     return
+
+def get_Tb_from_srf(spectra_df, srf_file):
+    
+    modtran_wl = np.array(10000 / spectra_df["FREQ"])[::-1]
+    modtran_Tb = np.array(spectra_df["BBODY_T[K]"])
+
+    srf = np.loadtxt(srf_file)
+    srf_wl = np.array(srf[:, 0]/1000)
+    srf_response = np.array(srf[:, 1])
+
+    from scipy.interpolate import interp1d
+    # 1. Interpolate BT onto the response wavelength grid
+    interp_bt = interp1d(modtran_wl, modtran_Tb, kind='linear', bounds_error=True)
+    bt_on_srf = interp_bt(srf_wl)
+
+    # 2. Compute the response-weighted average brightness temperature
+    weighted_bt = np.trapz(bt_on_srf * srf_response, srf_wl) / np.trapz(srf_response, srf_wl)
+
+    print(f"Weighted brightness temperature: {weighted_bt:.3f} K")
+
+    return

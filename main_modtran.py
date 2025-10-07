@@ -6,12 +6,15 @@ m_utils.run_modtran(json_path)
 
 df1 = m_utils.open_tp7_file("flc_custom1.tp7")
 df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting resolution
-print(df1)
-print(df2)
+# print(df1)
+# print(df2)
 
 m_utils.plot_btd_freq_range(df2, df_name='2025-03-12 (40.75, -67.75)', 
     fig_dir='MODTRAN_plot', fig_name='2025031206_40-75_67-75_med_res',
-    freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=(271, 280))
+    freq_range1=[768, 1000], freq_range2=[2440, 2942], ylim=(271, 280))
+
+srf_file = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_I5_filtered_Oct2011f_BA.dat"
+m_utils.get_Tb_from_srf(df2, srf_file)
 
 #--- Running FLC case
 # gfs_filepath = "/home/jturner/FLC_data/model_data/gfs_20250312_06z"
