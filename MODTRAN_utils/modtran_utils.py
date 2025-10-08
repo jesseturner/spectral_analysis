@@ -379,6 +379,7 @@ def get_Tb_from_srf(spectra_df, srf_file):
     bt_on_srf = interp_bt(srf_wl)
 
     # 2. Compute the response-weighted average brightness temperature
+    #--- Using trapezoid method to estimate the integral of Tb and SRF with respect to wavelength
     weighted_bt = np.trapz(bt_on_srf * srf_response, srf_wl) / np.trapz(srf_response, srf_wl)
 
     print(f"Weighted brightness temperature: {weighted_bt:.3f} K")
