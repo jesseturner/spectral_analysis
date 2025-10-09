@@ -1,22 +1,30 @@
 from MODTRAN_utils import modtran_utils as m_utils
 
+#--- FLC case
 json_path = "MODTRAN_json/2025031206_40-75_67-75_med_res.json"
+title_name = '2025-03-12 (40.75, -67.75)'
+ylim = (271, 280)
+fig_name = "2025031206_flc"
+
+#--- Null case
+# json_path = "MODTRAN_json/2025031206_35-75_69-25_med_res.json"
+# title_name = '2025-03-12 (35.75, -69.25)'
+# ylim = (282, 291)
+# fig_name = "2025031206_null"
 
 m_utils.run_modtran(json_path)
 
 df1 = m_utils.open_tp7_file("flc_custom1.tp7")
 df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting resolution
-# print(df1)
-# print(df2)
 
-m_utils.plot_btd_freq_range(df2, df_name='2025-03-12 (40.75, -67.75)', 
-    fig_dir='MODTRAN_plot', fig_name='2025031206_40-75_67-75_med_res',
-    freq_range1=[768, 1000], freq_range2=[2440, 2942], ylim=(271, 280))
+m_utils.plot_btd_freq_range(df2, title_name=title_name, 
+    fig_dir='MODTRAN_plot', fig_name=fig_name,
+    freq_range1=[1e4/11.6, 1e4/9.9], freq_range2=[1e4/3.9, 1e4/3.5], ylim=ylim)
 
-srf_file = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_I5_filtered_Oct2011f_BA.dat"
-m_utils.get_Tb_from_srf(df2, srf_file)
+srf_file = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
+m_utils.get_Tb_from_srf(df2, srf_file, central_wl=10.763e-6)
 
-#--- Running FLC case
+#--- Getting atmospheric profiles for cases
 # gfs_filepath = "/home/jturner/FLC_data/model_data/gfs_20250312_06z"
 # sst_filepath = "/home/jturner/FLC_data/model_data/sst_20250312"
 # lat, lon = 40.75, -67.75

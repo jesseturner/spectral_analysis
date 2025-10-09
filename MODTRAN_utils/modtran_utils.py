@@ -102,7 +102,7 @@ def plot_bt_dual_freq_range(df1, df2=None, df1_name='', df2_name='',
 
     return
 
-def plot_btd_freq_range(df, df_name='', 
+def plot_btd_freq_range(df, title_name='', 
     fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot',
     freq_range1=None, freq_range2=None, ylim=None):
     """
@@ -114,17 +114,17 @@ def plot_btd_freq_range(df, df_name='',
     fig, ax = plt.subplots(figsize=(10, 5))
 
     df_range1 = _filter_freq_to_range(df, freq_range1[0], freq_range1[1])
-    _plot_continuous(ax, df_range1, df_name=None, color="blue")
+    _plot_continuous(ax, df_range1, color="blue")
     ax.xaxis.label.set_color("blue")
     ax.tick_params(axis="x", colors="blue")
 
     ax2 = ax.twiny()
     df_range2 = _filter_freq_to_range(df, freq_range2[0], freq_range2[1])
-    _plot_continuous(ax2, df_range2, df_name=None, color="red")
+    _plot_continuous(ax2, df_range2, color="red")
     ax2.xaxis.label.set_color("red")
     ax2.tick_params(axis="x", colors="red")
     
-    ax.set_title(f"MODTRAN {df_name}")
+    ax.set_title(f"MODTRAN {title_name}")
     _plt_labels(ax, ylim=ylim)
     _plt_save(fig_dir, fig_name)
 
@@ -364,24 +364,60 @@ def run_modtran(json_path):
     print(result.returncode)
     return
 
-def get_Tb_from_srf(spectra_df, srf_file):
+def get_Tb_from_srf(spectra_df, srf_file, central_wl):
+    """
+    Use MODTRAN spectra and SRF to get brightness temperature.
     
-    modtran_wl = np.array(10000 / spectra_df["FREQ"])[::-1]
-    modtran_Tb = np.array(spectra_df["BBODY_T[K]"])
+    ----------
+    spectra_df : from open_7sc_file()
+    srf_file : downloaded .dat file
+    central_wl : float in [m]
+    """
 
+    #--- Convert spectral steps from cm-1 to µm, flipping direction to match to SRF
+    #--- Convert radiance to from wavenumber-based to wavelength-based, using Jacobian conversion
+    modtran_wl = np.array(1e4 / spectra_df["FREQ"])[::-1]
+    modtran_rad = np.array(spectra_df["TOTAL_RAD"][::-1] * 1e4 / (modtran_wl**2))
+
+    #--- Load SRF, which is in wavelengths and proportions
     srf = np.loadtxt(srf_file)
-    srf_wl = np.array(srf[:, 0]/1000)
+    srf_wl = np.array(srf[:, 0]/1000) # Convert from nm to µm
     srf_response = np.array(srf[:, 1])
 
+    #--- Interpolate BT onto the SRF wavelength grid
     from scipy.interpolate import interp1d
-    # 1. Interpolate BT onto the response wavelength grid
-    interp_bt = interp1d(modtran_wl, modtran_Tb, kind='linear', bounds_error=True)
-    bt_on_srf = interp_bt(srf_wl)
+    interp_rad = interp1d(modtran_wl, modtran_rad, kind='linear', bounds_error=True)
+    rad_on_srf = interp_rad(srf_wl)
+    #------ Compute the response-weighted average brightness temperature
+    #------ Using trapezoid method to estimate the integral of radiance and SRF with respect to wavelength
+    #------ Convert radiance to Tb using the central wavelength from VIIRS documentation
+    weighted_rad = np.trapz(rad_on_srf * srf_response, srf_wl) / np.trapz(srf_response, srf_wl)
+    weighted_rad_m = weighted_rad*1e6*1e4
+    Tb = radiance_to_brightness_temp_wavelength(weighted_rad_m, central_wl)
 
-    # 2. Compute the response-weighted average brightness temperature
-    #--- Using trapezoid method to estimate the integral of Tb and SRF with respect to wavelength
-    weighted_bt = np.trapz(bt_on_srf * srf_response, srf_wl) / np.trapz(srf_response, srf_wl)
-
-    print(f"Weighted brightness temperature: {weighted_bt:.3f} K")
-
+    print(f"Sensor brightness temperature: {Tb:.3f} K")
     return
+
+def radiance_to_brightness_temp_wavelength(radiance, wavelength):
+    """
+    Convert spectral radiance (per wavelength) to brightness temperature.
+
+    ----------
+    radiance : float or np.ndarray
+        Spectral radiance [W / (m²·sr·m)]
+        ~1e5 for shortwave IR, ~1e6 for longwave IR
+    wavelength : float or np.ndarray
+        Wavelength [m]
+    """
+    
+    c = 2.99792458e8       # speed of light [m/s]
+    h = 6.62607015e-34     # Planck constant [J·s]
+    k = 1.380649e-23       # Boltzmann constant [J/K]
+    lam = wavelength
+    L_lambda = radiance
+    
+    numerator = h * c
+    denominator = lam * k * np.log((2 * h * c**2) / (L_lambda * lam**5) + 1)
+    
+    T_B = numerator / denominator
+    return T_B
