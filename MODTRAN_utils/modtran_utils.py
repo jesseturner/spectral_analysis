@@ -138,41 +138,6 @@ def read_wyo_radiosonde_rtf_file(filepath):
     df = pd.read_fwf(filepath, widths=col_widths, names=col_names, skiprows=16, skipfooter=32)
     return df
 
-def build_modtran_custom_json(df):
-    press_json = df["PRES"].tolist()
-    temp_k_json = (round(df["TEMP"] + 273.15, 2)).tolist()
-    water_vapor_ppmv_json = (round(df["MIXR"]* 1.607e3, 2)).tolist()
-    return press_json, temp_k_json, water_vapor_ppmv_json
-
-def plot_custom_json(filepath):
-    with open(filepath, "r") as f:
-        data = json.load(f)
-
-    profiles = data["MODTRAN"][0]["MODTRANINPUT"]["ATMOSPHERE"]["PROFILES"]
-
-    pressure = profiles[0]["PROFILE"]  # millibar
-    temperature = profiles[1]["PROFILE"]  # Kelvin
-    h2o = profiles[2]["PROFILE"]  # ppmv
-
-    fig, ax1 = plt.subplots(figsize=(6, 8))
-
-    ax1.plot(temperature, pressure, "r-", label="Temperature (K)")
-    ax1.set_xlabel("Temperature (K)", color="r")
-    ax1.tick_params(axis="x", labelcolor="r")
-    ax1.set_ylabel("Pressure (mbar)")
-    ax1.invert_yaxis()  # Pressure decreasing with altitude
-
-    ax2 = ax1.twiny()
-    ax2.plot(h2o, pressure, "b-", label="H2O (ppmv)")
-    ax2.set_xlabel("H2O (ppmv)", color="b")
-    ax2.tick_params(axis="x", labelcolor="b")
-
-    plt.title("MODTRAN Format Temperature & H2O")
-    ax1.grid(True, linestyle="--", alpha=0.6)
-
-    _plt_save("MODTRAN_json", "custom_atmosphere")
-    return 
-
 def profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon):
     gfs_t, gfs_q, gfs_p = _read_gfs_point(gfs_filepath, lat, lon)
     sst = _read_sst_point(sst_filepath, lat, lon)
@@ -317,11 +282,11 @@ def create_modtran_json_from_df(df, json_path):
                     },
                     "SPECTRAL": {
                         "V1": 650.0,
-                        "V2": 2550.0,
+                        "V2": 3125.0,
                         "DV": 1.0,
                         "FWHM": 2.0,
-                        "YFLAG": "R",
-                        "MLFLX": -1
+                        "LBMNAM": "T",
+                        "BMNAME": "p1_2013"
                     },
                     "FILEOPTIONS": {}
                 }
