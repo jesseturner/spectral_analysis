@@ -12,16 +12,16 @@ from MODTRAN_utils import modtran_utils as m_utils
 # m_utils.create_modtran_json_from_df(df, json_path)
 
 #=== FLC case
-json_path = "MODTRAN_json/2025031206_40_67-75.json"
-title_name = '2025-03-12 (40, -67.75)'
-ylim = (271, 280)
-fig_name = "2025031206_flc"
+# json_path = "MODTRAN_json/2025031206_40_67-75.json"
+# title_name = '2025-03-12 (40, -67.75)'
+# ylim = (271, 280)
+# fig_name = "2025031206_flc"
 
 #=== Null case
-# json_path = "MODTRAN_json/2025031206_35-75_69-25_med_res.json"
-# title_name = '2025-03-12 (35.75, -69.25)'
-# ylim = (282, 291)
-# fig_name = "2025031206_null"
+json_path = "MODTRAN_json/2025031206_35-75_69-25_med_res.json"
+title_name = '2025-03-12 (35.75, -69.25)'
+ylim = (282, 291)
+fig_name = "2025031206_null"
 
 #--- Run modtran with JSON settings
 m_utils.run_modtran(json_path)
