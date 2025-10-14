@@ -353,20 +353,10 @@ def get_Tb_from_srf(spectra_df, srf_file, central_wl):
     from scipy.interpolate import interp1d
     interp_rad = interp1d(modtran_wl, modtran_rad, kind='linear', bounds_error=True)
     rad_on_srf = interp_rad(srf_wl)
-    #------ Compute the response-weighted average brightness temperature
-    #------ Using trapezoid method to estimate the integral of radiance and SRF with respect to wavelength
-    #------ Convert radiance to Tb using the central wavelength from VIIRS documentation
-    weighted_rad = np.trapz(rad_on_srf * srf_response, srf_wl) / np.trapz(srf_response, srf_wl)
-    weighted_rad_m = weighted_rad*1e6*1e4
 
-    Tb = reverse_planck_lambda(weighted_rad_m, central_wl)
-    print(f"Version using central wavelength: {Tb:.2f} K")
-
-    Tb2 = srf_brightness_temp(srf_wl*1e-6, srf_response, weighted_rad_m)
-    print(f"Version using forward-model radiance: {Tb2:.2f} K")
-
-    Tb_array = reverse_planck_lambda(rad_on_srf*1e6*1e4, srf_wl*1e-6)
-    Tb3 = np.trapz(Tb_array * srf_response, srf_wl) / np.trapz(srf_response, srf_wl)
+    rad_m = rad_on_srf*1e6*1e4 #--- Convert to meters-based units
+    Tb_array = reverse_planck_lambda(rad_m, srf_wl*1e-6) #--- Brightness temperature for each wavelength
+    Tb3 = np.trapz(Tb_array * srf_response, srf_wl) / np.trapz(srf_response, srf_wl) #------ Trapezoid method to get Tb multiplied by normalized SRF
     print(f"Version using Tb calculated for each step: {Tb3:.2f} K")
 
     return
@@ -407,25 +397,3 @@ def reverse_planck_lambda(radiance, wavelength):
     
     T = numerator / denominator
     return T
-
-def srf_brightness_temp(srf_wl, srf_response, L_obs):
-    """
-    Estimating band radiance equal to observed radiance (L_obs)
-    to back out a brightness temperature that accounts for SRF.
-    ----------
-    srf_wl : [m]
-    srf_response : [per wl]
-    L_obs : [W / (m²·sr·m)]
-    """
-    from scipy.optimize import brentq
-
-    D = np.trapz(srf_response, srf_wl)
-
-    def radiance_band(T):
-        B = planck_lambda(T, srf_wl)
-        return np.trapz(srf_response * B, srf_wl) / D
-
-    T_low, T_high = 50.0, 500.0
-    T_bt = brentq(lambda T: radiance_band(T) - L_obs, T_low, T_high)
-
-    return T_bt
