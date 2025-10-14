@@ -358,12 +358,13 @@ def get_Tb_from_srf(spectra_df, srf_file, central_wl):
     #------ Convert radiance to Tb using the central wavelength from VIIRS documentation
     weighted_rad = np.trapz(rad_on_srf * srf_response, srf_wl) / np.trapz(srf_response, srf_wl)
     weighted_rad_m = weighted_rad*1e6*1e4
-    Tb = reverse_planck_lambda(weighted_rad_m, central_wl)
 
-    print(f"Version using central WL: {Tb:.3f} K")
+    Tb = reverse_planck_lambda(weighted_rad_m, central_wl)
+    print(f"Version using central wavelength: {Tb:.3f} K")
 
     Tb2 = srf_brightness_temp(srf_wl*1e-6, srf_response, weighted_rad_m)
     print(f"Version using forward-model radiance: {Tb2:.3f} K")
+
     return
 
 def planck_lambda(T, wavelength):
@@ -405,8 +406,8 @@ def reverse_planck_lambda(radiance, wavelength):
 
 def srf_brightness_temp(srf_wl, srf_response, L_obs):
     """
-    Get brightness temperature for a band given spectral response function 
-    and SRF-adjusted radiance (L_obs).
+    Estimating band radiance equal to observed radiance (L_obs)
+    to back out a brightness temperature that accounts for SRF.
     ----------
     srf_wl : [m]
     srf_response : [per wl]
