@@ -30,12 +30,12 @@ df1 = m_utils.open_tp7_file("flc_custom1.tp7")
 df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting resolution
 
 #--- Plot BTD spectra
-m_utils.plot_btd_freq_range(df2, title_name=title_name, 
-    fig_dir='MODTRAN_plot', fig_name=fig_name,
-    freq_range1=[1e4/11.6, 1e4/9.9], freq_range2=[1e4/3.9, 1e4/3.5], ylim=ylim)
+# m_utils.plot_btd_freq_range(df2, title_name=title_name, 
+#     fig_dir='MODTRAN_plot', fig_name=fig_name,
+#     freq_range1=[1e4/11.6, 1e4/9.9], freq_range2=[1e4/3.9, 1e4/3.5], ylim=ylim)
 
 #--- Get BTD value from SRF
-band = "M15"
+band = "M12"
 if band == "M15":   
     central_wl = 10.763e-6
 if band == "M12":
