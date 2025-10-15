@@ -140,6 +140,9 @@ def plot_viirs_data(da, plot_dir, plot_name, plot_title, extent=None, pin_coords
             markeredgecolor='white',
             markeredgewidth=1.5, 
             transform=ccrs.PlateCarree())
+        
+        _print_value_at_point(da, pin_coords)
+
     if extent: ax.set_extent(extent, crs=ccrs.PlateCarree())
     ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
@@ -212,4 +215,13 @@ def plot_viirs_srf(srf_file):
     plt.title(f'{band_str} \n NG Band-Averaged RSRs')
 
     m_utils._plt_save("VIIRS_spectral_response_functions", f'srf_{band_str.lower().replace(" ", "_")}')
+    return
+
+def _print_value_at_point(da, pin_coords):
+    dist = ((da['Latitude'] - pin_coords[0])**2 + (da['Longitude'] - pin_coords[1])**2)**0.5
+    y_idx, x_idx = np.unravel_index(dist.argmin(), dist.shape)
+    pin_value = da.isel(y=y_idx, x=x_idx).item()
+    selected_lat = da['Latitude'].isel(y=y_idx, x=x_idx).item()
+    selected_lon = da['Longitude'].isel(y=y_idx, x=x_idx).item()
+    print(f"Value at ({selected_lat:.2f}, {selected_lon:.2f}): {pin_value:.2f} K")
     return

@@ -14,7 +14,6 @@ da_m12 = v_utils.open_viirs_brightness_temp(file_path, "M12")
 da_m15 = v_utils.open_viirs_brightness_temp(file_path, "M15")
 
 da_btd = da_m15 - da_m12
-print(da_btd)
 
 description = f"{viirs_file.split("_")[1]} {viirs_file.split("_")[2]} {viirs_file.split("_")[3]}"
 save_name = f"btd_{description.replace(" ", "_")}"
