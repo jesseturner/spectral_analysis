@@ -9,14 +9,14 @@ cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.n
 file_path = os.path.join(cris_dir, cris_file)
 
 #=== FLC case
-# target_lat = 40
-# target_lon = -67.75
-# ylim = (271, 280)
+target_lat = 40
+target_lon = -67.75
+ylim = (271, 280)
 
 #=== Null case
-target_lat = 35.75
-target_lon = -69.25
-ylim = (282, 291)
+# target_lat = 35.75
+# target_lon = -69.25
+# ylim = (282, 291)
 
 #--- Get brightness temperature spectra for point
 ds = c_utils.open_cris_data(file_path)
@@ -38,6 +38,6 @@ c_utils.plot_btd_freq_range(df,
     freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=ylim)
 
 #--- Get BTD value from SRF
-band = "M12"
+band = "M15"
 srf_file = f"VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_{band}_filtered_Oct2011f_BA.dat"
-m_utils.get_Tb_from_srf(df2, srf_file)
+c_utils.get_Tb_from_srf(df, srf_file)

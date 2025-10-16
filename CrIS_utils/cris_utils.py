@@ -153,3 +153,32 @@ def _plt_save(fig_dir, fig_name):
     os.makedirs(f"{fig_dir}", exist_ok=True)
     plt.savefig(f"{fig_dir}/{fig_name}.png", dpi=200, bbox_inches='tight')
     plt.close()
+
+def get_Tb_from_srf(spectra_df, srf_file):
+    """
+    Use CrIS spectra and SRF to get brightness temperature.
+    
+    ----------
+    spectra_df : from get_brightness_temperature(ds)
+    srf_file : downloaded .dat file
+    """
+
+    #--- flip direction to match to SRF
+    spectra_wl = spectra_df['Wavelength (um)'][::-1]
+    spectra_t = spectra_df['Brightness Temperature (K)'][::-1]
+
+    #--- Load SRF, which is in wavelengths and proportions
+    srf = np.loadtxt(srf_file)
+    srf_wl = np.array(srf[:, 0]/1000) # Convert from nm to µm
+    srf_response = np.array(srf[:, 1])
+
+    #--- Interpolate BT onto the SRF wavelength grid
+    from scipy.interpolate import interp1d
+    interp_rad = interp1d(spectra_wl, spectra_t, kind='linear', bounds_error=True)
+    Tb_array = interp_rad(srf_wl)
+
+    #------ Trapezoid method to get Tb multiplied by normalized SRF
+    Tb = np.trapz(Tb_array * srf_response, srf_wl) / np.trapz(srf_response, srf_wl) 
+    print(f"Brightness temperature: {Tb:.2f} K")
+
+    return

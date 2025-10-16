@@ -355,8 +355,8 @@ def get_Tb_from_srf(spectra_df, srf_file):
 
     rad_m = rad_on_srf*1e6*1e4 #--- Convert to meters-based units
     Tb_array = reverse_planck_lambda(rad_m, srf_wl*1e-6) #--- Brightness temperature for each wavelength
-    Tb3 = np.trapz(Tb_array * srf_response, srf_wl) / np.trapz(srf_response, srf_wl) #------ Trapezoid method to get Tb multiplied by normalized SRF
-    print(f"Version using Tb calculated for each step: {Tb3:.2f} K")
+    Tb = np.trapz(Tb_array * srf_response, srf_wl) / np.trapz(srf_response, srf_wl) #------ Trapezoid method to get Tb multiplied by normalized SRF
+    print(f"Brightness temperature: {Tb:.2f} K")
 
     return
 
