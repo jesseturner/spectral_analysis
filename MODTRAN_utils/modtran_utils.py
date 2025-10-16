@@ -329,14 +329,13 @@ def run_modtran(json_path):
     print(result.returncode)
     return
 
-def get_Tb_from_srf(spectra_df, srf_file, central_wl):
+def get_Tb_from_srf(spectra_df, srf_file):
     """
     Use MODTRAN spectra and SRF to get brightness temperature.
     
     ----------
     spectra_df : from open_7sc_file()
     srf_file : downloaded .dat file
-    central_wl : float in [m]
     """
 
     #--- Convert spectral steps from cm-1 to µm, flipping direction to match to SRF

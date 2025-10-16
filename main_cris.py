@@ -37,3 +37,7 @@ c_utils.plot_btd_freq_range(df,
     fig_dir='CrIS_plot', fig_name=f'btd_{save_name}', fig_title=plot_title,
     freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=ylim)
 
+#--- Get BTD value from SRF
+band = "M12"
+srf_file = f"VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_{band}_filtered_Oct2011f_BA.dat"
+m_utils.get_Tb_from_srf(df2, srf_file)

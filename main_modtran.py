@@ -36,12 +36,8 @@ df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting reso
 
 #--- Get BTD value from SRF
 band = "M12"
-if band == "M15":   
-    central_wl = 10.763e-6
-if band == "M12":
-    central_wl = 3.7e-6
 srf_file = f"VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_{band}_filtered_Oct2011f_BA.dat"
-m_utils.get_Tb_from_srf(df2, srf_file, central_wl=central_wl)
+m_utils.get_Tb_from_srf(df2, srf_file)
 
 #--- Getting atmospheric profiles for cases
 # gfs_filepath = "/home/jturner/FLC_data/model_data/gfs_20250312_06z"
