@@ -174,8 +174,14 @@ def get_Tb_from_srf(spectra_df, srf_file):
 
     #--- Interpolate BT onto the SRF wavelength grid
     from scipy.interpolate import interp1d
-    interp_rad = interp1d(spectra_wl, spectra_t, kind='linear', bounds_error=True)
+    interp_rad = interp1d(spectra_wl, spectra_t, kind='linear', bounds_error=False, fill_value=np.nan)
     Tb_array = interp_rad(srf_wl)
+
+    #--- Remove missing data from SRF arrays
+    mask = ~np.isnan(Tb_array)
+    Tb_array = Tb_array[mask]
+    srf_response = srf_response[mask]
+    srf_wl = srf_wl[mask]
 
     #------ Trapezoid method to get Tb multiplied by normalized SRF
     Tb = np.trapz(Tb_array * srf_response, srf_wl) / np.trapz(srf_response, srf_wl) 
