@@ -51,7 +51,8 @@ def open_viirs_brightness_temp(file_path, band):
         )
 
     da = _replace_viirs_fill_values(da)
-    da = _apply_scale_and_offset(file_path, band, da)
+    if band.upper() != "M13": #--- M13 doesn't have scale and offset
+        da = _apply_scale_and_offset(file_path, band, da)
 
     return da
 
