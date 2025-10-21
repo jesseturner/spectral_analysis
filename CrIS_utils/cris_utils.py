@@ -260,13 +260,13 @@ def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_tit
 
         c = plt.pcolormesh(ds_lon, ds_lat, ds_sel, cmap=cmap, norm=norm, shading="nearest")
 
-    clb = plt.colorbar(c, shrink=0.4, pad=0.02, ax=ax)
+    clb = plt.colorbar(c, shrink=0.6, pad=0.02, ax=ax)
     clb.ax.tick_params(labelsize=15)
     clb.set_label('(K)', fontsize=15)
 
     ax.set_extent([extent[0], extent[1], extent[2], extent[3]], crs=ccrs.PlateCarree())
-    ax.coastlines(resolution='50m', color='gray', linewidth=1)
-    ax.add_feature(cfeature.STATES, edgecolor='white', linewidth=1, zorder=6)
+    ax.coastlines(resolution='50m', color='black', linewidth=1)
+    # ax.add_feature(cfeature.STATES, edgecolor='black', linewidth=1, zorder=6)
 
     ax.set_title(fig_title, fontsize=20, pad=10)
 
