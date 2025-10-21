@@ -37,5 +37,5 @@ v_utils.plot_viirs_data(da_btd, "VIIRS_plot", save_name, plot_title, extent=[-73
 
 #--- Plot the VIIRS spectral response functions
 
-# srf_file = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
+# srf_file = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M12_FAKE.dat"
 # v_utils.plot_viirs_srf(srf_file)
