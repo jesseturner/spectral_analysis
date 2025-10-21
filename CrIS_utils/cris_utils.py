@@ -210,3 +210,40 @@ def create_fake_srf(name, full_range, response_range):
             txtfile.write(f"{x:.3f}\t{y:.7f}\n")
     
     return
+
+def plot_cris_spatial(ds, wl_sel, cris_sel, extent, fig_dir, fig_name):
+    """
+    ds : from open_cris_data()
+    wl_sel : (float) wavelength in microns
+    cris_sel : (str) "lw" (9.13-15.40 µm), "mw" (5.71-8.26), "sw" (3.92-4.64)
+    extent : [west, east, south, north]
+    """
+
+    #--- Selecting from the spectrum
+    wnum_sel = 10000/wl_sel
+    ds_wn_900 = ds.sel(wnum_lw=wnum_sel, method='nearest')
+    ds_wn_900 = ds_wn_900.sel(fov=1)
+    wnum_sel_ds = ds_wn_900[f'wnum_{cris_sel}'].values
+
+    #--- Getting brightness temperature
+    b_temp_900 = radiance_to_brightness_temp(ds_wn_900[f'rad_{cris_sel}'].values, wnum_sel)
+
+    #--- Plotting the map
+    projection=ccrs.PlateCarree(central_longitude=0)
+    fig,ax=plt.subplots(1, figsize=(12,12),subplot_kw={'projection': projection})
+
+    c = ax.pcolormesh(ds_wn_900['lon'], ds_wn_900['lat'], b_temp_900, cmap='Greys', shading='auto')
+
+    clb = plt.colorbar(c, shrink=0.4, pad=0.02, ax=ax)
+    clb.ax.tick_params(labelsize=15)
+    clb.set_label('(K)', fontsize=15)
+
+    ax.set_extent([extent[0], extent[1], extent[2], extent[3]], crs=ccrs.PlateCarree())
+    ax.coastlines(resolution='50m', color='gray', linewidth=1)
+    ax.add_feature(cfeature.STATES, edgecolor='white', linewidth=1, zorder=6)
+
+    ax.set_title(f"CrIS Brightness Temperature ({10000/wnum_sel_ds:.1f} μm)", fontsize=20, pad=10)
+
+    _plt_save(fig_dir, fig_name)
+
+    return
