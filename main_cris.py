@@ -45,4 +45,10 @@ ylim = (271, 280)
 
 #--- Plot CrIS spatially
 ds = c_utils.open_cris_data(file_path)
-c_utils.plot_cris_spatial(ds, wl_sel=11, cris_sel="lw", extent=[-73, -57, 33, 46], fig_dir="CrIS_plot", fig_name="spatial_example")
+ds_t_11, ds_11 = c_utils.get_cris_spatial_brightness_temp(ds, wl_sel=11)
+ds_t_3_9, ds_3_9 = c_utils.get_cris_spatial_brightness_temp(ds, wl_sel=3.95)
+ds_btd = ds_t_11 - ds_t_3_9
+
+c_utils.plot_cris_spatial(ds_btd, ds_3_9['lat'], ds_3_9['lon'], extent=[-73, -57, 33, 46], 
+    fig_dir="CrIS_plot", fig_name="spatial_example", fig_title=f"CrIS Brightness Temperature (11.0 - 3.95 μm)", 
+    is_btd=True)

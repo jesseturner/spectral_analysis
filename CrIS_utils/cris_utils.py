@@ -2,6 +2,7 @@ import earthaccess, os
 import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import pandas as pd
@@ -211,28 +212,53 @@ def create_fake_srf(name, full_range, response_range):
     
     return
 
-def plot_cris_spatial(ds, wl_sel, cris_sel, extent, fig_dir, fig_name):
+def get_cris_spatial_brightness_temp(ds, wl_sel):
     """
     ds : from open_cris_data()
     wl_sel : (float) wavelength in microns
-    cris_sel : (str) "lw" (9.13-15.40 µm), "mw" (5.71-8.26), "sw" (3.92-4.64)
+    """
+
+    cris_range = (
+        "lw" if 9.13 <= wl_sel <= 15.40 else
+        "mw" if 5.71 <= wl_sel <= 8.26 else
+        "sw" if 3.92 <= wl_sel <= 4.64 else
+        None)
+
+    if cris_range == None: print(f"Wavelength selection of {wl_sel} µm is out of CrIS range.")
+    
+    wnum_sel = 10000/wl_sel
+    if cris_range == "lw":
+        ds_wn = ds.sel(wnum_lw=wnum_sel, method='nearest')
+    if cris_range == "mw":
+        ds_wn = ds.sel(wnum_mw=wnum_sel, method='nearest')
+    if cris_range == "sw":
+        ds_wn = ds.sel(wnum_sw=wnum_sel, method='nearest')
+    
+    ds_wn = ds_wn.sel(fov=1)
+    wnum_sel_ds = ds_wn[f'wnum_{cris_range}'].values
+
+    b_temp_wn = radiance_to_brightness_temp(ds_wn[f'rad_{cris_range}'].values, wnum_sel)
+
+    return b_temp_wn, ds_wn
+
+def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_title, is_btd=False):
+    """
     extent : [west, east, south, north]
     """
 
-    #--- Selecting from the spectrum
-    wnum_sel = 10000/wl_sel
-    ds_wn_900 = ds.sel(wnum_lw=wnum_sel, method='nearest')
-    ds_wn_900 = ds_wn_900.sel(fov=1)
-    wnum_sel_ds = ds_wn_900[f'wnum_{cris_sel}'].values
-
-    #--- Getting brightness temperature
-    b_temp_900 = radiance_to_brightness_temp(ds_wn_900[f'rad_{cris_sel}'].values, wnum_sel)
-
-    #--- Plotting the map
     projection=ccrs.PlateCarree(central_longitude=0)
     fig,ax=plt.subplots(1, figsize=(12,12),subplot_kw={'projection': projection})
 
-    c = ax.pcolormesh(ds_wn_900['lon'], ds_wn_900['lat'], b_temp_900, cmap='Greys', shading='auto')
+    c = ax.pcolormesh(ds_lon, ds_lat, ds_sel, cmap='Greys', shading='auto')
+
+    if is_btd: #--- Custom colorbar for BTD
+        cmap = mcolors.LinearSegmentedColormap.from_list(
+            "custom_cmap",
+            [(0, "#06BA63"), (0.5, "black"), (1, "white")]
+        )
+        norm = mcolors.TwoSlopeNorm(vmin=-6, vcenter=0, vmax=1.5)
+
+        c = plt.pcolormesh(ds_lon, ds_lat, ds_sel, cmap=cmap, norm=norm, shading="nearest")
 
     clb = plt.colorbar(c, shrink=0.4, pad=0.02, ax=ax)
     clb.ax.tick_params(labelsize=15)
@@ -242,7 +268,7 @@ def plot_cris_spatial(ds, wl_sel, cris_sel, extent, fig_dir, fig_name):
     ax.coastlines(resolution='50m', color='gray', linewidth=1)
     ax.add_feature(cfeature.STATES, edgecolor='white', linewidth=1, zorder=6)
 
-    ax.set_title(f"CrIS Brightness Temperature ({10000/wnum_sel_ds:.1f} μm)", fontsize=20, pad=10)
+    ax.set_title(fig_title, fontsize=20, pad=10)
 
     _plt_save(fig_dir, fig_name)
 
