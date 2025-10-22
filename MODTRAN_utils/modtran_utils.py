@@ -53,10 +53,10 @@ def plot_bt_dual(df1, df2, df1_name='', df2_name='', fig_dir='MODTRAN_plot', fig
 
     return
 
-def _plot_continuous(ax, df, df_name=None, color='black'):
+def _plot_continuous(ax, df, df_name=None, color='black', linewidth=1):
     x = 10000/df['FREQ']
     y = df['BBODY_T[K]']
-    ax.plot(x, y, color=color, linewidth=1, label=df_name)
+    ax.plot(x, y, color=color, linewidth=linewidth, label=df_name)
         
     return
 
@@ -396,3 +396,36 @@ def reverse_planck_lambda(radiance, wavelength):
     
     T = numerator / denominator
     return T
+
+def plot_freq_range_srf(df, srf_file_list, srf_name_list, color_list, 
+    fig_dir='MODTRAN_plot', fig_name='MODTRAN_range_SRF', fig_title='MODTRAN Brightness Temperature',
+    freq_range=None, ylim=None, xlim=None):
+    """
+    Visualizing the brightness temperature spectra compared to the VIIRS SRF.
+    Using sensor response function file downloaded from https://ncc.nesdis.noaa.gov/VIIRS/VIIRSSpectralResponseFunctions.php
+    
+    srf_file_list : list of strings for each file path
+    freq_range format: [2430, 2555]
+    ylim: tuple like (271, 280)
+    """
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    df_range = _filter_freq_to_range(df, freq_range[0], freq_range[1])
+    _plot_continuous(ax, df_range, color="black", linewidth=0.5)
+
+    ax_srf = ax.twinx()
+    for i in range(len(srf_file_list)):
+        srf = np.loadtxt(srf_file_list[i])
+        x = srf[:, 0]/1000
+        y = srf[:, 1]
+        ax_srf.plot(x, y, color=color_list[i], alpha=0.6, linewidth=2, label=srf_name_list[i])
+    ax_srf.legend(loc='lower right')  
+
+    ax.set_title(fig_title)
+    ax.set_xlabel("Wavelength (μm)")
+    ax.set_ylabel("Temperature (K)")
+    ax.set_ylim(ylim)
+    ax.set_xlim(xlim)
+
+    _plt_save(fig_dir, fig_name)
+    return

@@ -140,7 +140,7 @@ def plot_btd_freq_range(df,
     return
 
 def plot_freq_range_srf(df, srf_file_list, srf_name_list, color_list, 
-    fig_dir='CrIS_plot', fig_name='CrIS_btd_range', fig_title='CrIS Brightness Temperature',
+    fig_dir='CrIS_plot', fig_name='CrIS_range_SRF', fig_title='CrIS Brightness Temperature',
     freq_range=None, ylim=None, xlim=None):
     """
     Visualizing the brightness temperature spectra compared to the VIIRS SRF.
@@ -153,7 +153,7 @@ def plot_freq_range_srf(df, srf_file_list, srf_name_list, color_list,
     fig, ax = plt.subplots(figsize=(10, 5))
 
     df_range = _filter_freq_to_range(df, freq_range[0], freq_range[1])
-    _plot_continuous(ax, df_range, color="black")
+    _plot_continuous(ax, df_range, color="black", linewidth=0.5)
 
     ax_srf = ax.twinx()
     for i in range(len(srf_file_list)):
@@ -176,11 +176,11 @@ def _filter_freq_to_range(df, freq_start, freq_end):
     filtered_df = df[((df["Wavenumber (cm-1)"] >= freq_start) & (df["Wavenumber (cm-1)"] <= freq_end))]
     return filtered_df
 
-def _plot_continuous(ax, df, color='black'):
+def _plot_continuous(ax, df, color='black', linewidth=1):
     x = df["Wavelength (um)"]
     y = df["Brightness Temperature (K)"]
     
-    ax.plot(x, y, color=color, linewidth=1)
+    ax.plot(x, y, color=color, linewidth=linewidth)
         
     return
 
