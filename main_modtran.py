@@ -51,17 +51,17 @@ df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting reso
 # m_utils.plot_skew_t_from_profile(df, title="GFS and SST vertical profile (2025-03-12)", fig_dir="/home/jturner/spectral_analysis", fig_name="gfs_vertical_profile_20250312")
 
 #--- Plot brightness temperature with VIIRS SRFs
-band = "full"
-xlim = (3.6, 12)
-ylim = (180, 300)
+band = "M13"
+xlim = (3.6, 4.2)
+ylim = (274, 281)
 freq_range =[10000/xlim[1], 10000/xlim[0]]
-srf_file1 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
-srf_file2 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M12_filtered_Oct2011f_BA.dat"
-srf_file3 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M12_FAKE.dat"
+# srf_file1 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
+# srf_file2 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M12_filtered_Oct2011f_BA.dat"
+# srf_file3 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M12_FAKE.dat"
 srf_file4 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M13_filtered_Oct2011f_BA.dat"
-srf_file_list = [srf_file1, srf_file2, srf_file3, srf_file4]
-srf_name_list = ["M15", "M12", "M12 Fake", "M13"]
-color_list = ["#17BEBB", "#2E282A", "#CD5334", "#EDB88B"]
+srf_file_list = [srf_file4] # [srf_file1, srf_file2, srf_file3, srf_file4]
+srf_name_list = ["M13"] # ["M15", "M12", "M12 Fake", "M13"]
+color_list = ["#EDB88B"] # ["#17BEBB", "#2E282A", "#CD5334", "#EDB88B"]
 
 m_utils.plot_freq_range_srf(df2, srf_file_list, srf_name_list, color_list,
     fig_dir='MODTRAN_plot', fig_name=f'band{band}_{fig_name}', fig_title=f"MODTRAN {title_name} \n Profile from GFS and OISST",
