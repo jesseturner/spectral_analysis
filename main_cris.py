@@ -38,17 +38,18 @@ plot_title = f"CrIS 2025-03-12 ({lat}, {lon}) \n j01 d20250312 t0642"
 #     freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=ylim)
 
 #--- Plot brightness temperature with VIIRS SRFs
-band = "M15"
-xlim = (9, 12)
+band = "395"
+xlim = (3.6, 4.2)
 ylim = (274, 281)
 freq_range =[10000/xlim[1], 10000/xlim[0]]
-srf_file1 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
+srf_file0 = "VIIRS_spectral_response_functions/line_395.dat"
+# srf_file1 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
 # srf_file2 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M12_filtered_Oct2011f_BA.dat"
 # srf_file3 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M12_FAKE.dat"
 # srf_file4 = "VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_M13_filtered_Oct2011f_BA.dat"
-srf_file_list = [srf_file1]#, srf_file2, srf_file3, srf_file4]
-srf_name_list = ["M15"]#, "M12", "M12 Fake", "M13"]
-color_list = ["#17BEBB"]#, "#2E282A", "#CD5334", "#EDB88B"]
+srf_file_list = [srf_file0]# [srf_file1, srf_file2, srf_file3, srf_file4]
+srf_name_list = ["3.95 µm"]# ["M15", "M12", "M12 Fake", "M13"]
+color_list = ["#2E282A"]#, ["#17BEBB", "#2E282A", "#CD5334", "#EDB88B"]
 
 c_utils.plot_freq_range_srf(df, srf_file_list, srf_name_list, color_list,
     fig_dir='CrIS_plot', fig_name=f'band{band}_{save_name}', fig_title=plot_title,
