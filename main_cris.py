@@ -39,7 +39,7 @@ plot_title = f"CrIS 2025-03-12 ({lat}, {lon}) \n j01 d20250312 t0642"
 
 
 #=== Temp: for running following lines
-band_lw = 10.83
+band_lw = 10.90
 band_str = str(band_lw).replace(".", "")
 
 #--- Create fake SRF
