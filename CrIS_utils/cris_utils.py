@@ -224,7 +224,7 @@ def get_Tb_from_srf(spectra_df, srf_file):
 
     return
 
-def create_fake_srf(name, full_range, response_range):
+def create_fake_srf(name, full_range, response_range, save_path):
     """
     Create a SRF file for a designated range.     
     ----------
@@ -233,14 +233,12 @@ def create_fake_srf(name, full_range, response_range):
     response_range : (start, end) tuple
     """
 
-    txt_filename = f"VIIRS_spectral_response_functions/NPP_VIIRS_NG_RSR_{name}.dat"
-
     data = []
     for x in range(full_range[0], full_range[1] + 1):
         y = 1.0 if response_range[0] <= x <= response_range[1] else 0.0
         data.append((x, y))
     
-    with open(txt_filename, "w") as txtfile:
+    with open(save_path, "w") as txtfile:
         for x, y in data:
             txtfile.write(f"{x:.3f}\t{y:.7f}\n")
     

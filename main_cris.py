@@ -37,35 +37,47 @@ plot_title = f"CrIS 2025-03-12 ({lat}, {lon}) \n j01 d20250312 t0642"
 #     fig_dir='CrIS_plot', fig_name=f'btd_{save_name}', fig_title=plot_title,
 #     freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=ylim)
 
+
+#=== Temp: for running following lines
+band_lw = 10.83
+band_str = str(band_lw).replace(".", "")
+
+#--- Create fake SRF
+band_lw_start = int(band_lw*1000)-1
+band_lw_mid = int(band_lw*1000)
+band_lw_end = int(band_lw*1000)+1
+srf_file = f"spectral_response_functions/VIIRS_NG_RSR_{band_str}.dat"
+
+c_utils.create_fake_srf(name=f"line_{band_str}", 
+    full_range=(band_lw_start, band_lw_end), 
+    response_range=(band_lw_mid, band_lw_mid),
+    save_path=srf_file)
+
+#--- Get BTD value from SRF
+# c_utils.get_Tb_from_srf(df, srf_file)
+
 #--- Plot brightness temperature with VIIRS SRFs
-band = "B14"
 xlim = (9, 12)
 ylim = (274, 281)
 freq_range =[10000/xlim[1], 10000/xlim[0]]
-# srf_file0 = "spectral_response_functions/line_1076.dat"
+# srf_file0 = f"spectral_response_functions/line_{band_str}.dat"
 # srf_file1 = "spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
-srf_file2 = "spectral_response_functions/GOES-R_ABI_SRF_ch14.dat"
-srf_file_list = [srf_file2]
-srf_name_list = ["B14"]
+#srf_file2 = "spectral_response_functions/GOES-R_ABI_SRF_ch14.dat"
+srf_file_list = [srf_file]
+srf_name_list = [f"{band_lw} μm"]
 color_list = ["#4A8FE7"]
 
 c_utils.plot_freq_range_srf(df, srf_file_list, srf_name_list, color_list,
-    fig_dir='CrIS_plot', fig_name=f'band{band}_{save_name}', fig_title=plot_title,
+    fig_dir='CrIS_plot', fig_name=f'band{band_str}_{save_name}', fig_title=plot_title,
     freq_range=freq_range, ylim=ylim, xlim=xlim)
 
-#--- Get BTD value from SRF
-# c_utils.create_fake_srf(name="M12_FAKE", full_range=(3200, 4250), response_range=(3900, 4000))
-# band = "M12_FAKE"
-# srf_file = f"spectral_response_functions/NPP_VIIRS_NG_RSR_{band}.dat"
-# c_utils.get_Tb_from_srf(df, srf_file)
-
 #--- Plot CrIS spatially
-# ds = c_utils.open_cris_data(file_path)
-# ds_t_11, ds_11 = c_utils.get_cris_spatial_brightness_temp(ds, wl_sel=10.76)
-# ds_t_3_9, ds_3_9 = c_utils.get_cris_spatial_brightness_temp(ds, wl_sel=3.95)
-# ds_btd = ds_t_11 - ds_t_3_9
+ds = c_utils.open_cris_data(file_path)
+ds_t_11, ds_11 = c_utils.get_cris_spatial_brightness_temp(ds, wl_sel=band_lw)
+ds_t_3_9, ds_3_9 = c_utils.get_cris_spatial_brightness_temp(ds, wl_sel=3.95)
+ds_btd = ds_t_11 - ds_t_3_9
 
-# c_utils.plot_cris_spatial(ds_btd, ds_3_9['lat'], ds_3_9['lon'], extent=[-73, -57, 33, 46], 
-#     fig_dir="CrIS_plot", fig_name="spatial_example", 
-#     fig_title=f"CrIS Brightness Temperature (10.76 - 3.95 μm) \n j01 d20250312 t0642", 
-#     is_btd=True)
+c_utils.plot_cris_spatial(ds_btd, ds_3_9['lat'], ds_3_9['lon'], extent=[-73, -57, 33, 46], 
+    fig_dir="CrIS_plot", fig_name=f"spatial_{band_str}_{save_name}", 
+    fig_title=f"CrIS Brightness Temperature ({band_lw} - 3.95 μm) \n j01 d20250312 t0642", 
+    is_btd=True)
