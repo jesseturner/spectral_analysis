@@ -56,13 +56,14 @@ xlim = (3.6, 4.2)
 ylim = (270, 279)
 freq_range =[10000/xlim[1], 10000/xlim[0]]
 # srf_file0 = "spectral_response_functions/line_395.dat"
-srf_file1 = "spectral_response_functions/NPP_VIIRS_NG_RSR_M13_filtered_Oct2011f_BA.dat"
-# srf_file2 = "spectral_response_functions/GOES-R_ABI_SRF_ch7.dat"
-srf_file3 = "spectral_response_functions/NPP_VIIRS_NG_RSR_M12_FAKE.dat"
-srf_file_list = [srf_file1, srf_file3]
-srf_name_list = ["M13", "M12 Fake"]
-color_list = ["#EDB88B", "#CD5334"]
+srf_file1 = "spectral_response_functions/NPP_VIIRS_NG_RSR_M12_filtered_Oct2011f_BA.dat"
+srf_file2 = "spectral_response_functions/GOES-R_ABI_SRF_ch7.dat"
+srf_file3 = "spectral_response_functions/NPP_VIIRS_NG_RSR_M15_filtered_Oct2011f_BA.dat"
+srf_file4 = "spectral_response_functions/GOES-R_ABI_SRF_ch13.dat"
+srf_file_list = [srf_file1, srf_file2, srf_file3, srf_file4]
+srf_name_list = ["VIIRS M12", "ABI B07", "VIIRS M15", "ABI B13"]
+color_list = ["#3A7CA5", "#A53A3A", "#8FC4E6", "#E68F8F"]
 
 m_utils.plot_freq_range_srf(df2, srf_file_list, srf_name_list, color_list,
-    fig_dir='MODTRAN_plot', fig_name=f'band{band}_{fig_name}', fig_title=f"MODTRAN {title_name} \n Profile from GFS and OISST",
+    fig_dir='MODTRAN_plot', fig_name=f'band{description}_{fig_name}', fig_title=f"MODTRAN {title_name} \n Profile from GFS and OISST",
     freq_range=freq_range, ylim=ylim, xlim=xlim)
