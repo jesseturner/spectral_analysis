@@ -161,7 +161,7 @@ def plot_freq_range_srf(df, srf_file_list, srf_name_list, color_list,
         x = srf[:, 0]/1000
         y = srf[:, 1]
         ax_srf.plot(x, y, color=color_list[i], alpha=0.6, linewidth=2, label=srf_name_list[i])
-    ax_srf.legend(loc='lower right')  
+    ax_srf.set_ylim(0,1)
 
     ax.set_title(fig_title)
     ax.set_xlabel("Wavelength (μm)")
@@ -224,23 +224,26 @@ def get_Tb_from_srf(spectra_df, srf_file):
 
     return
 
-def create_fake_srf(name, full_range, response_range, save_path):
+def create_fake_srf_lines(name, lines, save_path):
     """
-    Create a SRF file for a designated range.     
+    Create a SRF file from specific wavelength lines.     
     ----------
     name : string
-    full_range : (start, end) tuple
-    response_range : (start, end) tuple
+    lines : list of wavelengths (XX.XXX) to be included
+    save_path : .txt file
     """
+    srf_points = [round(l * 1000) for l in lines]
 
-    data = []
-    for x in range(full_range[0], full_range[1] + 1):
-        y = 1.0 if response_range[0] <= x <= response_range[1] else 0.0
-        data.append((x, y))
-    
-    with open(save_path, "w") as txtfile:
-        for x, y in data:
-            txtfile.write(f"{x:.3f}\t{y:.7f}\n")
+    step = 1
+    start = min(srf_points) - step
+    end = max(srf_points) + step
+
+    with open(save_path, "w") as f:
+        for i in range(start, end + step, step):
+            if i in srf_points:
+                f.write(f"{i:.3f}    1.0000000\n")
+            else:
+                f.write(f"{i:.3f}    0.0000000\n")
     
     return
 
