@@ -246,35 +246,6 @@ def create_fake_srf_lines(name, lines, save_path):
     
     return
 
-# def get_cris_spatial_Tb_line(ds, wl_sel):
-#     """
-#     ds : from open_cris_data()
-#     wl_sel : (float) wavelength in microns
-#     """
-
-#     cris_range = (
-#         "lw" if 9.13 <= wl_sel <= 15.40 else
-#         "mw" if 5.71 <= wl_sel <= 8.26 else
-#         "sw" if 3.92 <= wl_sel <= 4.64 else
-#         None)
-
-#     if cris_range == None: print(f"Wavelength selection of {wl_sel} µm is out of CrIS range.")
-    
-#     wnum_sel = 10000/wl_sel
-#     if cris_range == "lw":
-#         ds_wn = ds.sel(wnum_lw=wnum_sel, method='nearest')
-#     if cris_range == "mw":
-#         ds_wn = ds.sel(wnum_mw=wnum_sel, method='nearest')
-#     if cris_range == "sw":
-#         ds_wn = ds.sel(wnum_sw=wnum_sel, method='nearest')
-    
-#     ds_wn = ds_wn.sel(fov=1)
-#     wnum_sel_ds = ds_wn[f'wnum_{cris_range}'].values
-
-#     b_temp_wn = radiance_to_brightness_temp(ds_wn[f'rad_{cris_range}'].values, wnum_sel)
-
-#     return b_temp_wn, ds_wn
-
 def get_cris_band_Tb(ds, srf_file):
     """
     ds : from open_cris_data()
