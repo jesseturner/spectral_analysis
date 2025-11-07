@@ -53,7 +53,6 @@ def planck_radiance(wnum, T):
     return rad
 
 def radiance_to_brightness_temp(radiance, wnum):
-    
     B = radiance / (1000 * 100)  # mW/(m²·sr·cm^-1) to W/(m²·sr·m^-1)
     
     # Constants
@@ -247,34 +246,106 @@ def create_fake_srf_lines(name, lines, save_path):
     
     return
 
-def get_cris_spatial_brightness_temp(ds, wl_sel):
+# def get_cris_spatial_Tb_line(ds, wl_sel):
+#     """
+#     ds : from open_cris_data()
+#     wl_sel : (float) wavelength in microns
+#     """
+
+#     cris_range = (
+#         "lw" if 9.13 <= wl_sel <= 15.40 else
+#         "mw" if 5.71 <= wl_sel <= 8.26 else
+#         "sw" if 3.92 <= wl_sel <= 4.64 else
+#         None)
+
+#     if cris_range == None: print(f"Wavelength selection of {wl_sel} µm is out of CrIS range.")
+    
+#     wnum_sel = 10000/wl_sel
+#     if cris_range == "lw":
+#         ds_wn = ds.sel(wnum_lw=wnum_sel, method='nearest')
+#     if cris_range == "mw":
+#         ds_wn = ds.sel(wnum_mw=wnum_sel, method='nearest')
+#     if cris_range == "sw":
+#         ds_wn = ds.sel(wnum_sw=wnum_sel, method='nearest')
+    
+#     ds_wn = ds_wn.sel(fov=1)
+#     wnum_sel_ds = ds_wn[f'wnum_{cris_range}'].values
+
+#     b_temp_wn = radiance_to_brightness_temp(ds_wn[f'rad_{cris_range}'].values, wnum_sel)
+
+#     return b_temp_wn, ds_wn
+
+def get_cris_band_Tb(ds, srf_file):
     """
     ds : from open_cris_data()
-    wl_sel : (float) wavelength in microns
+    srf_file : (str) path
     """
 
-    cris_range = (
-        "lw" if 9.13 <= wl_sel <= 15.40 else
-        "mw" if 5.71 <= wl_sel <= 8.26 else
-        "sw" if 3.92 <= wl_sel <= 4.64 else
-        None)
+    srf = np.loadtxt(srf_file)
+    x = srf[:, 0]/1000
+    y = srf[:, 1]
 
-    if cris_range == None: print(f"Wavelength selection of {wl_sel} µm is out of CrIS range.")
+    cris_range = _classify_range(x)
+    print(f"CrIS range: {cris_range}")
+
+    if cris_range == None: print(f"SRF file is out of CrIS range.")
     
-    wnum_sel = 10000/wl_sel
+    #--- Getting the CrIS wavenumbers and radiances using the SRF
+    x_wn = 10_000 / x #--- Convert to wavenumber
+    x_sel = [x_val for x_val, y_val in zip(x_wn, y) if y_val == 1]
+    
     if cris_range == "lw":
-        ds_wn = ds.sel(wnum_lw=wnum_sel, method='nearest')
+        sub_ds = xr.concat(
+            [ds.sel(wnum_lw=x, method='nearest') for x in x_sel],
+            dim='wnum_lw'
+        )
     if cris_range == "mw":
-        ds_wn = ds.sel(wnum_mw=wnum_sel, method='nearest')
+        sub_ds = xr.concat(
+            [ds.sel(wnum_mw=x, method='nearest') for x in x_sel],
+            dim='wnum_mw'
+        )
     if cris_range == "sw":
-        ds_wn = ds.sel(wnum_sw=wnum_sel, method='nearest')
+        sub_ds = xr.concat(
+            [ds.sel(wnum_sw=x, method='nearest') for x in x_sel],
+            dim='wnum_sw'
+        )
     
-    ds_wn = ds_wn.sel(fov=1)
-    wnum_sel_ds = ds_wn[f'wnum_{cris_range}'].values
+    sub_ds = sub_ds.sel(fov=1)
+    wnum_sub_ds = sub_ds[f'wnum_{cris_range}'].values
+    rad_sub_ds = sub_ds[f'rad_{cris_range}'].values
 
-    b_temp_wn = radiance_to_brightness_temp(ds_wn[f'rad_{cris_range}'].values, wnum_sel)
+    #--- Calculate the brightness temperatures
+    #------ Currently flat averaging, add weighting for SRF
+    Tb_stack = []
+    for i in range(len(wnum_sub_ds)): 
+        print(f"Running Tb for {wnum_sub_ds[i]}...")
+        Tb_sub_ds_wnum = radiance_to_brightness_temp(rad_sub_ds[i,:,:], wnum_sub_ds[i])
+        Tb_stack.append(Tb_sub_ds_wnum)
 
-    return b_temp_wn, ds_wn
+    Tb = np.mean(Tb_stack, axis=0)
+
+    return Tb, sub_ds
+
+def _classify_range(wl_list):
+    """
+    wl_list : list of floats, in microns
+    """
+    ranges = {
+        "lw": (9.13, 15.40),
+        "mw": (5.71, 8.26),
+        "sw": (3.92, 4.64),
+    }
+
+    results = {}
+    for name, (low, high) in ranges.items():
+        inside = [low <= v <= high for v in wl_list]
+        if all(inside):
+            return name  # full range match
+        elif any(inside):
+            results[name] = f"partial_{name}"
+
+    return next(iter(results), None)
+
 
 def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_title, is_btd=False):
     """
