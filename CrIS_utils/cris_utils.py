@@ -91,18 +91,19 @@ def get_brightness_temperature(ds):
 
     return df
 
-def plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name="CrIS_Tb", fig_title="Brightness Temperature Spectrum from CrIS"):
-
+def plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name="CrIS_Tb", fig_title="Brightness Temperature Spectrum from CrIS", xlim=(3,12), ylim=(180,300)):
+    """
+    Plot the brightness temperature across the selected CrIS spectral range. 
+    """
 
     fig = plt.figure(figsize=(10, 5))
     plt.plot(df["Wavelength (um)"], df["Brightness Temperature (K)"], color="black", linewidth=0.5)
-    plt.xlim(4, 15)
-    plt.ylim(150, 400)
+    plt.xlim(xlim)
+    plt.ylim(ylim)
 
     plt.xlabel("Wavelength (μm)")
     plt.ylabel("Brightness Temperature (K)")
     plt.title(fig_title)
-    plt.grid(color='#d3d3d3')
 
     _plt_save(fig_dir, fig_name)
     return
@@ -164,7 +165,7 @@ def plot_freq_range_srf(df, srf_file_list, srf_name_list, color_list,
 
     ax.set_title(fig_title)
     ax.set_xlabel("Wavelength (μm)")
-    ax.set_ylabel("Temperature (K)")
+    ax.set_ylabel("Brightness Temperature (K)")
     ax.set_ylim(ylim)
     ax.set_xlim(xlim)
 
