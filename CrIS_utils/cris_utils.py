@@ -91,7 +91,7 @@ def get_brightness_temperature(ds):
 
     return df
 
-def plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name="CrIS_Tb", fig_title="Brightness Temperature Spectrum from CrIS", xlim=(3,12), ylim=(180,300)):
+def plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name="CrIS_Tb", fig_title="Brightness Temperature Spectrum from CrIS", xlim=None, ylim=None):
     """
     Plot the brightness temperature across the selected CrIS spectral range. 
     """

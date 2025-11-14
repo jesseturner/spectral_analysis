@@ -30,15 +30,11 @@ lon = f"{ds['lon'].values:.2f}"
 save_name = f"{cris_file.split(".")[1]}_{cris_file.split(".")[3]}_{ds['lat'].values:.0f}_{ds['lon'].values:.0f}"
 plot_title = f"CrIS 2025-03-12 ({lat}, {lon}) \n j01 d20250312 t0642"
 
-# c_utils.plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name=save_name, fig_title=plot_title)
+# c_utils.plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name=save_name, 
+#     fig_title=plot_title, xlim=(10,12), ylim=(268, 280))
 # c_utils.plot_btd_freq_range(df,
 #     fig_dir='CrIS_plot', fig_name=f'btd_{save_name}', fig_title=plot_title,
 #     freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=ylim)
-
-#--- Finding columns with mininum Tbs
-subset = df[df['Wavelength (um)'].between(10.3, 11.2)]
-result = subset.nsmallest(6, 'Brightness Temperature (K)')['Wavelength (um)']
-print(result)
 
 #=== Temp: for running following lines
 band_sel = [10.302640, 10.315925, 10.533246, 10.512484, 10.832769, 10.349288]
