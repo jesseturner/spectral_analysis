@@ -10,15 +10,15 @@ file_path = os.path.join(viirs_dir, viirs_file)
 v_utils.print_viirs_file_metadata(file_path)
 v_utils.print_viirs_file_attrs(file_path, dataset="Data_Products/VIIRS-M13-SDR/VIIRS-M13-SDR_Gran_0")
 
-da_sw = v_utils.open_viirs_brightness_temp(file_path, "M13")
+da_sw = v_utils.open_viirs_brightness_temp(file_path, "M12")
 da_lw = v_utils.open_viirs_brightness_temp(file_path, "M15")
 
 da_btd = da_lw - da_sw
 
 description = f"{viirs_file.split("_")[1]} {viirs_file.split("_")[2]} {viirs_file.split("_")[3]}"
 save_name = f"btd_{description.replace(" ", "_")}"
-plot_title = f"VIIRS M15 - M13 (10.76 μm - 4.05 μm) BTD \n {description}"
-v_utils.plot_viirs_data(da_btd, "VIIRS_plot", save_name, plot_title, extent=[-73, -57, 33, 46], pin_coords=(40, -67.75))
+plot_title = f"VIIRS M15 - M12 (10.76 μm - 3.7 μm) BTD \n {description}"
+v_utils.plot_viirs_data(da_btd, "VIIRS_plot", save_name, plot_title, extent=[-73, -57, 33, 46], pin_coords=(35.75, -69.25))
 
 
 #--- Plot the VIIRS Day/Night Band

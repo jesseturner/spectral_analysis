@@ -319,9 +319,10 @@ def _classify_range(wl_list):
     return next(iter(results), None)
 
 
-def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_title, is_btd=False):
+def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_title, is_btd=False, pin_coords=None):
     """
     extent : [west, east, south, north]
+    pin_coords : (lat, lon)
     """
 
     projection=ccrs.PlateCarree(central_longitude=0)
@@ -345,6 +346,15 @@ def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_tit
     ax.set_extent([extent[0], extent[1], extent[2], extent[3]], crs=ccrs.PlateCarree())
     ax.coastlines(resolution='50m', color='black', linewidth=1)
     # ax.add_feature(cfeature.STATES, edgecolor='black', linewidth=1, zorder=6)
+
+    if pin_coords:
+        ax.plot(pin_coords[1], pin_coords[0], 
+            marker='o', 
+            markersize=12,
+            markerfacecolor='red',
+            markeredgecolor='white',
+            markeredgewidth=1.5, 
+            transform=ccrs.PlateCarree())
 
     ax.set_title(fig_title, fontsize=20, pad=10)
 

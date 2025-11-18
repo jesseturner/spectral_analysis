@@ -9,14 +9,14 @@ cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.n
 file_path = os.path.join(cris_dir, cris_file)
 
 #=== FLC case
-target_lat = 40
-target_lon = -67.75
-ylim = (271, 280)
+# target_lat = 40
+# target_lon = -67.75
+# ylim = (271, 280)
 
 #=== Null case
-# target_lat = 35.75
-# target_lon = -69.25
-# ylim = (282, 291)
+target_lat = 35.75
+target_lon = -69.25
+ylim = (282, 291)
 
 #--- Get brightness temperature spectra for point
 ds = c_utils.open_cris_data(file_path)
@@ -30,15 +30,15 @@ lon = f"{ds['lon'].values:.2f}"
 save_name = f"{cris_file.split(".")[1]}_{cris_file.split(".")[3]}_{ds['lat'].values:.0f}_{ds['lon'].values:.0f}"
 plot_title = f"CrIS 2025-03-12 ({lat}, {lon}) \n j01 d20250312 t0642"
 
-# c_utils.plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name=save_name, 
-#     fig_title=plot_title, xlim=(10,12), ylim=(268, 280))
+c_utils.plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name=save_name, 
+    fig_title=plot_title, xlim=(10,12), ylim=ylim)
 # c_utils.plot_btd_freq_range(df,
 #     fig_dir='CrIS_plot', fig_name=f'btd_{save_name}', fig_title=plot_title,
 #     freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=ylim)
 
 #=== Temp: for running following lines
-band_sel = [10.302640, 10.315925, 10.533246, 10.512484, 10.832769, 10.349288]
-band_name = f"custom"
+band_sel = [10.302640]
+band_name = f"10.30 μm"
 save_name = "longwave_custom"
 
 #--- Create fake SRF
@@ -52,7 +52,7 @@ c_utils.get_Tb_from_srf(df, srf_file)
 
 #--- Plot brightness temperature with VIIRS SRFs
 xlim = (9.0, 12.0)
-ylim = (274, 281)
+# ylim = (274, 281)
 freq_range =[10000/xlim[1], 10000/xlim[0]]
 srf_file_list = [srf_file]
 color_list = ["#4A8FE7"]
@@ -71,4 +71,4 @@ ds_btd = ds_t_11 - ds_t_3_9
 c_utils.plot_cris_spatial(ds_btd, ds_3_9['lat'], ds_3_9['lon'], extent=[-73, -57, 33, 46], 
     fig_dir="CrIS_plot", fig_name=f"spatial_{save_name}", 
     fig_title=f"CrIS Brightness Temperature ({band_name} - 3.95 μm) \n j01 d20250312 t0642", 
-    is_btd=True)
+    is_btd=True, pin_coords=(target_lat, target_lon))
