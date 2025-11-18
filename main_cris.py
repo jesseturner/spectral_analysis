@@ -9,14 +9,14 @@ cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.n
 file_path = os.path.join(cris_dir, cris_file)
 
 #=== FLC case
-target_lat = 40
-target_lon = -67.75
-ylim = (268, 280)
+# target_lat = 40
+# target_lon = -67.75
+# ylim = (268, 280)
 
 #=== Null case
-# target_lat = 35.75
-# target_lon = -69.25
-# ylim = (282, 291)
+target_lat = 36
+target_lon = -72
+ylim = (280, 292)
 
 #--- Get brightness temperature spectra for point
 ds = c_utils.open_cris_data(file_path)
