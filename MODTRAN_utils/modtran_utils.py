@@ -30,15 +30,22 @@ def open_7sc_file(filepath):
 
     return df
 
-def plot_bt(df, df_name='', fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot'):
-    
+def plot_brightness_temperature(df, fig_dir="MODTRAN_plot", fig_name="MODTRAN_Tb", fig_title="Brightness Temperature Spectrum from MODTRAN", xlim=None, ylim=None):
+    """
+    Plot the brightness temperature across the selected MODTRAN spectral range. 
+    """
+
     fig, ax = plt.subplots(figsize=(10, 5))
 
-    _plot_continuous(ax, df, df_name, color='black')
+    _plot_continuous(ax, df, df_name=None, color='black', linewidth=1)
+    plt.xlim(xlim)
+    plt.ylim(ylim)
 
-    _plt_labels(ax)
+    plt.xlabel("Wavelength (μm)")
+    plt.ylabel("Brightness Temperature (K)")
+    plt.title(fig_title)
+
     _plt_save(fig_dir, fig_name)
-
     return
 
 def plot_bt_dual(df1, df2, df1_name='', df2_name='', fig_dir='MODTRAN_plot', fig_name='MODTRAN_plot'):
