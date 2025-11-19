@@ -13,7 +13,7 @@ from CrIS_utils import cris_utils as c_utils
 # m_utils.create_modtran_json_from_df(df, json_path)
 
 #=== FLC case
-json_path = "MODTRAN_json/2025031206_40_67-75.json"
+json_path = "MODTRAN_json/2025031206_40_67-75_high_res_dry.json"
 title_name = '2025-03-12 (40, -67.75)'
 ylim = (268, 280)
 fig_name = "2025031206_flc"
