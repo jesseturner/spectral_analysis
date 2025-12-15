@@ -14,9 +14,14 @@ file_path = os.path.join(cris_dir, cris_file)
 # ylim = (268, 280)
 
 #=== Null case
-target_lat = 36
-target_lon = -72
-ylim = (280, 292)
+# target_lat = 36
+# target_lon = -72
+# ylim = (280, 292)
+
+#=== Custom case
+target_lat = 42.46
+target_lon = -64.99
+ylim = (271, 278)
 
 #--- Get brightness temperature spectra for point
 ds = c_utils.open_cris_data(file_path)
@@ -51,7 +56,7 @@ c_utils.create_fake_srf_lines(name=f"line_{save_name}",
 c_utils.get_Tb_from_srf(df, srf_file)
 
 #--- Plot brightness temperature with VIIRS SRFs
-xlim = (9.0, 12.0)
+xlim = (3.9, 4.2)
 # ylim = (274, 281)
 freq_range =[10000/xlim[1], 10000/xlim[0]]
 srf_file_list = [srf_file]
