@@ -1,19 +1,19 @@
-from VIIRS_utils import viirs_utils as v_utils
+from modules_viirs import viirs_utils as v_utils
 import os
 
-dnb_dir = "/local/home/jturner/FLC_data/DNB_data/" 
+dnb_dir = "data/dnb/" 
 dnb_file = "GDNBO-SVDNB_j01_d20250312_t0639527_e0645327_b37894_c20250912025655090196_oebc_ops.h5"
 file_path = os.path.join(dnb_dir, dnb_file)
 
 v_utils.print_viirs_file_metadata(file_path)
 v_utils.print_viirs_file_attrs(file_path, dataset="Data_Products/VIIRS-DNB-GEO/VIIRS-DNB-GEO_Gran_0")
 
-# da = v_utils.open_dnb_radiance(file_path)
-# print(da)
+da = v_utils.open_dnb_radiance(file_path)
+print(da)
 
 description = f"{dnb_file.split("_")[1]} {dnb_file.split("_")[2]} {dnb_file.split("_")[3]}"
 save_name = f"dnb_{description.replace(" ", "_")}"
 plot_title = f"VIIRS Day/Night Band \n {description}"
 
 #--- This currently seems to have fill values or scaling, or both
-v_utils.plot_dnb_radiance(da, "VIIRS_plot", save_name, plot_title, extent=[-73, -57, 33, 46])
+v_utils.plot_dnb_radiance(da, "plots", save_name, plot_title, extent=[-73, -57, 33, 46])
