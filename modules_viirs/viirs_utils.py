@@ -4,8 +4,12 @@ import h5py
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import cartopy.crs as ccrs
-from MODTRAN_utils import modtran_utils as m_utils
 import numpy as np
+
+def _plt_save(fig_dir, fig_name):
+    os.makedirs(f"{fig_dir}", exist_ok=True)
+    plt.savefig(f"{fig_dir}/{fig_name}.png", dpi=200, bbox_inches='tight')
+    plt.close()
 
 def print_viirs_file_metadata(file_path):
     with h5py.File(file_path, "r") as f:
@@ -148,7 +152,7 @@ def plot_viirs_data(da, plot_dir, plot_name, plot_title, extent=None, pin_coords
     ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
-    m_utils._plt_save(plot_dir, plot_name)
+    _plt_save(plot_dir, plot_name)
     return
 
 def open_dnb_radiance(file_path):
@@ -198,7 +202,7 @@ def plot_dnb_radiance(da, plot_dir, plot_name, plot_title, extent=None, pin_coor
     ax.set_title(plot_title, fontsize=20, pad=10)
     ax.coastlines(resolution='50m', color='black', linewidth=1)
 
-    m_utils._plt_save(plot_dir, plot_name)
+    _plt_save(plot_dir, plot_name)
     return
 
 def plot_viirs_srf(srf_file):
@@ -215,7 +219,7 @@ def plot_viirs_srf(srf_file):
     plt.ylabel('Response')
     plt.title(f'{band_str} \n NG Band-Averaged RSRs')
 
-    m_utils._plt_save("VIIRS_spectral_response_functions", f'srf_{band_str.lower().replace(" ", "_")}')
+    _plt_save("VIIRS_spectral_response_functions", f'srf_{band_str.lower().replace(" ", "_")}')
     return
 
 def _print_value_at_point(da, pin_coords):
