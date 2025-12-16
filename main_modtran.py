@@ -13,9 +13,9 @@ from modules_cris import cris_utils as c_utils
 # m_utils.create_modtran_json_from_df(df, json_path)
 
 #=== FLC case
-json_path = "data/modtran/modtran_json/2025031206_40_67-75_high_res.json"
+json_path = "data/modtran/modtran_json/2025031206_40_67-75_cris_res.json"
 title_name = '2025-03-12 (40, -67.75)'
-ylim = (271, 278)
+ylim = (268, 280)
 fig_name = "2025031206_flc"
 
 #=== Null case
@@ -53,7 +53,7 @@ df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting reso
 #--- Plot brightness temperature
 m_utils.plot_brightness_temperature(df2, fig_dir="plots", fig_name=f"MODTRAN_Tb_{fig_name}", 
     fig_title=f"MODTRAN {title_name} \n Profile from GFS and OISST",
-    xlim=(3.9,4.2), ylim=ylim)
+    xlim=(10, 12), ylim=ylim)
 
 
 #--- Plot brightness temperature with VIIRS SRFs

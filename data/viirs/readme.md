@@ -1,0 +1,2 @@
+- SDR data downloaded from CLASS
+- Utils available to open and plot VIIRS on lat/lon grid
