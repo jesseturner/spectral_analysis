@@ -88,13 +88,14 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
 
     X, Y = np.meshgrid(x, y)
     
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(111, projection='3d')
+    fig = plt.figure(figsize=(8, 6), facecolor='black')
+    ax = fig.add_subplot(111, projection='3d', facecolor='black')
 
     # Optional: make background clean
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
+    ax.grid(False)
 
     # Consistent color scaling
     finite_vals = img_3d.values[np.isfinite(img_3d.values)]
@@ -103,7 +104,6 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
 
     # Plot stacked slices
     for img, ch in zip(img_3d, channel_list):
-        print(ch)
         img_np = img.values
 
         ax.contourf(
@@ -119,8 +119,9 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
     # Axes labeling & limits
     ax.set_xlabel('FOV per scan line')
     ax.set_ylabel('Scan line')
-    ax.set_zlabel('Channel / Wavelength')
-
+    ax.set_zlabel('ABI Channel', color="black")
+    
+    ax.invert_yaxis()
     ax.set_zlim(np.min(channel_list), np.max(channel_list))
 
     # Viewing angle (important)
