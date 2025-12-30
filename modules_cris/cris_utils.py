@@ -361,3 +361,91 @@ def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_tit
     _plt_save(fig_dir, fig_name)
 
     return
+
+def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
+
+    # Filter to frequencies
+    img_3d = ds['Tb_CLR'].sel(number_channels=channel_list)
+
+    # Remove NaN values
+    img_3d = img_3d.where(img_3d != -19998)
+
+    # Crop to a square
+    ny = img_3d.sizes['num_scan_line']
+    nx = img_3d.sizes['num_fov_per_scan_line']
+    side = min(nx, ny)
+    x0 = (nx - side) // 2
+    y0 = (ny - side) // 2
+
+    img_3d = img_3d.isel(
+        num_fov_per_scan_line=slice(x0, x0 + side),
+        num_scan_line=slice(y0, y0 + side)
+    )
+
+    # Get the coordinates
+    x = img_3d['num_fov_per_scan_line'].values
+    y = img_3d['num_scan_line'].values
+
+    X, Y = np.meshgrid(x, y)
+    
+    fig = plt.figure(figsize=(8, 6), facecolor='black')
+    ax = fig.add_subplot(111, projection='3d', facecolor='black')
+
+    # Optional: make background clean
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.grid(False)
+
+    # Consistent color scaling
+    finite_vals = img_3d.values[np.isfinite(img_3d.values)]
+    vmin = finite_vals.min()+27 # Adjusted to get green colors to line up nicely
+    vmax = finite_vals.max()-27
+    cmap, norm = custom_cmap_selection(custom_cmap_name)
+
+    # Plot stacked slices
+    for img, ch in zip(img_3d, channel_list):
+        img_np = img.values
+
+        ax.contourf(
+            X, Y, img_np,
+            levels=20,
+            zdir='z',
+            offset=ch,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax
+        )
+
+    # Axes labeling & limits
+    ax.set_xlabel('FOV per scan line')
+    ax.set_ylabel('Scan line')
+    ax.set_zlabel('ABI Channel', color="black")
+    
+    ax.invert_yaxis()
+    ax.set_zlim(np.min(channel_list), np.max(channel_list))
+
+    # Viewing angle
+    ax.view_init(elev=25, azim=-60)
+
+    _plt_save(plot_dir, plot_name)
+
+    return
+
+def custom_cmap_selection(custom_cmap_name):
+    
+    if custom_cmap_name == "green":
+        cmap = mcolors.LinearSegmentedColormap.from_list(
+            "custom_cmap",
+            [(0, "#06BA63"), (0.5, "black"), (1, "white")]
+        )
+        norm = mcolors.TwoSlopeNorm(vmin=-6, vcenter=0, vmax=1.5)
+
+    if custom_cmap_name == "blue":
+        cmap = mcolors.LinearSegmentedColormap.from_list(
+            "custom_cmap",
+            [(0, "#A9A9A9"), (0.5, "white"), (1, "#1167b1")]
+        )
+        norm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=3)
+    
+    return cmap, norm

@@ -61,7 +61,7 @@ def plot_Tb_CLD(ds, channel_index, plot_title, plot_dir, plot_name):
     return
 
 
-def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
+def plot_Tb_3d(ds, channel_list, custom_cmap_name, plot_dir, plot_name):
 
     # Filter to frequencies
     img_3d = ds['Tb_CLR'].sel(number_channels=channel_list)
@@ -98,12 +98,9 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
 
     # Consistent color scaling
     finite_vals = img_3d.values[np.isfinite(img_3d.values)]
-    vmin = finite_vals.min()+27 # Adjusted to get green colors to line up nicely
+    vmin = finite_vals.min()+21 # Adjustment to get colors to line up nicely
     vmax = finite_vals.max()-27
-    cmap = mcolors.LinearSegmentedColormap.from_list(
-        "custom_cmap",
-        [(0, "#06BA63"), (0.5, "black"), (1, "white")]
-    )
+    cmap, norm = custom_cmap_selection(custom_cmap_name)
 
     # Plot stacked slices
     for img, ch in zip(img_3d, channel_list):
@@ -144,3 +141,21 @@ def convert_freq_to_index(channel_freq_list):
         channel_index_list.append(index)
         
     return channel_index_list
+
+def custom_cmap_selection(custom_cmap_name):
+    
+    if custom_cmap_name == "green":
+        cmap = mcolors.LinearSegmentedColormap.from_list(
+            "custom_cmap",
+            [(0, "#06BA63"), (0.5, "black"), (1, "white")]
+        )
+        norm = mcolors.TwoSlopeNorm(vmin=-6, vcenter=0, vmax=1.5)
+
+    if custom_cmap_name == "blue":
+        cmap = mcolors.LinearSegmentedColormap.from_list(
+            "custom_cmap",
+            [(0, "#A9A9A9"), (0.5, "white"), (1, "#1167b1")]
+        )
+        norm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=3)
+    
+    return cmap, norm

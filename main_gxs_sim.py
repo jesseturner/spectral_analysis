@@ -24,8 +24,8 @@ ds = gxs.open_gxs_data(gxs_filepath)
 
 # channel_index_list = gxs.convert_freq_to_index(channel_freq_abi)
 # print(channel_index_list)
-# gxs.plot_Tb_3d(ds, channel_index_list, plot_dir="plots", plot_name="stack_abi")
+# gxs.plot_Tb_3d(ds, channel_index_list, custom_cmap_name="blue", plot_dir="plots", plot_name="stack_abi")
 
 #--- Create 3D stack image for full GXS
 channel_index_list = range(100, 2201, 100)
-gxs.plot_Tb_3d(ds, channel_index_list, plot_dir="plots", plot_name="stack_gxs")
+gxs.plot_Tb_3d(ds, channel_index_list, custom_cmap_name="blue", plot_dir="plots", plot_name="stack_gxs")
