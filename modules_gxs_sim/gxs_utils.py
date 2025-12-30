@@ -19,6 +19,7 @@ def _plt_save(fig_dir, fig_name):
     os.makedirs(f"{fig_dir}", exist_ok=True)
     plt.savefig(f"{fig_dir}/{fig_name}.png", dpi=200, bbox_inches='tight')
     plt.close()
+    return
 
 def plot_Tb_CLD(ds, channel_index, plot_title, plot_dir, plot_name):
     '''
@@ -61,7 +62,6 @@ def plot_Tb_CLD(ds, channel_index, plot_title, plot_dir, plot_name):
 
 
 def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
-    from mpl_toolkits.mplot3d import Axes3D
 
     # Filter to frequencies
     img_3d = ds['Tb_CLR'].sel(number_channels=channel_list)
@@ -84,7 +84,6 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
     # Get the coordinates
     x = img_3d['num_fov_per_scan_line'].values
     y = img_3d['num_scan_line'].values
-    channels = img_3d['number_channels'].values
 
     X, Y = np.meshgrid(x, y)
     
@@ -128,12 +127,10 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
     ax.invert_yaxis()
     ax.set_zlim(np.min(channel_list), np.max(channel_list))
 
-    # Viewing angle (important)
+    # Viewing angle
     ax.view_init(elev=25, azim=-60)
 
-    plt.tight_layout()
-    plt.savefig(f"{plot_dir}/{plot_name}.png", dpi=200)
-    plt.close(fig)
+    _plt_save(plot_dir, plot_name)
 
     return
 
