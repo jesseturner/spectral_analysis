@@ -1,8 +1,8 @@
 import xarray as xr
 import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
 import os
 import numpy as np
+import matplotlib.colors as mcolors
 
 def open_gxs_data(filepath):
     '''
@@ -99,8 +99,12 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
 
     # Consistent color scaling
     finite_vals = img_3d.values[np.isfinite(img_3d.values)]
-    vmin = finite_vals.min()
-    vmax = finite_vals.max()
+    vmin = finite_vals.min()+27 # Adjusted to get green colors to line up nicely
+    vmax = finite_vals.max()-27
+    cmap = mcolors.LinearSegmentedColormap.from_list(
+        "custom_cmap",
+        [(0, "#06BA63"), (0.5, "black"), (1, "white")]
+    )
 
     # Plot stacked slices
     for img, ch in zip(img_3d, channel_list):
@@ -111,7 +115,7 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
             levels=20,
             zdir='z',
             offset=ch,
-            cmap='Greys',
+            cmap=cmap,
             vmin=vmin,
             vmax=vmax
         )
