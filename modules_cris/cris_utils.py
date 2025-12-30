@@ -362,29 +362,12 @@ def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_tit
 
     return
 
-def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
+def plot_block(ds, custom_cmap_name, plot_dir, plot_name):
 
-    # Filter to frequencies
-    img_3d = ds['Tb_CLR'].sel(number_channels=channel_list)
-
-    # Remove NaN values
-    img_3d = img_3d.where(img_3d != -19998)
-
-    # Crop to a square
-    ny = img_3d.sizes['num_scan_line']
-    nx = img_3d.sizes['num_fov_per_scan_line']
-    side = min(nx, ny)
-    x0 = (nx - side) // 2
-    y0 = (ny - side) // 2
-
-    img_3d = img_3d.isel(
-        num_fov_per_scan_line=slice(x0, x0 + side),
-        num_scan_line=slice(y0, y0 + side)
-    )
-
-    # Get the coordinates
-    x = img_3d['num_fov_per_scan_line'].values
-    y = img_3d['num_scan_line'].values
+    rad = ds['rad_lw'].values
+    x = ds['xtrack'].values
+    y = ds['atrack'].values
+    z = ds['wnum_lw'].values
 
     X, Y = np.meshgrid(x, y)
     
@@ -398,32 +381,27 @@ def plot_Tb_3d(ds, channel_list, plot_dir, plot_name):
     ax.grid(False)
 
     # Consistent color scaling
-    finite_vals = img_3d.values[np.isfinite(img_3d.values)]
-    vmin = finite_vals.min()+27 # Adjusted to get green colors to line up nicely
-    vmax = finite_vals.max()-27
+    vmin = np.min(rad)+27 # Adjusted to get green colors to line up nicely
+    vmax = np.max(rad)-27
     cmap, norm = custom_cmap_selection(custom_cmap_name)
 
     # Plot stacked slices
-    for img, ch in zip(img_3d, channel_list):
-        img_np = img.values
+    set_min = 150 # Customizing the appearance of the stack
+    set_max = 550
+    for i in range(set_min,set_max):
+        rad_i = rad[:,:,0,i]
 
         ax.contourf(
-            X, Y, img_np,
+            X, Y, rad_i,
             levels=20,
             zdir='z',
-            offset=ch,
+            offset=z[i],
             cmap=cmap,
             vmin=vmin,
             vmax=vmax
         )
-
-    # Axes labeling & limits
-    ax.set_xlabel('FOV per scan line')
-    ax.set_ylabel('Scan line')
-    ax.set_zlabel('ABI Channel', color="black")
     
-    ax.invert_yaxis()
-    ax.set_zlim(np.min(channel_list), np.max(channel_list))
+    ax.set_zlim(z[set_min], z[set_max])
 
     # Viewing angle
     ax.view_init(elev=25, azim=-60)

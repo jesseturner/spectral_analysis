@@ -61,7 +61,7 @@ def plot_Tb_CLD(ds, channel_index, plot_title, plot_dir, plot_name):
     return
 
 
-def plot_Tb_3d(ds, channel_list, custom_cmap_name, plot_dir, plot_name):
+def plot_block(ds, channel_list, custom_cmap_name, plot_dir, plot_name):
 
     # Filter to frequencies
     img_3d = ds['Tb_CLR'].sel(number_channels=channel_list)
