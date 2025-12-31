@@ -319,8 +319,11 @@ def _classify_range(wl_list):
     return next(iter(results), None)
 
 
-def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_title, is_btd=False, pin_coords=None):
+def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, custom_cmap_name, fig_dir, fig_name, fig_title, is_btd=False, pin_coords=None):
     """
+    Spatial plot of CrIS brightness temperature for a certain band. Band can either be CrIS narrow band, or a simulated broad band from a SRF. 
+
+    ds_sel : from get_cris_band_Tb(), BTD simply uses ds_sel1 - ds_sel2
     extent : [west, east, south, north]
     pin_coords : (lat, lon)
     """
@@ -331,12 +334,7 @@ def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, fig_dir, fig_name, fig_tit
     c = ax.pcolormesh(ds_lon, ds_lat, ds_sel, cmap='Greys', shading='auto')
 
     if is_btd: #--- Custom colorbar for BTD
-        cmap = mcolors.LinearSegmentedColormap.from_list(
-            "custom_cmap",
-            [(0, "#06BA63"), (0.5, "black"), (1, "white")]
-        )
-        norm = mcolors.TwoSlopeNorm(vmin=-6, vcenter=0, vmax=1.5)
-
+        cmap, norm = custom_cmap_selection(custom_cmap_name)
         c = plt.pcolormesh(ds_lon, ds_lat, ds_sel, cmap=cmap, norm=norm, shading="nearest")
 
     clb = plt.colorbar(c, shrink=0.6, pad=0.02, ax=ax)
