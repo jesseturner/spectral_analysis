@@ -30,14 +30,14 @@ def open_7sc_file(filepath):
 
     return df
 
-def plot_brightness_temperature(df, fig_dir="MODTRAN_plot", fig_name="MODTRAN_Tb", fig_title="Brightness Temperature Spectrum from MODTRAN", xlim=None, ylim=None):
+def plot_brightness_temperature(df, fig_dir="MODTRAN_plot", fig_name="MODTRAN_Tb", fig_title="Brightness Temperature Spectrum from MODTRAN", xlim=None, ylim=None, line_color="black"):
     """
     Plot the brightness temperature across the selected MODTRAN spectral range. 
     """
 
     fig, ax = plt.subplots(figsize=(10, 5))
 
-    _plot_continuous(ax, df, df_name=None, color='black', linewidth=1)
+    _plot_continuous(ax, df, df_name=None, color=line_color, linewidth=1)
     plt.xlim(xlim)
     plt.ylim(ylim)
 
@@ -63,6 +63,10 @@ def plot_bt_dual(df1, df2, df1_name='', df2_name='', fig_dir='MODTRAN_plot', fig
 def _plot_continuous(ax, df, df_name=None, color='black', linewidth=1):
     x = 10000/df['FREQ']
     y = df['BBODY_T[K]']
+    
+    if color == "white":
+        ax.set_facecolor('black')
+    
     ax.plot(x, y, color=color, linewidth=linewidth, label=df_name)
         
     return

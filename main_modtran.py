@@ -1,5 +1,4 @@
 from modules_modtran import modtran_utils as m_utils
-from modules_cris import cris_utils as c_utils
 
 #--- Create JSON from SST and GFS
 # gfs_filepath = "data/gfs/gfs_20250312_06z"
@@ -15,7 +14,6 @@ from modules_cris import cris_utils as c_utils
 #=== FLC case
 json_path = "data/modtran/modtran_json/2025031206_40_67-75_cris_res.json"
 title_name = '2025-03-12 (40, -67.75)'
-ylim = (268, 280)
 fig_name = "2025031206_flc"
 
 #=== Null case
@@ -29,6 +27,11 @@ m_utils.run_modtran(json_path)
 
 df1 = m_utils.open_tp7_file("flc_custom1.tp7")
 df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting resolution
+
+#--- Plot brightness temperature
+m_utils.plot_brightness_temperature(df2, fig_dir="plots", fig_name=f"MODTRAN_Tb_{fig_name}", 
+    fig_title=f"MODTRAN {title_name} \n Profile from GFS and OISST",
+    xlim=(10, 12), ylim=(274, 280), line_color="white")
 
 #--- Plot BTD spectra
 # m_utils.plot_btd_freq_range(df2, title_name=title_name, 
@@ -49,11 +52,6 @@ df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting reso
 # print(df)
 
 # m_utils.plot_skew_t_from_profile(df, title="GFS and SST vertical profile (2025-03-12)", fig_dir="plots", fig_name="gfs_vertical_profile_20250312")
-
-#--- Plot brightness temperature
-m_utils.plot_brightness_temperature(df2, fig_dir="plots", fig_name=f"MODTRAN_Tb_{fig_name}", 
-    fig_title=f"MODTRAN {title_name} \n Profile from GFS and OISST",
-    xlim=(10, 12), ylim=ylim)
 
 
 #--- Plot brightness temperature with VIIRS SRFs
