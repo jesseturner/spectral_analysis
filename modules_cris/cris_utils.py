@@ -141,26 +141,27 @@ def plot_btd_freq_range(df,
 
 def plot_freq_range_srf(df, srf_file_list, srf_name_list, color_list, 
     fig_dir='CrIS_plot', fig_name='CrIS_range_SRF', fig_title='CrIS Brightness Temperature',
-    freq_range=None, ylim=None, xlim=None):
+    freq_range=None, ylim=None, xlim=None, line_color="black"):
     """
     Visualizing the brightness temperature spectra compared to the VIIRS SRF.
     Using sensor response function file downloaded from https://ncc.nesdis.noaa.gov/VIIRS/VIIRSSpectralResponseFunctions.php
     
-    srf_file_list : list of strings for each file path
+    srf_file_list : list of strings for each SRF file path
+    srf_name_list : list of strings for each SRF name
     freq_range format: [2430, 2555]
     ylim: tuple like (271, 280)
     """
     fig, ax = plt.subplots(figsize=(10, 5))
 
     df_range = _filter_freq_to_range(df, freq_range[0], freq_range[1])
-    _plot_continuous(ax, df_range, color="black", linewidth=0.5)
+    _plot_continuous(ax, df_range, color=line_color, linewidth=1)
 
     ax_srf = ax.twinx()
     for i in range(len(srf_file_list)):
         srf = np.loadtxt(srf_file_list[i])
         x = srf[:, 0]/1000
         y = srf[:, 1]
-        ax_srf.plot(x, y, color=color_list[i], alpha=0.6, linewidth=2, label=srf_name_list[i])
+        ax_srf.plot(x, y, color=color_list[i], alpha=0.6, linewidth=4, label=srf_name_list[i])
     ax_srf.set_ylim(0,1)
 
     ax.set_title(fig_title)
