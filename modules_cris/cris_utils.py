@@ -96,13 +96,13 @@ def plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name="CrIS_Tb", fig
     Plot the brightness temperature across the selected CrIS spectral range. 
     """
 
+    if line_color == "white":
+        plt.style.use('dark_background')
+
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(df["Wavelength (um)"], df["Brightness Temperature (K)"], color=line_color, linewidth=0.5)
+    ax.plot(df["Wavelength (um)"], df["Brightness Temperature (K)"], color=line_color, linewidth=1)
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
-
-    if line_color == "white":
-        ax.set_facecolor('black')
 
     ax.set_xlabel("Wavelength (μm)")
     ax.set_ylabel("Brightness Temperature (K)")
@@ -345,14 +345,14 @@ def plot_cris_spatial(ds_sel, ds_lat, ds_lon, extent, custom_cmap_name, fig_dir,
     clb.set_label('(K)', fontsize=15)
 
     ax.set_extent([extent[0], extent[1], extent[2], extent[3]], crs=ccrs.PlateCarree())
-    ax.coastlines(resolution='50m', color='black', linewidth=1)
+    ax.coastlines(resolution='50m', color='white', linewidth=2)
     # ax.add_feature(cfeature.STATES, edgecolor='black', linewidth=1, zorder=6)
 
     if pin_coords:
         ax.plot(pin_coords[1], pin_coords[0], 
             marker='o', 
             markersize=12,
-            markerfacecolor='red',
+            markerfacecolor='#ffab40',
             markeredgecolor='white',
             markeredgewidth=1.5, 
             transform=ccrs.PlateCarree())
@@ -424,6 +424,13 @@ def custom_cmap_selection(custom_cmap_name):
         cmap = mcolors.LinearSegmentedColormap.from_list(
             "custom_cmap",
             [(0, "#A9A9A9"), (0.5, "white"), (1, "#1167b1")]
+        )
+        norm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=3)
+
+    if custom_cmap_name == "blueblack":
+        cmap = mcolors.LinearSegmentedColormap.from_list(
+            "custom_cmap",
+            [(0, "#A9A9A9"), (0.5, "black"), (1, "#4baafc")]
         )
         norm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=3)
     

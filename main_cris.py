@@ -9,8 +9,8 @@ cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.n
 file_path = os.path.join(cris_dir, cris_file)
 
 #=== FLC case
-target_lat = 40
-target_lon = -67.75
+target_lat = 42.5 #40
+target_lon = -65.25 #-67.75
 ylim = (268, 280)
 
 #=== Null case
@@ -56,17 +56,18 @@ c_utils.plot_brightness_temperature(df, fig_dir="plots", fig_name=save_name,
 #     freq_range=freq_range, ylim=ylim, xlim=xlim)
 
 #--- Plot CrIS spatially
-# ds = c_utils.open_cris_data(file_path)
-# ds_t_11, ds_11 = c_utils.get_cris_band_Tb(ds, 
-#     srf_file="data/spectral_response_functions/VIIRS_NG_RSR_longwave_custom.dat")
-# ds_t_3_9, ds_3_9 = c_utils.get_cris_band_Tb(ds, 
-#     srf_file="data/spectral_response_functions/GOES-R_ABI_SRF_ch7.dat")
-# ds_btd = ds_t_11 - ds_t_3_9
+ds = c_utils.open_cris_data(file_path)
+ds_t_11, ds_11 = c_utils.get_cris_band_Tb(ds, 
+    srf_file="data/spectral_response_functions/VIIRS_NG_RSR_longwave_custom.dat")
+ds_t_3_9, ds_3_9 = c_utils.get_cris_band_Tb(ds, 
+    srf_file="data/spectral_response_functions/GOES-R_ABI_SRF_ch7.dat")
+ds_btd = ds_t_11 - ds_t_3_9
 
-# c_utils.plot_cris_spatial(ds_btd, ds_3_9['lat'], ds_3_9['lon'], extent=[-73, -57, 33, 46], custom_cmap_name="blue",
-#     fig_dir="plots", fig_name=f"spatial_nlct", 
-#     fig_title=f"CrIS Brightness Temperature (10.3 μm - 3.95 μm) \n j01 d20250312 t0642", 
-#     is_btd=True, pin_coords=False)
+c_utils.plot_cris_spatial(ds_btd, ds_3_9['lat'], ds_3_9['lon'], extent=[-73, -57, 33, 46], 
+    custom_cmap_name="blueblack",
+    fig_dir="plots", fig_name=f"spatial_{save_name}", 
+    fig_title=f"CrIS Brightness Temperature (10.3 μm - 3.95 μm) \n j01 d20250312 t0642", 
+    is_btd=True, pin_coords=(float(lat),float(lon)))
 
 #--- Plot CrIS block
 # ds = c_utils.open_cris_data(file_path)
