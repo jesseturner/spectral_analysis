@@ -7,6 +7,7 @@ import os
 cris_dir = "data/cris/"
 cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.nc"
 file_path = os.path.join(cris_dir, cris_file)
+c_utils.set_plots_dark() # use dark style for all following figures
 
 #=== FLC case
 target_lat = 42.5 #40

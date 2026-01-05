@@ -96,9 +96,6 @@ def plot_brightness_temperature(df, fig_dir="CrIS_plot", fig_name="CrIS_Tb", fig
     Plot the brightness temperature across the selected CrIS spectral range. 
     """
 
-    if line_color == "white":
-        plt.style.use('dark_background')
-
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.plot(df["Wavelength (um)"], df["Brightness Temperature (K)"], color=line_color, linewidth=1)
     ax.set_xlim(xlim)
@@ -435,3 +432,7 @@ def custom_cmap_selection(custom_cmap_name):
         norm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=3)
     
     return cmap, norm
+
+def set_plots_dark():
+    plt.style.use('dark_background')
+    return
