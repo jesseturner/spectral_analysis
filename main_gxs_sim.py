@@ -1,5 +1,4 @@
 from modules_gxs_sim import gxs_utils as gxs
-import numpy as np
 
 gxs_filepath = "data/gxs_sim/Tb_gxs2402bae_g26_d20190922_t211500_e211500.nc"
 

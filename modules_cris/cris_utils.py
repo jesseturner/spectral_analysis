@@ -373,18 +373,18 @@ def plot_block(ds, custom_cmap_name, plot_dir, plot_name):
     fig = plt.figure(figsize=(8, 6), facecolor='black')
     ax = fig.add_subplot(111, projection='3d', facecolor='black')
 
-    # Optional: make background clean
+    #--- Make background clean
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
     ax.grid(False)
 
-    # Consistent color scaling
-    vmin = np.min(rad)+27 # Adjusted to get green colors to line up nicely
+    #--- Color scaling
+    vmin = np.min(rad)+27 # Adjusted to get colors to line up nicely
     vmax = np.max(rad)-27
     cmap, norm = custom_cmap_selection(custom_cmap_name)
 
-    # Plot stacked slices
+    #--- Plot stacked slices
     set_min = 150 # Customizing the appearance of the stack
     set_max = 550
     for i in range(set_min,set_max):
@@ -392,17 +392,16 @@ def plot_block(ds, custom_cmap_name, plot_dir, plot_name):
 
         ax.contourf(
             X, Y, rad_i,
-            levels=20,
+            levels=10,
             zdir='z',
             offset=z[i],
             cmap=cmap,
             vmin=vmin,
             vmax=vmax
-        )
-    
+            ) 
+   
+    #--- Viewing angle
     ax.set_zlim(z[set_min], z[set_max])
-
-    # Viewing angle
     ax.view_init(elev=25, azim=-60)
 
     _plt_save(plot_dir, plot_name)
