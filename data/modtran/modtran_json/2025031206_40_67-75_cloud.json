@@ -148,7 +148,7 @@
         "AEROSOLS": {
           "IHAZE": "AER_MARITIME",
           "ICLD": "CLOUD_STRATUS",
-          "VIS": 10.0,
+          "VIS": 1.0,
           "CALT": 0.5
         },
         "GEOMETRY": {},

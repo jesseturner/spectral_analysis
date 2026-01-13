@@ -10,9 +10,9 @@ file_path = os.path.join(cris_dir, cris_file)
 c_utils.set_plots_dark() # use dark style for all following figures
 
 #=== FLC case
-# target_lat = 40
-# target_lon = -67.75
-# ylim = (268, 280)
+target_lat = 40
+target_lon = -67.75
+ylim = (268, 280)
 
 #=== Null case
 # target_lat = 36
@@ -21,17 +21,17 @@ c_utils.set_plots_dark() # use dark style for all following figures
 
 
 #--- Plot brightness temperature spectra for point
-# ds = c_utils.open_cris_data(file_path)
-# ds = c_utils.isolate_target_point(ds, target_lat=target_lat, target_lon=target_lon)
-# df = c_utils.get_brightness_temperature(ds)
+ds = c_utils.open_cris_data(file_path)
+ds = c_utils.isolate_target_point(ds, target_lat=target_lat, target_lon=target_lon)
+df = c_utils.get_brightness_temperature(ds)
 
-# lat = f"{ds['lat'].values:.2f}"
-# lon = f"{ds['lon'].values:.2f}"
-# save_name = f"{cris_file.split(".")[1]}_{cris_file.split(".")[3]}_{ds['lat'].values:.0f}_{ds['lon'].values:.0f}"
-# plot_title = f"CrIS 2025-03-12 ({lat}, {lon}) \n j01 d20250312 t0642"
+lat = f"{ds['lat'].values:.2f}"
+lon = f"{ds['lon'].values:.2f}"
+save_name = f"{cris_file.split(".")[1]}_{cris_file.split(".")[3]}_{ds['lat'].values:.0f}_{ds['lon'].values:.0f}"
+plot_title = f"CrIS 2025-03-12 ({lat}, {lon}) \n j01 d20250312 t0642"
 
-# c_utils.plot_brightness_temperature(df, fig_dir="plots", fig_name=save_name, 
-#     fig_title=plot_title, xlim=(10,12), ylim=ylim, line_color="white")
+c_utils.plot_brightness_temperature(df, fig_dir="plots", fig_name=save_name, 
+    fig_title=plot_title, xlim=(3,12), ylim=(180,300), line_color="white")
 # c_utils.plot_btd_freq_range(df,
 #     fig_dir='plots', fig_name=f'btd_{save_name}', fig_title=plot_title,
 #     freq_range1=[833, 952], freq_range2=[2430, 2555], ylim=ylim)
@@ -75,5 +75,5 @@ c_utils.set_plots_dark() # use dark style for all following figures
 #     is_btd=True, pin_coords=False)
 
 #--- Plot CrIS block
-ds = c_utils.open_cris_data(file_path)
-c_utils.plot_block(ds, custom_cmap_name="blue", plot_dir="plots", plot_name="stack_cris")
+# ds = c_utils.open_cris_data(file_path)
+# c_utils.plot_block(ds, custom_cmap_name="blue", plot_dir="plots", plot_name="stack_cris")
