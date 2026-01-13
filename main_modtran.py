@@ -31,7 +31,7 @@ df2 = m_utils.open_7sc_file("flc_custom1.7sc") #--- Necessary for adjusting reso
 #--- Plot brightness temperature
 m_utils.plot_brightness_temperature(df2, fig_dir="plots", fig_name=f"MODTRAN_Tb_{fig_name}", 
     fig_title=f"MODTRAN {title_name} \n Profile from GFS and OISST",
-    xlim=(10, 12), ylim=(274, 280), line_color="white")
+    xlim=(3, 12), ylim=(180, 300), line_color="white")
 
 #--- Plot BTD spectra
 # m_utils.plot_btd_freq_range(df2, title_name=title_name, 
