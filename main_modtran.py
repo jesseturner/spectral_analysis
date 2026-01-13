@@ -12,9 +12,9 @@ from modules_modtran import modtran_utils as m_utils
 # m_utils.create_modtran_json_from_df(df, json_path)
 
 #=== FLC case
-json_path = "data/modtran/modtran_json/2025031206_40_67-75_cris_res.json"
+json_path = "data/modtran/modtran_json/2025031206_40_67-75_cloud.json"
 title_name = '2025-03-12 (40, -67.75)'
-fig_name = "2025031206_flc"
+fig_name = "2025031206_flc_cloud"
 
 #=== Null case
 # json_path = "data/modtran/modtran_json/2025031206_35-75_69-25_med_res.json"

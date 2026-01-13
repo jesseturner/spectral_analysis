@@ -147,7 +147,9 @@
         },
         "AEROSOLS": {
           "IHAZE": "AER_MARITIME",
-          "VIS": 0.0
+          "ICLD": "CLOUD_STRATUS",
+          "VIS": 10.0,
+          "CALT": 0.5
         },
         "GEOMETRY": {},
         "SURFACE": {
@@ -158,8 +160,8 @@
         "SPECTRAL": {
           "V1": 650.0,
           "V2": 3125.0,
-          "DV": 0.1,
-          "FWHM": 0.2,
+          "DV": 0.3125,
+          "FWHM": 0.625,
           "LBMNAM": "T",
           "BMNAME": "p1_2013"
         },
