@@ -157,15 +157,91 @@ c_utils.set_plots_dark()
 # m_utils.create_modtran_json_from_df(df, json_path)
 
 #--- 4. Getting average spectra from CrIS
-FLC_points = [(40, -67.75), (40.5, -67.80), (40.6,-67.18), (40.47, -66.63), (40.93, -66.79), (40.5, -68.4), (40, -68.8), (40, -69), (40, -69.4), (39.6, -70), (39.3, 70.6), (39.3, 71)]
-TLC_points = [(41.99, -67.78), (42.56, 66.77), (42.53, -66.21), (43.02, -66.22), (42.98, -65.63), (42.84, -65.19), (42.91, -64.77), (42.57, -64.79), (42.50, -65.21)]
+# FLC_points = [(40, -67.75), (40.5, -67.80), (40.6,-67.18), (40.47, -66.63), (40.93, -66.79), (40.5, -68.4), (40, -68.8), (40, -69), (40, -69.4), (39.6, -70), (39.3, 70.6), (39.3, 71)]
+# TLC_points = [(41.99, -67.78), (42.56, 66.77), (42.53, -66.21), (43.02, -66.22), (42.98, -65.63), (42.84, -65.19), (42.91, -64.77), (42.57, -64.79), (42.50, -65.21)]
 
-fig_name = "fig1_source_CrIS_average"
-plot_title = "IR Spectra to Distinguish Low Clouds in CrIS"
+# fig_name = "fig1_source_CrIS_average"
+# plot_title = "IR Spectra to Distinguish Low Clouds in CrIS"
 
-def get_category_stats(ds_func, points):
+# def get_category_stats(ds_func, points):
+#     """
+#     Given a list of lat/lon points, return the wavelengths, average Tb, and variance of Tb.
+#     """
+#     all_Tb = []
+
+#     for lat, lon in points:
+#         ds = ds_func(file_path)
+#         ds = c_utils.isolate_target_point(ds, target_lat=lat, target_lon=lon)
+#         df_cris = c_utils.get_brightness_temperature(ds)
+#         wl = df_cris["Wavelength (um)"]
+#         Tb = df_cris["Brightness Temperature (K)"].values
+#         all_Tb.append(Tb)
+
+#     all_Tb = np.array(all_Tb)
+#     Tb_mean = np.mean(all_Tb, axis=0)
+#     Tb_min = np.min(all_Tb, axis=0)
+#     Tb_max = np.max(all_Tb, axis=0)
+#     Tb_var = np.var(all_Tb, axis=0)
+
+#     return wl, Tb_mean, Tb_min, Tb_max, Tb_var
+
+# # Compute stats for each category
+# wl_FLC, Tb_mean_FLC, Tb_min_FLC, Tb_max_FLC, Tb_var_FLC = get_category_stats(c_utils.open_cris_data, FLC_points)
+# wl_TLC, Tb_mean_TLC, Tb_min_TLC, Tb_max_TLC, Tb_var_TLC = get_category_stats(c_utils.open_cris_data, TLC_points)
+
+# # Plotting
+# plt.figure(figsize=(10,6))
+# plt.plot(wl_FLC, Tb_mean_FLC, label="False Low Cloud (Mean)", color="#1E90FF")
+# plt.fill_between(wl_FLC, Tb_min_FLC, Tb_max_FLC, color="#1E90FF", alpha=0.3)
+
+# plt.plot(wl_TLC, Tb_mean_TLC, label="True Low Cloud (Mean)", color="#00FA9A")
+# plt.fill_between(wl_TLC, Tb_min_TLC, Tb_max_TLC, color="#00FA9A", alpha=0.3)
+
+# plt.xlabel("Wavelength (um)")
+# plt.ylabel("Brightness Temperature (K)")
+# plt.xlim((3,12))
+# plt.ylim((180,300))
+# plt.title(plot_title)
+# plt.legend()
+# plt.tight_layout()
+# plt.savefig(f"plots/{fig_name}", dpi=200)
+
+# fig, ax = plt.subplots(figsize=(10, 5))
+# plt.close()
+
+# #--- Plotting the difference in averages
+# fig, ax = plt.subplots(figsize=(10, 5))
+
+# wl = wl_FLC
+# Tb_diff = Tb_mean_TLC - Tb_mean_FLC
+
+# plt.axhline(y=0, color="blue", linestyle="-", linewidth=1, zorder=0)
+# ax.plot(wl, Tb_diff, 
+#         color="white", 
+#         linewidth=0.5, 
+#         label=f"True Low Cloud - False Low Cloud", 
+#         zorder=3)
+# ax.set_xlim((3,12))
+# ax.set_ylim((-10,10))
+
+# ax.set_xlabel("Wavelength (μm)")
+# ax.set_ylabel("Brightness Temperature Difference (K)")
+# ax.set_title(f"Average {plot_title}")
+# ax.legend()
+
+# plt.savefig(f"plots/{fig_name}_diff.png", dpi=200, bbox_inches='tight')
+# plt.close()
+
+#--- Linear regression (L2 regularization)
+#------ Not working yet!
+
+def get_category_Tb(ds_func, points, file_path):
     """
-    Given a list of lat/lon points, return the wavelengths, average Tb, and variance of Tb.
+    Given a list of lat/lon points, return the wavelengths and all Tb spectra.
+    
+    Returns:
+        wl: wavelengths (length 1000)
+        Tb_all: array of shape (n_points, n_wavelengths)
     """
     all_Tb = []
 
@@ -173,59 +249,76 @@ def get_category_stats(ds_func, points):
         ds = ds_func(file_path)
         ds = c_utils.isolate_target_point(ds, target_lat=lat, target_lon=lon)
         df_cris = c_utils.get_brightness_temperature(ds)
-        wl = df_cris["Wavelength (um)"]
         Tb = df_cris["Brightness Temperature (K)"].values
         all_Tb.append(Tb)
 
-    all_Tb = np.array(all_Tb)
-    Tb_mean = np.mean(all_Tb, axis=0)
-    Tb_min = np.min(all_Tb, axis=0)
-    Tb_max = np.max(all_Tb, axis=0)
+    Tb_all = np.array(all_Tb)  # shape: (n_points, n_wavelengths)
+    wl = df_cris["Wavelength (um)"].values
 
-    return wl, Tb_mean, Tb_min, Tb_max
+    return wl, Tb_all
 
-# Compute stats for each category
-wl_FLC, Tb_mean_FLC, Tb_min_FLC, Tb_max_FLC = get_category_stats(c_utils.open_cris_data, FLC_points)
-wl_TLC, Tb_mean_TLC, Tb_min_TLC, Tb_max_TLC = get_category_stats(c_utils.open_cris_data, TLC_points)
+FLC_points = [(40, -67.75), (40.5, -67.80), (40.6,-67.18), (40.47, -66.63), (40.93, -66.79), (40.5, -68.4), (40, -68.8), (40, -69), (40, -69.4), (39.6, -70), (39.3, 70.6), (39.3, 71)]
+TLC_points = [(41.99, -67.78), (42.56, 66.77), (42.53, -66.21), (43.02, -66.22), (42.98, -65.63), (42.84, -65.19), (42.91, -64.77), (42.57, -64.79), (42.50, -65.21)]
 
-# Plotting
-plt.figure(figsize=(10,6))
-plt.plot(wl_FLC, Tb_mean_FLC, label="False Low Cloud (Mean)", color="#1E90FF")
-plt.fill_between(wl_FLC, Tb_min_FLC, Tb_max_FLC, color="#1E90FF", alpha=0.3)
+# TLC
+wl, Tb_TLC = get_category_Tb(c_utils.open_cris_data, TLC_points, file_path)
+n_repeat = 20 // Tb_TLC.shape[0] + 1  # ensure >= 20
+Tb_TLC = np.tile(Tb_TLC, (n_repeat, 1))[:20, :]  # shape (20, n_wavelengths)
 
-plt.plot(wl_TLC, Tb_mean_TLC, label="True Low Cloud (Mean)", color="#00FA9A")
-plt.fill_between(wl_TLC, Tb_min_TLC, Tb_max_TLC, color="#00FA9A", alpha=0.3)
+# FLC
+wl, Tb_FLC = get_category_Tb(c_utils.open_cris_data, FLC_points, file_path)
+n_repeat = 20 // Tb_FLC.shape[0] + 1
+Tb_FLC = np.tile(Tb_FLC, (n_repeat, 1))[:20, :]
 
-plt.xlabel("Wavelength (um)")
-plt.ylabel("Brightness Temperature (K)")
-plt.xlim((3,12))
-plt.ylim((180,300))
-plt.title(plot_title)
-plt.legend()
-plt.tight_layout()
-plt.savefig(f"plots/{fig_name}", dpi=200)
+print("Tb_TLC shape:", Tb_TLC.shape)
+print("Tb_FLC shape:", Tb_FLC.shape)
+print("Number of wavelengths:", wl.shape)
 
-fig, ax = plt.subplots(figsize=(10, 5))
-plt.close()
 
-fig, ax = plt.subplots(figsize=(10, 5))
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import LeaveOneOut, cross_val_score
+from sklearn.preprocessing import StandardScaler
 
-wl = wl_FLC
-Tb_diff = Tb_mean_TLC - Tb_mean_FLC
+X = np.vstack([Tb_TLC, Tb_FLC])  # shape: (20, 1000)
+y = np.array([1]*Tb_TLC.shape[0] + [0]*Tb_FLC.shape[0]) 
 
-plt.axhline(y=0, color="blue", linestyle="-", linewidth=1, zorder=0)
-ax.plot(wl, Tb_diff, 
-        color="white", 
-        linewidth=0.5, 
-        label=f"True Low Cloud - False Low Cloud", 
-        zorder=3)
-ax.set_xlim((3,12))
-ax.set_ylim((-10,10))
+mask = ~np.isnan(X).any(axis=0)
+X = X[:, mask]
 
-ax.set_xlabel("Wavelength (μm)")
-ax.set_ylabel("Brightness Temperature Difference (K)")
-ax.set_title(f"Average {plot_title}")
-ax.legend()
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
 
-plt.savefig(f"plots/{fig_name}_diff.png", dpi=200, bbox_inches='tight')
+# L2 regularization (default), strong enough to handle p >> n
+clf = LogisticRegression(
+    penalty='l2',      # ridge
+    solver='liblinear', # good for small datasets
+    C=1.0,             # inverse regularization strength; smaller = stronger regularization
+    max_iter=1000
+)
+
+loo = LeaveOneOut()
+scores = cross_val_score(clf, X_scaled, y, cv=loo)
+
+print(f"LOO CV Accuracy: {np.mean(scores)*100:.1f}%")
+
+n_permutations = 1000
+perm_scores = np.zeros(n_permutations)
+
+for i in range(n_permutations):
+    y_perm = np.random.permutation(y)
+    perm_scores[i] = np.mean(cross_val_score(clf, X_scaled, y_perm, cv=loo))
+
+p_val = np.mean(perm_scores >= np.mean(scores))
+print(f"Permutation test p-value: {p_val:.3f}")
+
+clf.fit(X_scaled, y)
+weights = clf.coef_[0]  # shape (1000,)
+
+plt.figure(figsize=(10,5))
+plt.plot(wl, weights)
+plt.axhline(0, color='black', linestyle='--')
+plt.xlabel("Wavelength (μm)")
+plt.ylabel("Logistic regression weight")
+plt.title("Feature weights across wavelength")
+plt.savefig(f"plots/fig4_linear_regression_L2.png", dpi=200, bbox_inches='tight')
 plt.close()
