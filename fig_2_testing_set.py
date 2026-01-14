@@ -10,89 +10,48 @@ sys.path.append("../GOES_Analysis")
 from GOES_utils import goes_utils as g_utils
 
 #--- Testing set
-# FLC_points = [
-#     (43.5, -66.0), 
-#     (43.0, -67.0), 
-#     (43.0, -66.5), 
-#     (43.0, -66.0), 
-#     (42.5, -67.5), 
-#     (42.5, -67.0), 
-#     (42.5, -66.5), 
-#     (42.0, -68.0), 
-#     (42.0, -67.5), 
-#     (41.5, -68.5), 
-#     (41.5, -68.0), 
-#     (41.5, -65.0), 
-#     (41.0, -69.0), 
-#     (41.0, -68.5), 
-#     (41.0, -65.5), 
-#     (41.0, -65.0), 
-#     (40.5, -69.5), 
-#     (40.5, -69.0), 
-#     (40.5, -68.5), 
-#     (40.0, -70.0), 
-#     (40.0, -69.5), 
-#     (40.0, -69.0), 
-#     (40.0, -68.5),
-#     (39.5, -70.5), 
-#     (39.5, -70.0),  
-#     (39.5, -69.5), 
-#     (39.5, -69.0), 
-#     (39.5, -68.5), 
-#     (39.5, -68.0),
-#     (39.0, -71.0), 
-#     (39.0, -70.5), 
-#     (39.0, -70.0),  
-#     (39.0, -69.5), 
-#     (39.0, -69.0), 
-#     (39.0, -68.5), 
-#     (39.0, -68.0), 
-#     (39.0, -67.5), 
-
-# ]
-# TLC_points = [
-#     (44.5, -65.5), 
-#     (44.5, -65.0), 
-#     (44.5, -64.5),
-#     (44.5, -64.0),
-#     (44.5, -63.5),
-#     (44.5, -63.0),
-#     (44.5, -62.5),
-#     (44.5, -62.0),
-#     (44.0, -65.5), 
-#     (44.0, -65.0), 
-#     (44.0, -64.5), 
-#     (44.0, -64.0),
-#     (44.0, -63.5), 
-#     (44.0, -63.0),  
-#     (44.0, -62.5), 
-#     (43.5, -65.5), 
-#     (43.5, -65.0), 
-#     (43.5, -64.5), 
-#     (43.5, -64.0), 
-#     (43.5, -63.5), 
-#     (43.5, -63.0), 
-#     (43.0, -65.5), 
-#     (43.0, -65.0), 
-#     (43.0, -64.5), 
-#     (43.0, -64.0), 
-#     (43.0, -63.5), 
-#     (43.0, -63.0), 
-#     (42.5, -65.5), 
-#     (42.5, -65.0), 
-#     (42.5, -64.5), 
-#     (42.5, -64.0), 
-#     (42.0, -66.0), 
-#     (42.0, -65.5), 
-#     (42.0, -65.0), 
-#     (41.5, -67.0), 
-#     (41.5, -66.5), 
-#     (41.5, -66.0), 
-#     (41.5, -65.5), 
-#     ]
+FLC_points = [
+    (42.5, -63.0),
+    (42.5, -63.5),
+    (42.0, -63.5),
+    (41.5, -64.0),
+    (41.5, -63.5),
+    (41.5, -63.0),
+    (41.0, -64.0),
+    (41.0, -63.5),
+    (40.5, -63.75),
+    (40.0, -64.0),
+    (39.5, -64.0),
+]
+TLC_points = [
+    (45.0, -66.0),
+    (45.0, -65.5),
+    (45.0, -65.0),
+    (45.0, -64.5),
+    (45.0, -64.0),
+    (45.0, -63.5),
+    (44.5, -67.5),
+    (44.5, -67.0),
+    (44.5, -66.5),
+    (44.5, -66.0),
+    (44.5, -65.5),
+    (44.5, -65.0),
+    (44.5, -64.5),
+    (44.0, -68.0),
+    (44.0, -67.5),
+    (44.0, -67.0),
+    (43.5, -64.5),
+    (43.0, -66.0),
+    (43.0, -65.5),
+    (42.5, -66.5),
+    (42.5, -66.0),
+    (42.0, -67.0),
+    (42.0, -66.5),
+]
 
 #--- Split training points into lon/lat
- 
+FLC_lats, FLC_lons = zip(*FLC_points)
+TLC_lats, TLC_lons = zip(*TLC_points)
 
 year = 2024
 month = 7
@@ -129,39 +88,39 @@ custom_cmap_name = "blueblack"
 cmap, norm = g_utils.custom_cmap_selection(custom_cmap_name)
 pcm = plt.pcolormesh(btd.lon, btd.lat, btd, cmap=cmap, norm=norm, shading="nearest")
 
-# ax.scatter(
-#     FLC_lons, FLC_lats,
-#     s=60,
-#     c='cyan',
-#     marker='o',
-#     edgecolors='white',
-#     linewidths=0.7,
-#     transform=ccrs.PlateCarree(),
-#     label='False Low Cloud'
-# )
+ax.scatter(
+    FLC_lons, FLC_lats,
+    s=60,
+    c='cyan',
+    marker='o',
+    edgecolors='white',
+    linewidths=0.7,
+    transform=ccrs.PlateCarree(),
+    label='False Low Cloud'
+)
 
-# ax.scatter(
-#     TLC_lons, TLC_lats,
-#     s=60,
-#     c='magenta',
-#     marker='^',
-#     edgecolors='white',
-#     linewidths=0.7,
-#     transform=ccrs.PlateCarree(),
-#     label='True Low Cloud'
-# )
+ax.scatter(
+    TLC_lons, TLC_lats,
+    s=60,
+    c='magenta',
+    marker='^',
+    edgecolors='white',
+    linewidths=0.7,
+    transform=ccrs.PlateCarree(),
+    label='True Low Cloud'
+)
 
 clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
 clb.ax.tick_params(labelsize=15)
 clb.set_label('(K)', fontsize=15)
 
-# ax.legend(
-#     loc='lower left',
-#     fontsize=12,
-#     frameon=True,
-#     facecolor='black',
-#     edgecolor='white'
-# )
+ax.legend(
+    loc='lower left',
+    fontsize=12,
+    frameon=True,
+    facecolor='black',
+    edgecolor='white'
+)
 
 if extent: ax.set_extent(extent, crs=ccrs.PlateCarree())
 ax.set_title(plot_title, fontsize=20, pad=10)

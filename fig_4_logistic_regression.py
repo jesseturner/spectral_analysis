@@ -1,4 +1,4 @@
-#--- Fitting a logistic regression to the training set and plotting the weight by wavelength.
+# Fitting a logistic regression to the training set and plotting the weight by wavelength.
 
 from modules_cris import cris_utils as c_utils
 import matplotlib.pyplot as plt
@@ -7,17 +7,15 @@ import os
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import LeaveOneOut, cross_val_score
 from sklearn.preprocessing import StandardScaler
+from fig_1_cris_modtran_overlay import file_path
 from fig_2_training_set import FLC_points, TLC_points
 
-cris_dir = "data/cris/"
-cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.nc"
-file_path = os.path.join(cris_dir, cris_file)
 c_utils.set_plots_dark()
 
 #--- Logistic regression (L2 regularization)
 
 def get_category_Tb(ds_func, points, file_path):
-    ds = ds_func(file_path)  # open once
+    ds = ds_func(file_path)
     all_Tb = []
 
     for lat, lon in points:

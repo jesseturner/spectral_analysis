@@ -5,11 +5,9 @@ from modules_cris import cris_utils as c_utils
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+from fig_1_cris_modtran_overlay import file_path
 from fig_2_training_set import FLC_points, TLC_points
 
-cris_dir = "data/cris/"
-cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.nc"
-file_path = os.path.join(cris_dir, cris_file)
 c_utils.set_plots_dark()
 
 fig_name = "fig3_source_CrIS_average"
