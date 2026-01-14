@@ -5,10 +5,7 @@ from modules_cris import cris_utils as c_utils
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-
-#--- Getting average spectra from CrIS
-FLC_points = [(40, -67.75), (40.5, -67.80), (40.6,-67.18), (40.47, -66.63), (40.93, -66.79), (40.5, -68.4), (40, -68.8), (40, -69), (40, -69.4), (39.6, -70), (39.3, 70.6), (39.3, 71)]
-TLC_points = [(41.99, -67.78), (42.56, 66.77), (42.53, -66.21), (43.02, -66.22), (42.98, -65.63), (42.84, -65.19), (42.91, -64.77), (42.57, -64.79), (42.50, -65.21)]
+from fig_2_training_testing_set import FLC_points, TLC_points
 
 cris_dir = "data/cris/"
 cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.nc"
