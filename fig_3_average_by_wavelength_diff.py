@@ -2,7 +2,6 @@
 # and the by-wavelength difference between the average spectra for FLC and TLC. 
 
 from modules_cris import cris_utils as c_utils
-import os
 import matplotlib.pyplot as plt
 import numpy as np
 from fig_1_cris_modtran_overlay import file_path

@@ -3,7 +3,6 @@
 from modules_cris import cris_utils as c_utils
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import LeaveOneOut, cross_val_score
 from sklearn.preprocessing import StandardScaler
@@ -14,23 +13,24 @@ c_utils.set_plots_dark()
 
 #--- Logistic regression (L2 regularization)
 
-def get_category_Tb(ds_func, points, file_path):
-    ds = ds_func(file_path)
+def get_category_Tb_from_ds(ds, points):
     all_Tb = []
 
     for lat, lon in points:
-        ds_point = c_utils.isolate_target_point(ds, target_lat=lat, target_lon=lon)
+        ds_point = c_utils.isolate_target_point(
+            ds, target_lat=lat, target_lon=lon
+        )
         df_cris = c_utils.get_brightness_temperature(ds_point)
-        Tb = df_cris["Brightness Temperature (K)"].values
-        all_Tb.append(Tb)
+        all_Tb.append(df_cris["Brightness Temperature (K)"].values)
 
     Tb_all = np.array(all_Tb)
     wl = df_cris["Wavelength (um)"].values
 
     return wl, Tb_all
 
-wl, Tb_TLC = get_category_Tb(c_utils.open_cris_data, TLC_points, file_path)
-wl, Tb_FLC = get_category_Tb(c_utils.open_cris_data, FLC_points, file_path)
+ds = c_utils.open_cris_data(file_path)
+wl, Tb_TLC = get_category_Tb_from_ds(ds, TLC_points)
+wl, Tb_FLC = get_category_Tb_from_ds(ds, FLC_points)
 
 print("Tb_TLC shape:", Tb_TLC.shape)
 print("Tb_FLC shape:", Tb_FLC.shape)
