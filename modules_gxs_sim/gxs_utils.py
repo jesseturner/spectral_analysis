@@ -98,8 +98,8 @@ def plot_block(ds, channel_list, custom_cmap_name, plot_dir, plot_name):
 
     # Consistent color scaling
     finite_vals = img_3d.values[np.isfinite(img_3d.values)]
-    vmin = finite_vals.min()+21 # Adjustment to get colors to line up nicely
-    vmax = finite_vals.max()-27
+    vmin = finite_vals.min() # Adjustment to get colors to line up nicely
+    vmax = finite_vals.max()
     cmap, norm = custom_cmap_selection(custom_cmap_name)
 
     # Plot stacked slices

@@ -28,3 +28,15 @@ ds = gxs.open_gxs_data(gxs_filepath)
 #--- Create 3D stack image for full GXS
 channel_index_list = range(100, 2201, 100)
 gxs.plot_block(ds, channel_index_list, custom_cmap_name="blue", plot_dir="plots", plot_name="stack_gxs")
+
+#--- Coarsen spatial resolution to approximate CrIS
+# channel_index_list = range(100, 2201, 10)
+# ds = ds[['Tb_CLR']]
+# ds_clean = ds.where(ds != -19998)
+# ds_coarse = ds_clean.coarsen(
+#     num_scan_line=40,
+#     num_fov_per_scan_line=40,
+#     boundary="trim"
+# ).mean(skipna=True)
+# ds_coarse = ds_coarse.compute()
+# gxs.plot_block(ds_coarse, channel_index_list, custom_cmap_name="blue", plot_dir="plots", plot_name="stack_cris_sim")
