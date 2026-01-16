@@ -13,3 +13,5 @@ plots/*
 *.wrn
 *.idx
 data/gfs/*
+data/modtran/fig_6_modtran_sets
+*.npz
