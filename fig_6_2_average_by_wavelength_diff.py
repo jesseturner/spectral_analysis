@@ -100,7 +100,7 @@ ax.legend()
 
 plt.tight_layout()
 os.makedirs("plots", exist_ok=True)
-plt.savefig("plots/fig_avg_modtran.png", dpi=200, bbox_inches='tight')
+plt.savefig("plots/fig_6_avg_modtran.png", dpi=200, bbox_inches='tight')
 plt.close()
 
 # --- Difference between FLC and TLC ---
@@ -121,5 +121,5 @@ plt.title("Average IR Spectra to Distinguish Low Clouds in MODTRAN")
 ax.legend()
 
 plt.tight_layout()
-plt.savefig("plots/fig_modtran_diff.png", dpi=200, bbox_inches='tight')
+plt.savefig("plots/fig_6_modtran_diff.png", dpi=200, bbox_inches='tight')
 plt.close()
