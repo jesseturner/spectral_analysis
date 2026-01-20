@@ -81,21 +81,16 @@ x_FLC,   y_FLC   = average_spectra(FLC_json_list, "FLC")
 fig, ax = plt.subplots(figsize=(10, 5))
 ax.set_facecolor('black')
 
-linewidth = 0.5
-xlim = (3, 12)  # example limits in μm
-ylim = (200, 300)
-fig_title = "Average MODTRAN Spectra"
-
 # Plot average spectra
-ax.plot(x_TLC_i, y_TLC_i, color="#1E90FF", linewidth=linewidth, label="TLC_i")
-ax.plot(x_TLC, y_TLC, color="#FF4500", linewidth=linewidth, label="TLC")
-ax.plot(x_FLC, y_FLC, color="#00FA9A", linewidth=linewidth, label="FLC")
+ax.plot(x_TLC_i, y_TLC_i, color="#1E90FF", linewidth=0.5, label="TLC_i")
+ax.plot(x_TLC, y_TLC, color="#FF4500", linewidth=0.5, label="TLC")
+ax.plot(x_FLC, y_FLC, color="#00FA9A", linewidth=0.5, label="FLC")
 
-ax.set_xlim(xlim)
-ax.set_ylim(ylim)
+ax.set_xlim((3, 12))
+ax.set_ylim((200, 300))
 ax.set_xlabel("Wavelength (μm)")
 ax.set_ylabel("Brightness Temperature (K)")
-ax.set_title(fig_title)
+ax.set_title("Average MODTRAN Spectra")
 ax.legend()
 
 plt.tight_layout()
@@ -108,19 +103,27 @@ fig, ax = plt.subplots(figsize=(10, 5))
 ax.set_facecolor('black')
 
 plt.axhline(y=0, color="blue", linestyle="-", linewidth=1, zorder=0)
+
+#--- Only CrIS regions
+mask = (
+    ((x_FLC >= 3.92) & (x_FLC <= 4.64)) |
+    ((x_FLC >= 5.71) & (x_FLC <= 8.26)) |
+    ((x_FLC >= 9.13) & (x_FLC <= 15.4))
+)
+y_plot = np.where(mask, y_TLC - y_FLC, np.nan)
+
 ax.plot(x_FLC, 
-        y_TLC - y_FLC, 
+        y_plot, 
         color="white", 
-        linewidth=linewidth, 
+        linewidth=0.5, 
         label="True Low Cloud - False Low Cloud", 
         zorder=3)
 ax.set_ylim((-18,18))
-ax.set_xlim(xlim)
+ax.set_xlim((3,16))
 plt.xlabel("Wavelength (μm)")
 plt.ylabel("Brightness Temperature Difference (K)")
 plt.title("Average IR Spectra to Distinguish Low Clouds in MODTRAN")
 ax.legend()
 
-plt.tight_layout()
 plt.savefig("plots/fig6_source_modtran_diff.png", dpi=200, bbox_inches='tight')
 plt.close()

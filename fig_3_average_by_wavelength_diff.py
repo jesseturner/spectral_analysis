@@ -41,7 +41,7 @@ wl_FLC, Tb_mean_FLC, Tb_min_FLC, Tb_max_FLC, Tb_var_FLC = get_category_stats(c_u
 wl_TLC, Tb_mean_TLC, Tb_min_TLC, Tb_max_TLC, Tb_var_TLC = get_category_stats(c_utils.open_cris_data, TLC_points)
 
 # Plotting
-plt.figure(figsize=(10,6))
+plt.figure(figsize=(10,5))
 plt.plot(wl_FLC, Tb_mean_FLC, label="False Low Cloud (Mean)", color="#1E90FF")
 plt.fill_between(wl_FLC, Tb_min_FLC, Tb_max_FLC, color="#1E90FF", alpha=0.3)
 
@@ -65,12 +65,21 @@ wl = wl_FLC
 Tb_diff = Tb_mean_TLC - Tb_mean_FLC
 
 plt.axhline(y=0, color="blue", linestyle="-", linewidth=1, zorder=0)
-ax.plot(wl, Tb_diff, 
+
+#--- Only CrIS regions
+mask = (
+    ((wl >= 3.92) & (wl <= 4.64)) |
+    ((wl >= 5.71) & (wl <= 8.26)) |
+    ((wl >= 9.13) & (wl <= 15.4))
+)
+y_plot = np.where(mask, Tb_diff, np.nan)
+
+ax.plot(wl, y_plot, 
         color="white", 
         linewidth=0.5, 
         label=f"True Low Cloud - False Low Cloud", 
         zorder=3)
-ax.set_xlim((3,12))
+ax.set_xlim((3,16))
 ax.set_ylim((-10,10))
 
 ax.set_xlabel("Wavelength (μm)")
