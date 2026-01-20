@@ -38,7 +38,7 @@ def open_cris_data(filepath):
 def isolate_target_point(ds, target_lat, target_lon):
     abs_diff = np.abs(ds['lat'] - target_lat) + np.abs(ds['lon'] - target_lon)
     atrack_idx, xtrack_idx, fov_idx = np.unravel_index(abs_diff.argmin(), abs_diff.shape)
-    ds_target = ds.isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx).load()
+    ds_target = ds.isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx)
 
     print(f"Using lat/lon of {ds_target['lat'].values:.2f}, {ds_target['lon'].values:.2f}, fov of {fov_idx}")
     return ds_target

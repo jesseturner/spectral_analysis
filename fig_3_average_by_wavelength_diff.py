@@ -5,29 +5,32 @@ from modules_cris import cris_utils as c_utils
 import matplotlib.pyplot as plt
 import numpy as np
 from fig_1_cris_modtran_overlay import file_path
-from fig_2_training_set import FLC_points, TLC_points
+from fig_2_training_set import training_df
 
 c_utils.set_plots_dark()
 
 fig_name = "fig3_source_CrIS_average"
 plot_title = "IR Spectra to Distinguish Low Clouds in CrIS"
 
-def get_category_stats(ds_func, points):
+def get_category_stats(points):
     """
     Given a list of lat/lon points, return the wavelengths, average Tb, and variance of Tb.
     """
     all_Tb = []
-    ds = ds_func(file_path)
+    ds = c_utils.open_cris_data(file_path)
 
-    for lat, lon in points:
-        
+    for i, (lat, lon) in enumerate(points):
         ds_target = c_utils.isolate_target_point(ds, target_lat=lat, target_lon=lon)
         df_cris = c_utils.get_brightness_temperature(ds_target)
         wl = df_cris["Wavelength (um)"]
         Tb = df_cris["Brightness Temperature (K)"].values
         all_Tb.append(Tb)
+        print(f"{i}/{len(points)}")
 
-    ds.close()
+    print(type(all_Tb))
+    print(len(all_Tb))
+    print([a.shape for a in all_Tb[:5]])
+    print("Sometimes getting a segmentation fault here")
     all_Tb = np.array(all_Tb)
     Tb_mean = np.mean(all_Tb, axis=0)
     Tb_min = np.min(all_Tb, axis=0)
@@ -37,12 +40,17 @@ def get_category_stats(ds_func, points):
     return wl, Tb_mean, Tb_min, Tb_max, Tb_var
 
 # Compute stats for each category
-wl_FLC, Tb_mean_FLC, Tb_min_FLC, Tb_max_FLC, Tb_var_FLC = get_category_stats(c_utils.open_cris_data, FLC_points)
-wl_TLC, Tb_mean_TLC, Tb_min_TLC, Tb_max_TLC, Tb_var_TLC = get_category_stats(c_utils.open_cris_data, TLC_points)
+no_clouds = training_df[training_df["label"].isin(["clear", "HC", "FLC"])]
+no_clouds_points = list(zip(no_clouds.lat, no_clouds.lon))
+print(no_clouds_points)
+yes_clouds = training_df[training_df["label"].isin(["TLC"])]
+yes_clouds_points = list(zip(yes_clouds.lat, yes_clouds.lon))
+wl_FLC, Tb_mean_FLC, Tb_min_FLC, Tb_max_FLC, Tb_var_FLC = get_category_stats(no_clouds_points)
+wl_TLC, Tb_mean_TLC, Tb_min_TLC, Tb_max_TLC, Tb_var_TLC = get_category_stats(yes_clouds_points)
 
 # Plotting
 plt.figure(figsize=(10,5))
-plt.plot(wl_FLC, Tb_mean_FLC, label="False Low Cloud (Mean)", color="#1E90FF")
+plt.plot(wl_FLC, Tb_mean_FLC, label="Not Low Cloud (Mean)", color="#1E90FF")
 plt.fill_between(wl_FLC, Tb_min_FLC, Tb_max_FLC, color="#1E90FF", alpha=0.3)
 
 plt.plot(wl_TLC, Tb_mean_TLC, label="True Low Cloud (Mean)", color="#00FA9A")
@@ -77,7 +85,7 @@ y_plot = np.where(mask, Tb_diff, np.nan)
 ax.plot(wl, y_plot, 
         color="white", 
         linewidth=0.5, 
-        label=f"True Low Cloud - False Low Cloud", 
+        label=f"Low Cloud - Not Low Cloud", 
         zorder=3)
 ax.set_xlim((3,16))
 ax.set_ylim((-10,10))

@@ -13,7 +13,7 @@ from GOES_utils import goes_utils as g_utils
 
 #--- Training set
 
-df = pd.DataFrame(
+training_df = pd.DataFrame(
     [
         (45.0, -72.5, "mixed"), 
         (45.0, -72.0, "mixed"), 
@@ -356,7 +356,7 @@ label_styles = {
 }
 
 for label, style in label_styles.items():
-    d = df[df["label"] == label]
+    d = training_df[training_df["label"] == label]
 
     ax.scatter(
         d["lon"],
