@@ -115,11 +115,12 @@ ax.plot(x_FLC,
         label="True Low Cloud - False Low Cloud", 
         zorder=3)
 ax.set_ylim((-18,18))
+ax.set_xlim(xlim)
 plt.xlabel("Wavelength (μm)")
 plt.ylabel("Brightness Temperature Difference (K)")
 plt.title("Average IR Spectra to Distinguish Low Clouds in MODTRAN")
 ax.legend()
 
 plt.tight_layout()
-plt.savefig("plots/fig_6_modtran_diff.png", dpi=200, bbox_inches='tight')
+plt.savefig("plots/fig6_source_modtran_diff.png", dpi=200, bbox_inches='tight')
 plt.close()

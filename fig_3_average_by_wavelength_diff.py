@@ -17,15 +17,17 @@ def get_category_stats(ds_func, points):
     Given a list of lat/lon points, return the wavelengths, average Tb, and variance of Tb.
     """
     all_Tb = []
+    ds = ds_func(file_path)
 
     for lat, lon in points:
-        ds = ds_func(file_path)
-        ds = c_utils.isolate_target_point(ds, target_lat=lat, target_lon=lon)
-        df_cris = c_utils.get_brightness_temperature(ds)
+        
+        ds_target = c_utils.isolate_target_point(ds, target_lat=lat, target_lon=lon)
+        df_cris = c_utils.get_brightness_temperature(ds_target)
         wl = df_cris["Wavelength (um)"]
         Tb = df_cris["Brightness Temperature (K)"].values
         all_Tb.append(Tb)
 
+    ds.close()
     all_Tb = np.array(all_Tb)
     Tb_mean = np.mean(all_Tb, axis=0)
     Tb_min = np.min(all_Tb, axis=0)
@@ -54,8 +56,6 @@ plt.title(plot_title)
 plt.legend()
 plt.tight_layout()
 plt.savefig(f"plots/{fig_name}", dpi=200)
-
-fig, ax = plt.subplots(figsize=(10, 5))
 plt.close()
 
 #--- Plotting the difference in averages
