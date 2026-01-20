@@ -3,6 +3,8 @@
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import numpy as np
+import pandas as pd
+from modules_cris import cris_utils as c_utils
 
 #--- Grab GOES utils from outside path
 import sys
@@ -10,90 +12,144 @@ sys.path.append("../GOES_Analysis")
 from GOES_utils import goes_utils as g_utils
 
 #--- Training set
-FLC_points = [
-    (43.5, -66.0), 
-    (43.0, -67.0), 
-    (43.0, -66.5), 
-    (43.0, -66.0), 
-    (42.5, -67.5), 
-    (42.5, -67.0), 
-    (42.5, -66.5), 
-    (42.0, -68.0), 
-    (42.0, -67.5), 
-    (41.5, -68.5), 
-    (41.5, -68.0), 
-    (41.5, -65.0), 
-    (41.0, -69.0), 
-    (41.0, -68.5), 
-    (41.0, -65.5), 
-    (41.0, -65.0), 
-    (40.5, -69.5), 
-    (40.5, -69.0), 
-    (40.5, -68.5), 
-    (40.0, -70.0), 
-    (40.0, -69.5), 
-    (40.0, -69.0), 
-    (40.0, -68.5),
-    (39.5, -70.5), 
-    (39.5, -70.0),  
-    (39.5, -69.5), 
-    (39.5, -69.0), 
-    (39.5, -68.5), 
-    (39.5, -68.0),
-    (39.0, -71.0), 
-    (39.0, -70.5), 
-    (39.0, -70.0),  
-    (39.0, -69.5), 
-    (39.0, -69.0), 
-    (39.0, -68.5), 
-    (39.0, -68.0), 
-    (39.0, -67.5), 
 
-]
-TLC_points = [
-    (44.5, -65.5), 
-    (44.5, -65.0), 
-    (44.5, -64.5),
-    (44.5, -64.0),
-    (44.5, -63.5),
-    (44.5, -63.0),
-    (44.5, -62.5),
-    (44.5, -62.0),
-    (44.0, -65.5), 
-    (44.0, -65.0), 
-    (44.0, -64.5), 
-    (44.0, -64.0),
-    (44.0, -63.5), 
-    (44.0, -63.0),  
-    (44.0, -62.5), 
-    (43.5, -65.5), 
-    (43.5, -65.0), 
-    (43.5, -64.5), 
-    (43.5, -64.0), 
-    (43.5, -63.5), 
-    (43.5, -63.0), 
-    (43.0, -65.5), 
-    (43.0, -65.0), 
-    (43.0, -64.5), 
-    (43.0, -64.0), 
-    (43.0, -63.5), 
-    (43.0, -63.0), 
-    (42.5, -65.5), 
-    (42.5, -65.0), 
-    (42.5, -64.5), 
-    (42.5, -64.0), 
-    (42.0, -66.0), 
-    (42.0, -65.5), 
-    (42.0, -65.0), 
-    (41.5, -67.0), 
-    (41.5, -66.5), 
-    (41.5, -66.0), 
-    (41.5, -65.5), 
-    ]
+df = pd.DataFrame(
+    [
+        (45.0, -72.5, "mixed"), 
+        (45.0, -72.0, "mixed"), 
+        (45.0, -71.5, "mixed"), 
+        (45.0, -71.0, "mixed"), 
+        (45.0, -70.5, "mixed"), 
+        (45.0, -70.0, "mixed"), 
+        (45.0, -69.5, "mixed"), 
+        (45.0, -69.0, "mixed"), 
+        (45.0, -68.5, "mixed"), 
+        (45.0, -68.0, "mixed"), 
+        (45.0, -67.5, "TLC"), 
+        (45.0, -67.0, "TLC"), 
+        (45.0, -66.5, "TLC"), 
+        (45.0, -66.0, "mixed"), 
+        (45.0, -65.5, "HC"), 
+        (45.0, -65.0, "mixed"), 
+        (45.0, -64.5, "TLC"),
+        (45.0, -64.0, "TLC"),
+        (45.0, -63.5, "TLC"),
+        (45.0, -63.0, "TLC"),
+        (45.0, -62.5, "TLC"),
+        (45.0, -62.0, "TLC"),
+        (45.0, -61.5, "mixed"),
+        (45.0, -61.0, "clear"),
+        (45.0, -60.5, "mixed"),
+        (45.0, -60.0, "mixed"),
+        (45.0, -59.5, "clear"),
+        (45.0, -59.0, "clear"),
+        (45.0, -58.5, "clear"),
+        (45.0, -58.0, "clear"),
+        (45.0, -57.5, "clear"),
 
-#--- Split training points into lon/lat
-FLC_lats, FLC_lons = zip(*FLC_points)
-TLC_lats, TLC_lons = zip(*TLC_points)
+        (44.5, -72.5, "mixed"), 
+        (44.5, -72.0, "mixed"), 
+        (44.5, -71.5, "mixed"), 
+        (44.5, -71.0, "mixed"), 
+        (44.5, -70.5, "mixed"), 
+        (44.5, -70.0, "HC"), 
+        (44.5, -69.5, "HC"), 
+        (44.5, -69.0, "mixed"), 
+        (44.5, -68.5, "mixed"), 
+        (44.5, -68.0, "mixed"), 
+        (44.5, -67.5, "mixed"), 
+        (44.5, -67.0, "mixed"), 
+        (44.5, -66.5, "HC"), 
+        (44.5, -66.0, "mixed"), 
+        (44.5, -65.5, "TLC"), 
+        (44.5, -65.0, "TLC"), 
+        (44.5, -64.5, "TLC"),
+        (44.5, -64.0, "TLC"),
+        (44.5, -63.5, "TLC"),
+        (44.5, -63.0, "TLC"),
+        (44.5, -62.5, "TLC"),
+        (44.5, -62.0, "TLC"),
+        (44.5, -61.5, "clear"),
+        (44.5, -61.0, "clear"),
+        (44.5, -60.5, "clear"),
+        (44.5, -60.0, "clear"),
+        (44.5, -59.5, "clear"),
+        (44.5, -59.0, "clear"),
+        (44.5, -58.5, "clear"),
+        (44.5, -58.0, "clear"),
+        (44.5, -57.5, "clear"),
+
+        (44.0, -65.5, "TLC"), 
+        (44.0, -65.0, "TLC"), 
+        (44.0, -64.5, "TLC"), 
+        (44.0, -64.0, "TLC"),
+        (44.0, -63.5, "TLC"), 
+        (44.0, -63.0, "TLC"),  
+        (44.0, -62.5, "TLC"), 
+        (43.5, -66.0, "FLC"), 
+        (43.5, -65.5, "TLC"), 
+        (43.5, -65.0, "TLC"), 
+        (43.5, -64.5, "TLC"), 
+        (43.5, -64.0, "TLC"), 
+        (43.5, -63.5, "TLC"), 
+        (43.5, -63.0, "TLC"),
+        (43.0, -67.0, "FLC"), 
+        (43.0, -66.5, "FLC"), 
+        (43.0, -66.0, "FLC"),
+        (43.0, -65.5, "TLC"), 
+        (43.0, -65.0, "TLC"), 
+        (43.0, -64.5, "TLC"), 
+        (43.0, -64.0, "TLC"), 
+        (43.0, -63.5, "TLC"), 
+        (43.0, -63.0, "TLC"),  
+        (42.5, -67.5, "FLC"), 
+        (42.5, -67.0, "FLC"), 
+        (42.5, -66.5, "FLC"), 
+        (42.5, -65.5, "TLC"), 
+        (42.5, -65.0, "TLC"), 
+        (42.5, -64.5, "TLC"), 
+        (42.5, -64.0, "TLC"), 
+        (42.0, -68.0, "FLC"), 
+        (42.0, -67.5, "FLC"), 
+        (42.0, -66.0, "TLC"), 
+        (42.0, -65.5, "TLC"), 
+        (42.0, -65.0, "TLC"), 
+
+        (41.5, -68.5, "FLC"), 
+        (41.5, -68.0, "FLC"), 
+        (41.5, -67.0, "TLC"), 
+        (41.5, -66.5, "TLC"), 
+        (41.5, -66.0, "TLC"), 
+        (41.5, -65.5, "TLC"), 
+        (41.5, -65.0, "FLC"), 
+        (41.0, -69.0, "FLC"), 
+        (41.0, -68.5, "FLC"), 
+        (41.0, -65.5, "FLC"), 
+        (41.0, -65.0, "FLC"), 
+        (40.5, -69.5, "FLC"), 
+        (40.5, -69.0, "FLC"), 
+        (40.5, -68.5, "FLC"), 
+        (40.0, -70.0, "FLC"), 
+        (40.0, -69.5, "FLC"), 
+        (40.0, -69.0, "FLC"), 
+        (40.0, -68.5, "FLC"),
+        (39.5, -70.5, "FLC"), 
+        (39.5, -70.0, "FLC"),  
+        (39.5, -69.5, "FLC"), 
+        (39.5, -69.0, "FLC"), 
+        (39.5, -68.5, "FLC"), 
+        (39.5, -68.0, "FLC"),
+        (39.0, -71.0, "FLC"), 
+        (39.0, -70.5, "FLC"), 
+        (39.0, -70.0, "FLC"),  
+        (39.0, -69.5, "FLC"), 
+        (39.0, -69.0, "FLC"), 
+        (39.0, -68.5, "FLC"), 
+        (39.0, -68.0, "FLC"), 
+        (39.0, -67.5, "FLC"), 
+    ],
+    columns=["lat", "lon", "label"]
+)
 
 year = 2025
 month = 3
@@ -122,50 +178,63 @@ wl2 = round(ds2.band_wavelength.values[0],1)
 Tb2 = (ds2.planck_fk2/(np.log((ds2.planck_fk1/ds2.Rad)+1)) - ds2.planck_bc1)/ds2.planck_bc2
 btd = Tb1 - Tb2
 
-projection=ccrs.PlateCarree(central_longitude=0)
-fig,ax=plt.subplots(1, figsize=(12,12),subplot_kw={'projection': projection})
+projection = ccrs.PlateCarree()
+fig, ax = plt.subplots(figsize=(12, 12), subplot_kw={"projection": projection})
 
+#--- Plot ABI
 custom_cmap_name = "blueblack"
 cmap, norm = g_utils.custom_cmap_selection(custom_cmap_name)
 pcm = plt.pcolormesh(btd.lon, btd.lat, btd, cmap=cmap, norm=norm, shading="nearest")
 
-ax.scatter(
-    FLC_lons, FLC_lats,
-    s=60,
-    c='cyan',
-    marker='o',
-    edgecolors='white',
-    linewidths=0.7,
-    transform=ccrs.PlateCarree(),
-    label='False Low Cloud'
-)
+#--- Plot CrIS
+file_path = "data/cris/SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.nc"
+ds_spatial = c_utils.open_cris_data(file_path)
+ds_t_11, ds_11 = c_utils.get_cris_band_Tb(ds_spatial, 
+    srf_file="data/spectral_response_functions/NPP_VIIRS_NG_RSR_I5_filtered_Oct2011f_BA.dat")
+ds_t_3_9, ds_3_9 = c_utils.get_cris_band_Tb(ds_spatial, 
+    srf_file="data/spectral_response_functions/GOES-R_ABI_SRF_ch7.dat")
+ds_btd = ds_t_11 - ds_t_3_9
+print(ds_btd)
+cris_spatial = plt.pcolormesh(ds_3_9['lon'], ds_3_9['lat'], ds_btd, 
+                              cmap=cmap, norm=norm, shading="nearest", alpha=0.3)
 
-ax.scatter(
-    TLC_lons, TLC_lats,
-    s=60,
-    c='magenta',
-    marker='^',
-    edgecolors='white',
-    linewidths=0.7,
-    transform=ccrs.PlateCarree(),
-    label='True Low Cloud'
-)
+label_styles = {
+    "FLC": dict(color="cyan", marker="o", label="False Low Cloud"),
+    "clear": dict(color="black", marker="o", label="Clear Sky"),
+    "TLC": dict(color="magenta", marker="^", label="True Low Cloud"),
+    "HC": dict(color="white", marker="^", label="High Cloud"),
+    "mixed": dict(color="white", marker="x", label="Mixed Pixel"),
+}
+
+for label, style in label_styles.items():
+    d = df[df["label"] == label]
+
+    ax.scatter(
+        d["lon"],
+        d["lat"],
+        s=60,
+        edgecolors="white",
+        linewidths=0.7,
+        transform=ccrs.PlateCarree(),
+        zorder=4,
+        **style,
+    )
 
 clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
+clb.set_label("(K)", fontsize=15)
 clb.ax.tick_params(labelsize=15)
-clb.set_label('(K)', fontsize=15)
+
+ax.set_extent(extent, crs=ccrs.PlateCarree())
+ax.set_title(plot_title, fontsize=20, pad=10)
+ax.coastlines(resolution="50m", color="white", linewidth=2)
 
 ax.legend(
-    loc='lower left',
+    loc="lower left",
     fontsize=12,
     frameon=True,
-    facecolor='black',
-    edgecolor='white'
+    facecolor="black",
+    edgecolor="white",
 )
-
-if extent: ax.set_extent(extent, crs=ccrs.PlateCarree())
-ax.set_title(plot_title, fontsize=20, pad=10)
-ax.coastlines(resolution='50m', color='white', linewidth=2)
 
 plt.savefig(f"plots/fig2_training_set.png", dpi=200, bbox_inches='tight')
 plt.close()
