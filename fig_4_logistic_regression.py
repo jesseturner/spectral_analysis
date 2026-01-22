@@ -83,12 +83,19 @@ print(f"LOO CV Accuracy: {np.mean(scores)*100:.1f}%")
 
 clf.fit(X_scaled, y)
 weights = clf.coef_[0]  # shape (1000,)
+#--- Only CrIS regions
+mask = (
+    ((wl >= 3.92) & (wl <= 4.64)) |
+    ((wl >= 5.71) & (wl <= 8.26)) |
+    ((wl >= 9.13) & (wl <= 15.4))
+)
+y_plot = np.where(mask, weights, np.nan)
 
 plt.figure(figsize=(10,5))
-plt.plot(wl, weights, zorder=3, linewidth=1)
+plt.plot(wl, y_plot, zorder=3, linewidth=1)
 plt.axhline(0, color='white', linestyle='--')
-plt.xlabel("Wavelength (μm)")
-plt.ylabel("Logistic regression weight")
-plt.title("Feature weights across wavelength")
+plt.xlabel("Wavelength (μm)", fontsize=15)
+plt.ylabel("Logistic Regression Coefficient", fontsize=15)
+plt.title("Logistic Regression Feature Weights from CrIS Spectra", fontsize=18)
 plt.savefig(f"plots/fig4_CrIS_logistic_regression_L2.png", dpi=200, bbox_inches='tight')
 plt.close()
