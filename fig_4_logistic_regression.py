@@ -7,9 +7,30 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import LeaveOneOut, cross_val_score
 from sklearn.preprocessing import StandardScaler
 from fig_1_cris_modtran_overlay import file_path
-from fig_2_training_set import FLC_points, TLC_points
+from fig_2_training_set import training_df
 
 c_utils.set_plots_dark()
+
+# Ensure labels are consistent (optional but recommended)
+training_df["label"] = training_df["label"].str.strip()
+
+# TLC points
+TLC_points = (
+    training_df
+    .loc[training_df["label"] == "TLC", ["lat", "lon"]]
+    .to_numpy()
+)
+
+# Non-low cloud (NLC) points: anything that is NOT TLC and NOT mixed
+NLC_points = (
+    training_df
+    .loc[~training_df["label"].isin(["TLC", "mixed"]), ["lat", "lon"]]
+    .to_numpy()
+)
+
+print("Number of low cloud points:", len(TLC_points))
+print("Number of non-low cloud points:", len(NLC_points))
+
 
 #--- Logistic regression (L2 regularization)
 
@@ -30,15 +51,15 @@ def get_category_Tb_from_ds(ds, points):
 
 ds = c_utils.open_cris_data(file_path)
 wl, Tb_TLC = get_category_Tb_from_ds(ds, TLC_points)
-wl, Tb_FLC = get_category_Tb_from_ds(ds, FLC_points)
+wl, Tb_NLC = get_category_Tb_from_ds(ds, NLC_points)
 
 print("Tb_TLC shape:", Tb_TLC.shape)
-print("Tb_FLC shape:", Tb_FLC.shape)
+print("Tb_NLC shape:", Tb_NLC.shape)
 print("Number of wavelengths:", wl.shape)
 
 
-X = np.vstack([Tb_TLC, Tb_FLC])  # shape: (20, 1000)
-y = np.array([1]*Tb_TLC.shape[0] + [0]*Tb_FLC.shape[0]) 
+X = np.vstack([Tb_TLC, Tb_NLC])  # shape: (20, 1000)
+y = np.array([1]*Tb_TLC.shape[0] + [0]*Tb_NLC.shape[0]) 
 
 row_mask = ~np.isnan(X).any(axis=1)
 X = X[row_mask, :]
