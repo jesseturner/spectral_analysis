@@ -1,0 +1,1 @@
+Notes are currently in https://docs.google.com/document/d/1ynFbfXcX7P-WhQJc0GnhmaZ3T2NFJgTtGp2DBm6nM84/edit?usp=sharing. 
