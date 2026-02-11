@@ -551,11 +551,11 @@ cris_spatial = plt.pcolormesh(ds_3_9['lon'], ds_3_9['lat'], ds_btd,
                               cmap=cmap, norm=norm, shading="nearest", alpha=0.5)
 
 label_styles = {
-    "FLC": dict(color="cyan", marker="o", label="False Low Cloud"),
-    "clear": dict(color="black", marker="o", label="Clear Sky"),
+    "FLC": dict(color="white", marker="+", label="False Low Cloud"),
+    "clear": dict(color="white", marker="x", label="Clear Sky"),
     "TLC": dict(color="magenta", marker="^", label="True Low Cloud"),
     "HC": dict(color="white", marker="^", label="High Cloud"),
-    "mixed": dict(color="white", marker="x", label="Mixed Pixel"),
+    "mixed": dict(color="white", marker="1", label="Mixed Pixel"),
 }
 
 for label, style in label_styles.items():
