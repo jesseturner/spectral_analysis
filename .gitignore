@@ -15,3 +15,4 @@ plots/*
 data/gfs/*
 data/modtran/fig_6_modtran_sets
 *.npz
+*.bsp

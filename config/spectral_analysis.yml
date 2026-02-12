@@ -11,4 +11,5 @@ dependencies:
   - netcdf4=1.7.2
   - h5py=3.13.0
   - xarray=2024.11.0
+  - skyfield
 prefix: /Applications/anaconda3/envs/spectral_analysis
