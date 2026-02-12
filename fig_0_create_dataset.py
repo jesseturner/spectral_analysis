@@ -1,6 +1,5 @@
-# create dataset of cloud masks to compare to DNB
-# filter to moonlit dates
-# also download CrIS to dataset for future training
+# Get list of moonlit dates
+# Create dataset of samples from clavrx, DNB, and CrIS
 
 from datetime import datetime, timedelta, timezone
 from skyfield.api import load
