@@ -1,6 +1,3 @@
-# Get list of moonlit dates
-# Create dataset of samples from clavrx, DNB, and CrIS
-
 from datetime import datetime, timedelta, timezone
 from skyfield.api import load
 import numpy as np
@@ -72,9 +69,10 @@ def main():
             all_files.extend(glob.glob(pattern))
 
     total_files = len(all_files)
+    all_files.sort()
     print(f"Total files with high moonlight: {total_files}")
 
-    sample = 9120
+    sample = 1886
     print(f"Setting sample to file {sample}...")
     ds_example = xr.open_dataset(
         all_files[sample],
@@ -90,48 +88,39 @@ def main():
     else:
         datetime_str = "Unknown - File format unexpected."
     print(f"Plotting sample from {datetime_str}...")
+    print("---Plotting could be improved by removing error codes and NaNs---")
 
     da_cloud_mask = ds_example['cloud_mask']
 
     plot_clavrx_cloud_mask(da_cloud_mask, datetime_str, save_path="clavrx_cloud_mask_file")
 
-    start = 180
-    end = 189
-    print(f"Setting range to file {start} to file {end}...")
-
-    match_start = re.search(r'd(\d{8})_t(\d{6})', all_files[start])
-    if match_start:
-        date_part = match_start.group(1)
-        time_part = match_start.group(2)
-        date_formatted = f"{date_part[:4]}-{date_part[4:6]}-{date_part[6:]}"
-        time_formatted = f"{time_part[:2]}:{time_part[2:4]}"
-        datetime_str_start = f"{date_formatted} {time_formatted}"
-    else:
-        datetime_str_start = "Unknown - File format unexpected."
-
-    match_end = re.search(r'd(\d{8})_t(\d{6})', all_files[end])
-    if match_end:
-        date_part = match_end.group(1)
-        time_part = match_end.group(2)
-        date_formatted = f"{date_part[:4]}-{date_part[4:6]}-{date_part[6:]}"
-        time_formatted = f"{time_part[:2]}:{time_part[2:4]}"
-        datetime_str_end = f"{date_formatted} {time_formatted}"
-    else:
-        datetime_str_end = "Unknown - File format unexpected."
-
-    print(f"Plotting sample range from {datetime_str_start} to {datetime_str_end}...")
+    orbit = "b42765"
+    orbit_files = [f for f in all_files if re.search(orbit, f)]
+    print(f"Plotting {len(orbit_files)} files for orbit {orbit}...")
 
     print(f"Opening multiple files not working yet...")
-
     # ds = xr.open_mfdataset(
-    #     all_files[start:end],
-    #     concat_dim="FakeDim1D",
+    #     orbit_files,
+    #     concat_dim="scan_lines_along_track_direction",
     #     engine="netcdf4",
     #     combine="nested",
-    #     parallel=True)
+    #     parallel=True, 
+    #     data_vars='minimal', 
+    #     coords='minimal', 
+    #     compat='override')
     
-    # datetime_str = f"{datetime_str_start} to {datetime_str_end}"
-    # plot_clavrx_cloud_mask(da_cloud_mask, datetime_str, save_path="clavrx_cloud_mask_file_range")
+    # match = re.search(r'd(\d{8})_t(\d{6})', orbit_files[0])
+    # if match:
+    #     date_part = match.group(1)
+    #     time_part = match.group(2)
+    #     date_formatted = f"{date_part[:4]}-{date_part[4:6]}-{date_part[6:]}"
+    #     time_formatted = f"{time_part[:2]}:{time_part[2:4]}"
+    #     datetime_str = f"{date_formatted} {time_formatted}"
+    # else:
+    #     datetime_str = "Unknown - File format unexpected."
+    
+    # datetime_str = f"{datetime_str} ({orbit})"
+    # plot_clavrx_cloud_mask(da_cloud_mask, datetime_str, save_path="clavrx_cloud_mask_file_orbit")
     
     return
 
