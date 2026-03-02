@@ -27,7 +27,7 @@ def main():
     all_files = filter_to_sat(all_files, "j01")
 
     print("Getting most recent NOAA-20 orbit...")
-    orbit = get_orbit(all_files[-100])
+    orbit = get_orbit(all_files[-600])
 
     orbit_files = [f for f in all_files if re.search(orbit, f)]
     print(f"{len(orbit_files)} files in orbit {orbit}...")
@@ -204,7 +204,7 @@ def plot_clavrx_cloud_mask(da_cloud_mask, datetime_str, save_path):
     )
 
     ax.set_title(f"Clavrx Cloud Mask \n {datetime_str}", fontsize=20, pad=10)
-    # ax.coastlines(resolution='50m', color='black', linewidth=1)
+    ax.coastlines(resolution='50m', color='black', linewidth=1)
 
     labels = [
         "Clear",
@@ -248,7 +248,7 @@ def plot_clavrx_dnb_refl(da_dnb_refl, datetime_str, save_path):
     )
 
     ax.set_title(f"Clavrx DNB Reflectance \n {datetime_str}", fontsize=20, pad=10)
-    # ax.coastlines(resolution='50m', color='black', linewidth=1)
+    ax.coastlines(resolution='50m', color='black', linewidth=1)
 
     plt.savefig(f"plots/{save_path}.png",
                 dpi=200, bbox_inches='tight')
@@ -261,11 +261,10 @@ def get_matching_cris_files(orbit_files_select, sat_str):
     from botocore import UNSIGNED
     from botocore.config import Config
 
-    print("NEXT STEP: use selected clavrx files to download matched CrIS files using path below")
+    print("Using selected clavrx files to download matched CrIS files...")
     bucket = f"noaa-nesdis-{sat_str}-pds"
 
     for path in orbit_files_select: 
-        print(path)
         filename = path.split("/")[-1]
     
         m = re.match(r'clavrx_(\w+)_d(\d{8})_t(\d+)_e(\d+)_b(\d+)\.level2\.hdf', filename)
@@ -277,16 +276,41 @@ def get_matching_cris_files(orbit_files_select, sat_str):
         month = date_str[4:6]
         day = date_str[6:8]
 
-        print(sensor, date_str, t_start, t_end, orbit)
 
-        cris_filename = f"CrIS-FS-SDR/{year}/{month}/{day}/SCRIF_{sensor}_d{date_str}_t{t_start.zfill(7)}_e{t_end.zfill(7)}_b{orbit}_c{creation}_oebc_ops.h5"
-        s3 = boto3.client(
-            "s3",
-            config=Config(signature_version=UNSIGNED)
+        prefix = f"CrIS-FS-SDR/{year}/{month}/{day}/"
+        s3 = boto3.client("s3", config=Config(signature_version=UNSIGNED))
+        response = s3.list_objects_v2(
+            Bucket=bucket,
+            Prefix=prefix
         )
+        
+        orbit_matches = []
 
-        print("Downloading CrIS file...")
-        s3.download_file(bucket, cris_filename, f"data/cris/from_aws/{cris_filename}.h5")
+        for obj in response.get("Contents", []):
+            name = obj["Key"].split("/")[-1]
+            parts = name.split("_")
+
+            if (
+                parts[1] == sensor
+                and parts[3].startswith(f"t{t_start[:4]}")
+                and parts[5] == f"b{orbit}"
+            ):
+                orbit_matches.append(obj['Key'])
+
+        if orbit_matches:
+            print(f"For clavrx file {path.split('/')[-1]}, matching CrIS file(s):")
+            for match in orbit_matches:
+                name = match.split('/')[-1]
+                print(f"Downloading {name}...")
+                s3.download_file(
+                    bucket,
+                    match,
+                    f"data/cris/from_aws/{name}"
+                )
+        else: 
+            print("No CrIS files found. AWS is a little behind, try an earlier pass...")
+
+
     return
 
 #---------------
