@@ -10,16 +10,15 @@ def main():
     # aws_geo_path = "data/cris/GCRSO_j01_d20260303_t1648349_e1649047_b42951_c20260303172818357000_oebc_ops.h5"
     # open_aws_cris(aws_sdr_path, aws_geo_path)
 
-    # ea_cris_files = download_cris_data("2026-03-02", "2026-03-03", cris_dir="data/cris/from_earthaccess")
-    # print(ea_cris_files)
+    ea_cris_files = download_cris_data("2026-03-04", "2026-03-05", cris_dir="data/cris/from_earthaccess")
 
-    cris_path = "data/cris/from_earthaccess/SNDR.J1.CRIS.20260302T0012.m06.g003.L1B.std.v03_08.G.260302072655.nc"
-    ds = xr.open_dataset(cris_path)
-    ds_sel = ds.sel(atrack=slice(0, 18), xtrack=slice(0, 18), fov=0, wnum_lw=648.75)
-    print(ds_sel['lat'])
-    print(ds_sel['rad_lw'])
+    # cris_path = "data/cris/from_earthaccess/SNDR.J1.CRIS.20260302T0012.m06.g003.L1B.std.v03_08.G.260302072655.nc"
+    # ds = xr.open_dataset(cris_path)
+    # ds_sel = ds.sel(atrack=slice(0, 18), xtrack=slice(0, 18), fov=0, wnum_lw=648.75)
+    # print(ds_sel['lat'])
+    # print(ds_sel['rad_lw'])
 
-    plot_cris_spatial(ds_sel['rad_lw'], ds_sel['lat'], ds_sel['lon'], fig_dir="plots", fig_name="cris_rad", fig_title="CrIS radiance")
+    # plot_cris_spatial(ds_sel['rad_lw'], ds_sel['lat'], ds_sel['lon'], fig_dir="plots", fig_name="cris_rad", fig_title="CrIS radiance")
 
     return
 
@@ -47,6 +46,7 @@ def download_cris_data(date_start, date_end, lon_west=None, lat_south=None, lon_
     )
     os.makedirs(f"{cris_dir}", exist_ok=True)
     files = earthaccess.download(results, cris_dir)
+    print(f"{len(files)} downloaded.")
     return files
 
 def plot_cris_spatial(ds_sel, ds_lat, ds_lon, fig_dir, fig_name, fig_title):
