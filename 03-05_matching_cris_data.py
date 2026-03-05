@@ -31,20 +31,21 @@ def main():
 
     orbit_files = [f for f in all_files if re.search(orbit, f)]
     print(f"{len(orbit_files)} files in orbit {orbit}...")
+    print(f"Files starting from {extract_datetime_from_filename(orbit_files[0])}...")
 
     sample_start, sample_end = 24, 27
     print(f"Setting sample to file {sample_start} to {sample_end}...")
     orbit_files_select = only_valid_nighttime_files(orbit_files[sample_start:sample_end])
     print(f"Sampling {len(orbit_files_select)}/{len(orbit_files)} valid nighttime files in orbit {orbit}...")
 
-    da_cris = create_cris_da(orbit_files_select)
+    da_cris, datetime_str_cris = create_cris_da(orbit_files_select)
     ds_combined, datetime_str = get_combined_multiple_files(orbit_files_select)
     da_refl_lunar = get_variable(ds_combined, 'refl_lunar_dnb_nom')
     da_cloud_mask = get_variable(ds_combined, 'cloud_mask')
     
     plot_clavrx_cloud_mask(da_cloud_mask, datetime_str, save_path="clavrx_cloud_mask")
     plot_clavrx_dnb_refl(da_refl_lunar, datetime_str, save_path="clavrx_refl_lunar")
-    plot_cris_spatial(da_cris, datetime_str, save_path="cris_rad")
+    plot_cris_spatial(da_cris, datetime_str_cris, save_path="cris_rad")
 
     return
 
@@ -161,6 +162,21 @@ def extract_datetime_from_filename(filename):
 
     return f"{date_formatted} {time_formatted}"
 
+
+def extract_datetime_from_filename_cris(filename):
+    match = re.search(r'CRIS.(\d{8})T(\d{4})', filename)
+
+    if not match:
+        return None
+
+    date_part = match.group(1)
+    time_part = match.group(2)
+
+    date_formatted = f"{date_part[:4]}-{date_part[4:6]}-{date_part[6:]}"
+    time_formatted = f"{time_part[:2]}:{time_part[2:4]}"
+
+    return f"{date_formatted} {time_formatted}"
+
 def get_variable(ds, var_name):
 
     da_var = ds[var_name]
@@ -200,7 +216,8 @@ def plot_clavrx_cloud_mask(da_cloud_mask, datetime_str, save_path):
     )
 
     ax.set_title(f"Clavrx Cloud Mask \n {datetime_str}", fontsize=20, pad=10)
-    ax.coastlines(resolution='50m', color='black', linewidth=1)
+    ax.coastlines(resolution='50m', color='white', linewidth=1)
+    ax.set_extent([-180, 180, -90, 90], crs=ccrs.PlateCarree())
 
     labels = [
         "Clear",
@@ -244,7 +261,9 @@ def plot_clavrx_dnb_refl(da_dnb_refl, datetime_str, save_path):
     )
 
     ax.set_title(f"Clavrx DNB Reflectance \n {datetime_str}", fontsize=20, pad=10)
-    ax.coastlines(resolution='50m', color='black', linewidth=1)
+    ax.coastlines(resolution='50m', color='white', linewidth=1)
+    ax.set_extent([-180, 180, -90, 90], crs=ccrs.PlateCarree())
+
 
     plt.savefig(f"plots/{save_path}.png",
                 dpi=200, bbox_inches='tight')
@@ -259,10 +278,11 @@ def plot_cris_spatial(da_cris, datetime_str, save_path):
 
     c = ax.pcolormesh(da_cris['lon'], da_cris['lat'], da_cris, cmap='Greys', shading='auto')
 
-    ax.coastlines(resolution='50m', color='black', linewidth=1)
+    ax.coastlines(resolution='50m', color='white', linewidth=1)
+    ax.set_extent([-180, 180, -90, 90], crs=ccrs.PlateCarree())
+
 
     ax.set_title(f"CrIS Radiance (648.75 cm-1) \n {datetime_str}", fontsize=20, pad=10)
-    ax.coastlines(resolution='50m', color='black', linewidth=1)
 
     plt.savefig(f"plots/{save_path}.png",
                 dpi=200, bbox_inches='tight')
@@ -287,7 +307,14 @@ def create_cris_da(orbit_files_select):
     ds_sel = ds.sel(atrack=slice(0, 18), xtrack=slice(0, 18), fov=0, wnum_lw=648.75)
     da_cris = ds_sel['rad_lw']
 
-    return da_cris
+    start_dt = extract_datetime_from_filename_cris(cris_files[0])
+    end_dt   = extract_datetime_from_filename_cris(cris_files[-1])
+    if start_dt and end_dt:
+        datetime_str = f"{start_dt} - {end_dt}"
+    else:
+        datetime_str = "Unknown - File format unexpected."
+
+    return da_cris, datetime_str
 
 def extract_date_time_from_clavrx(path):
     """

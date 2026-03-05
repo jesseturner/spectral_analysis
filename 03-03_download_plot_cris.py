@@ -10,7 +10,7 @@ def main():
     # aws_geo_path = "data/cris/GCRSO_j01_d20260303_t1648349_e1649047_b42951_c20260303172818357000_oebc_ops.h5"
     # open_aws_cris(aws_sdr_path, aws_geo_path)
 
-    ea_cris_files = download_cris_data("2026-03-04", "2026-03-05", cris_dir="data/cris/from_earthaccess")
+    ea_cris_files = download_cris_data("2026-03-05", "2026-03-06", cris_dir="data/cris/from_earthaccess")
 
     # cris_path = "data/cris/from_earthaccess/SNDR.J1.CRIS.20260302T0012.m06.g003.L1B.std.v03_08.G.260302072655.nc"
     # ds = xr.open_dataset(cris_path)
