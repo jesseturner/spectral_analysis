@@ -6,6 +6,7 @@ import cartopy.crs as ccrs
 import re
 import glob
 from datetime import datetime, timedelta
+import numpy as np
 
 
 def main():
@@ -15,6 +16,7 @@ def main():
     cris_pattern = os.path.join(cris_dir, f"SNDR.J1.CRIS.{cris_date}*")
 
     cris_files = glob.glob(cris_pattern)
+    cris_files.sort() 
     print(f"{len(cris_files)} CrIS files found...")
     if not cris_files:
         print("CrIS files not found, downloading...")
@@ -23,10 +25,10 @@ def main():
         next_day_formatted = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
         cris_files = download_cris_data(sel_day_formatted, next_day_formatted, cris_dir=cris_dir)
 
-    cris_files_sample = cris_files[:12]
+    cris_files_sample = cris_files[:]
+    print(f"Using {len(cris_files_sample)}/{len(cris_files)} of the files...")
 
-    da_cris, datetime_str = create_cris_da(cris_files_sample)
-    print(da_cris)
+    da_cris, datetime_str = create_cris_da(cris_files_sample, wnum_sel=750)
     
     plot_cris_spatial(da_cris, datetime_str, save_path="cris_rad")
 
@@ -60,7 +62,7 @@ def download_cris_data(date_start, date_end, lon_west=None, lat_south=None, lon_
     print(f"{len(files)} downloaded.")
     return files
 
-def create_cris_da(cris_files):
+def create_cris_da(cris_files, wnum_sel):
     print("Creating CrIS dataset...")
 
     ds = xr.open_mfdataset(
@@ -68,7 +70,7 @@ def create_cris_da(cris_files):
         combine="nested",
         concat_dim="atrack")
 
-    ds_sel = ds.sel(fov=0, wnum_lw=648.75)
+    ds_sel = ds.sel(fov=0, wnum_lw=wnum_sel)
     da_cris = ds_sel['rad_lw']
 
     start_dt = extract_datetime_from_filename_cris(cris_files[0])
@@ -95,17 +97,31 @@ def extract_datetime_from_filename_cris(filename):
     return f"{date_formatted} {time_formatted}"
 
 def plot_cris_spatial(da_cris, datetime_str, save_path):
-    print("Plotting CrIS radiance (manually selected)...")
+    wnum_sel = da_cris['wnum_lw'].values
+    print(f"Plotting CrIS radiance ({wnum_sel} cm-1)...")
     projection=ccrs.PlateCarree(central_longitude=0)
     fig,ax=plt.subplots(1, figsize=(12,12),subplot_kw={'projection': projection})
 
     c = ax.pcolormesh(da_cris['lon'], da_cris['lat'], da_cris, cmap='Greys', shading='auto')
+    # sc = ax.scatter(
+    #     da_cris['lon'],
+    #     da_cris['lat'],
+    #     c=da_cris,
+    #     cmap="Blues_r",
+    #     s=1,
+    #     marker="s",
+    #     linewidths=0,
+    #     vmin=50,
+    #     vmax=66,
+    #     transform=ccrs.PlateCarree()
+    # )
 
-    ax.coastlines(resolution='50m', color='white', linewidth=1)
+    ax.coastlines(resolution='50m', color='black', linewidth=1)
     ax.set_extent([-180, 180, -90, 90], crs=ccrs.PlateCarree())
 
-
-    ax.set_title(f"CrIS Radiance (648.75 cm-1) \n {datetime_str}", fontsize=20, pad=10)
+    cbar = plt.colorbar(c, ax=ax, orientation='vertical', pad=0.02, shrink=0.3)
+    cbar.set_label("mW/(m2 sr cm-1)")
+    ax.set_title(f"CrIS Radiance ({wnum_sel} cm-1) \n {datetime_str}", fontsize=20, pad=10)
 
     plt.savefig(f"plots/{save_path}.png",
                 dpi=200, bbox_inches='tight')
