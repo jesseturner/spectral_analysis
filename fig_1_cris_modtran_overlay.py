@@ -5,7 +5,7 @@ from modules_modtran import modtran_utils as m_utils
 import os
 import matplotlib.pyplot as plt
 
-cris_dir = "data/cris/"
+cris_dir = "data/cris/from_earthaccess/"
 cris_file = "SNDR.J1.CRIS.20250312T0642.m06.g068.L1B.std.v03_08.G.250312132403.nc"
 file_path = os.path.join(cris_dir, cris_file)
 c_utils.set_plots_dark()
