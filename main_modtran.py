@@ -44,14 +44,14 @@ m_utils.plot_brightness_temperature(df2, fig_dir="plots", fig_name=f"MODTRAN_Tb_
 # m_utils.get_Tb_from_srf(df2, srf_file)
 
 #--- Getting atmospheric profiles for cases
-# gfs_filepath = "data/gfs/model_data/gfs_20250312_06z"
-# sst_filepath = "data/gfs/model_data/sst_20250312"
-# lat, lon = 40.75, -67.75
+gfs_filepath = "data/gfs/gfs_20250312_06z"
+sst_filepath = "data/gfs/sst_20250312"
+lat, lon = 40, -67.75
 
-# df = m_utils.profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon)
-# print(df)
+df = m_utils.profile_from_gfs_and_sst(gfs_filepath, sst_filepath, lat, lon)
+print(df)
 
-# m_utils.plot_skew_t_from_profile(df, title="GFS and SST vertical profile (2025-03-12)", fig_dir="plots", fig_name="gfs_vertical_profile_20250312")
+m_utils.plot_skew_t_from_profile(df, title="GFS and SST vertical profile (2025-03-12)", fig_dir="plots", fig_name="gfs_vertical_profile_20250312")
 
 
 #--- Plot brightness temperature with VIIRS SRFs
