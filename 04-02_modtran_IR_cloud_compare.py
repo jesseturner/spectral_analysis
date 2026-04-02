@@ -3,20 +3,20 @@ import matplotlib.pyplot as plt
 
 def main():
 
-    modtran_low_cloud = "data/modtran/modtran_json/2025031206_40_67-75.json"
-    modtran_inversion = "data/modtran/modtran_json/2025031206_40_67-75.json"
-    modtran_clear = "data/modtran/modtran_json/2025031206_40_67-75.json"
+    modtran_low_cloud = "data/modtran/modtran_json/04-02_low_cloud.json"
+    modtran_inversion = "data/modtran/modtran_json/04-02_inversion.json"
+    modtran_clear = "data/modtran/modtran_json/04-02_clear_sky.json"
 
     wl1, Tb1 = get_modtran_Tb(modtran_low_cloud)
     wl2, Tb2 = get_modtran_Tb(modtran_inversion)
     wl3, Tb3 = get_modtran_Tb(modtran_clear)
 
     Tb_lines = [
-        {"Tb": Tb1, "label": "Low Cloud", "color": "blue"},
-        {"Tb": Tb2, "label": "Inversion", "color": "red"},
-        {"Tb": Tb3, "label": "Clear Sky", "color": "green"},
+        {"wl": wl1, "Tb": Tb1, "label": "Low Cloud", "color": "blue"},
+        {"wl": wl2, "Tb": Tb2, "label": "Inversion", "color": "red"},
+        {"wl": wl3, "Tb": Tb3, "label": "Clear Sky", "color": "green"},
     ]
-
+    
     plot_Tb_spectra(Tb_lines)
 
 #------------------------
@@ -34,7 +34,7 @@ def plot_Tb_spectra(Tb_lines):
     ax.set_facecolor('black')
 
     for line in Tb_lines:
-        ax.plot(line["data"], label=line["label"], color=line["color"], linewidth=0.5,)
+        ax.plot(line["wl"], line["Tb"], label=line["label"], color=line["color"], linewidth=0.5,)
     
     ax.set_xlim((3,12))
     ax.set_ylim((180,300))
@@ -44,7 +44,7 @@ def plot_Tb_spectra(Tb_lines):
     ax.set_title("MODTRAN IR spectra")
     ax.legend()
 
-    plt.savefig(f"plots/modtran_ir_compare.png", dpi=200, bbox_inches='tight')
+    plt.savefig(f"plots/modtran_ir_compare.png", dpi=300, bbox_inches='tight')
     plt.close()
 
     return 
