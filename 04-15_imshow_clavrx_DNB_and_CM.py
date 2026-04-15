@@ -1,10 +1,8 @@
+#--- Opening CLAVR-x files with pyhdf, plotting with imshow
+
 from pyhdf.SD import SD, SDC
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.colors import ListedColormap
-from matplotlib.colors import BoundaryNorm
-import cartopy.crs as ccrs
 from datetime import datetime
 import os
 import glob
