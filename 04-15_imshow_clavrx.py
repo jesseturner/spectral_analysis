@@ -22,29 +22,45 @@ def main():
     print("Clavrx files are in HDF4 format, using pyhdf...")
     print(f"{len(filepath_list)} files found for {clavrx_date_str[0:4]}-{clavrx_date_str[4:6]}-{clavrx_date_str[6:8]} hour {clavrx_date_str[8:10]}")
     
-    print_hdf_file_info(example_file=filepath_list[0], dataset='cloud_mask')
-    print_hdf_file_info(example_file=filepath_list[0], dataset='refl_lunar_dnb_nom')
+    # print_hdf_datasets_all(example_file=filepath_list[0])
+    print_hdf_dataset_info(example_file=filepath_list[0], dataset='cloud_mask')
+    print_hdf_dataset_info(example_file=filepath_list[0], dataset='refl_lunar_dnb_nom')
+    print_hdf_dataset_info(example_file=filepath_list[0], dataset='cloud_type')
 
     #--- Add logic only get nighttime data with moonlight
     filepath_list = filepath_list[30:42]
-    all_cloud_mask_data = opening_clavrx(filepath_list, dataset='cloud_mask')
-    all_dnb_data = opening_clavrx(filepath_list, dataset='refl_lunar_dnb_nom')
+    cloud_mask_data = opening_clavrx(filepath_list, dataset='cloud_mask')
+    dnb_data = opening_clavrx(filepath_list, dataset='refl_lunar_dnb_nom')
+    cloud_type_data = opening_clavrx(filepath_list, dataset='cloud_type')
 
-    all_cm_combined = np.concatenate(all_cloud_mask_data, axis=0)
-    all_dnb_combined = np.concatenate(all_dnb_data, axis=0)
-    print(f"Unique values: {np.unique(all_cm_combined)}")
-    print(f"Unique values: {np.unique(all_dnb_combined)}")
+    print(f"Cloud Mask unique values: {np.unique(cloud_mask_data)}")
+    print(f"Day/Night Band unique values: {np.unique(dnb_data)}")
+    print(f"Cloud Type unique values: {np.unique(cloud_type_data)}")
 
-    plot_clavrx_cloud_mask(all_cm_combined)
-    plot_clavrx_dnb(all_dnb_combined)
+    plot_clavrx_cloud_mask(cloud_mask_data)
+    plot_clavrx_dnb(dnb_data)
+    plot_clavrx_cloud_type(cloud_type_data)
 
     return
 
 #---------------
 
-def print_hdf_file_info(example_file, dataset):
+def print_hdf_datasets_all(example_file):
     '''
-    :param example_file:
+    :param example_file: 'clavrx_j01_d20260306_t0401141_e0402386_b42986.level2.hdf'
+    '''
+    file = SD(example_file, SDC.READ)
+    print(f"--- HDF contains these datasets: ---")
+    datasets = file.datasets()
+    for name in datasets.items():
+        print(f"Dataset name: {name}")
+
+
+    return 
+
+def print_hdf_dataset_info(example_file, dataset):
+    '''
+    :param example_file: 'clavrx_j01_d20260306_t0401141_e0402386_b42986.level2.hdf'
     :param dataset: 'cloud_mask', 'refl_lunar_dnb_nom'
     '''
     file = SD(example_file, SDC.READ)
@@ -74,14 +90,16 @@ def opening_clavrx(filepath_list, dataset):
 
         file.end()
 
-    return data_array
+    data_array_combined = np.concatenate(data_array, axis=0)
+
+    return data_array_combined
 
 def plot_clavrx_cloud_mask(data_array):
     fig, ax = plt.subplots(1, figsize=(12,12))
     img = ax.imshow(data_array, cmap='gray', vmin=0, vmax=3)
     ax.set_title("CLAVR-x Cloud Mask")
     plt.axis('off')
-    plt.savefig(f"plots/imshow_cloud_mask.png",
+    plt.savefig(f"plots/2026_04_15_imshow_cloud_mask.png",
                 dpi=200, bbox_inches='tight')
     plt.close()
 
@@ -92,7 +110,18 @@ def plot_clavrx_dnb(data_array):
     img = ax.imshow(data_array, cmap='gray', vmin=-32000, vmax=24000)
     ax.set_title("CLAVR-x Day/Night Band Radiance")
     plt.axis('off')
-    plt.savefig(f"plots/imshow_dnb.png",
+    plt.savefig(f"plots/2026_04_15_imshow_dnb.png",
+                dpi=200, bbox_inches='tight')
+    plt.close()
+
+    return 
+
+def plot_clavrx_cloud_type(data_array):
+    fig, ax = plt.subplots(1, figsize=(12,12))
+    img = ax.imshow(data_array, cmap='gray', vmin=0, vmax=9)
+    ax.set_title("CLAVR-x Cloud Type")
+    plt.axis('off')
+    plt.savefig(f"plots/2026_04_15_imshow_cloud_type.png",
                 dpi=200, bbox_inches='tight')
     plt.close()
 
