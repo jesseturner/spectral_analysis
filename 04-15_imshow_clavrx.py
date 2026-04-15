@@ -3,6 +3,7 @@
 from pyhdf.SD import SD, SDC
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 from datetime import datetime
 import os
 import glob
@@ -40,6 +41,7 @@ def main():
     plot_clavrx_cloud_mask(cloud_mask_data)
     plot_clavrx_dnb(dnb_data)
     plot_clavrx_cloud_type(cloud_type_data)
+    plot_clavrx_cm_minus_dnb(cloud_mask_data, dnb_data)
 
     return
 
@@ -108,7 +110,7 @@ def plot_clavrx_cloud_mask(data_array):
 def plot_clavrx_dnb(data_array):
     fig, ax = plt.subplots(1, figsize=(12,12))
     img = ax.imshow(data_array, cmap='gray', vmin=-32000, vmax=24000)
-    ax.set_title("CLAVR-x Day/Night Band Radiance")
+    ax.set_title("CLAVR-x Day/Night Band Reflectance")
     plt.axis('off')
     plt.savefig(f"plots/2026_04_15_imshow_dnb.png",
                 dpi=200, bbox_inches='tight')
@@ -126,6 +128,35 @@ def plot_clavrx_cloud_type(data_array):
     plt.close()
 
     return 
+
+def plot_clavrx_cm_minus_dnb(array_cloud_mask, array_dnb):
+    fig, ax = plt.subplots(1, figsize=(12,12))
+
+    #--- Turn Day/Night Band into a cloud mask
+    array_dnb_mask = np.select(
+    [
+        array_dnb < -20000,
+        (array_dnb >= -20000) & (array_dnb < -10000),
+        (array_dnb >= -10000) & (array_dnb <= 5000),
+        array_dnb > 5000
+    ], [0, 1, 2, 3] )
+    
+    diff_array = array_cloud_mask - array_dnb_mask
+    img = ax.imshow(diff_array, cmap='bwr', vmin=-3, vmax=3)
+
+    legend_elements = [
+        Patch(facecolor='red', label='More Cloud Mask'),
+        Patch(facecolor='blue', label='More Day/Night Band')
+    ]
+    ax.legend(handles=legend_elements)
+    ax.set_title("CLAVR-x Cloud Mask - Day/Night Band Mask")
+    plt.axis('off')
+    plt.savefig(f"plots/2026_04_15_imshow_cm_minus_dnb.png",
+                dpi=200, bbox_inches='tight')
+    plt.close()
+
+    return 
+
 
 #---------------
 
