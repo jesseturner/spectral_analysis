@@ -175,36 +175,6 @@ def open_dnb_radiance(file_path):
 
     return da
 
-def plot_dnb_radiance(da, plot_dir, plot_name, plot_title, extent=None, pin_coords=None):
-    """
-    extent: [west, east, south, north]
-    pin_coords: (latitude, longitude)
-    """
-    projection=ccrs.PlateCarree(central_longitude=0)
-    fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
-    
-    cmap = "binary_r"
-    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, shading="nearest", vmin=0.5e-9, vmax=9e-9)
-
-    clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
-    clb.ax.tick_params(labelsize=15)
-    clb.set_label('Radiance (W cm$^{-2}$ sr$^{-1}$)', fontsize=15)
-
-    if pin_coords:
-        ax.plot(pin_coords[1], pin_coords[0], 
-            marker='o', 
-            markersize=12,
-            markerfacecolor='red',
-            markeredgecolor='white',
-            markeredgewidth=1.5, 
-            transform=ccrs.PlateCarree())
-    if extent: ax.set_extent(extent, crs=ccrs.PlateCarree())
-    ax.set_title(plot_title, fontsize=20, pad=10)
-    ax.coastlines(resolution='50m', color='black', linewidth=1)
-
-    _plt_save(plot_dir, plot_name)
-    return
-
 def plot_viirs_srf(srf_file):
     """
     Using sensor response function file downloaded from https://ncc.nesdis.noaa.gov/VIIRS/VIIRSSpectralResponseFunctions.php
