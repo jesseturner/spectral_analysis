@@ -334,6 +334,9 @@ def _q_to_ppmv(q):
     return ppmv
 
 def run_modtran(json_path):
+    '''
+    MODTRAN is set up on jpss-cloud6 machine
+    '''
     result = subprocess.run(["/home/jturner/modtran6/bin/linux/mod6c_cons", json_path])
     print(result.stdout)
     print(result.stderr)

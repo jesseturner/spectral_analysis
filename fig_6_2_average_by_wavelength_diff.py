@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from modules_modtran import modtran_utils as m_utils
-from modules_cris import cris_utils as c_utils
+from readers import modtran_utils as m_utils
+from readers import cris_utils as c_utils
 
 c_utils.set_plots_dark()
 

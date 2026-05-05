@@ -7,6 +7,7 @@ Data sources:
 * Numerical weather prediction model GFS
 * Simulated GeoXO sounder (GXS)
 * Radiosonde measurements
+* CLAVR-x cloud algorithm data
 
 Methods: 
 * MODTRAN radiative transfer simulation (available on jpss-cloud6 machine)

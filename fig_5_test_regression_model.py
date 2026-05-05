@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from modules_cris import cris_utils as c_utils
+from readers import cris_utils as c_utils
 from fig_1_cris_modtran_overlay import file_path
 from fig_2_testing_set import FLC_points, TLC_points, btd, extent, cmap, norm 
 from fig_4_logistic_regression import get_category_Tb_from_ds, clf, scaler

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import numpy as np
 import pandas as pd
-from modules_cris import cris_utils as c_utils
+from readers import cris_utils as c_utils
 
 #--- Grab GOES utils from outside path
 import sys

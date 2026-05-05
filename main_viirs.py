@@ -1,4 +1,4 @@
-from modules_viirs import viirs_utils as v_utils
+from readers import viirs_utils as v_utils
 import os
 
 #--- Plot the VIIRS BTD

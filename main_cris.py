@@ -1,4 +1,4 @@
-from modules_cris import cris_utils as c_utils
+from readers import cris_utils as c_utils
 import os
 
 #--- Download CrIS data

@@ -1,4 +1,4 @@
-from modules_modtran import modtran_utils as m_utils
+from readers import modtran_utils as m_utils
 
 #--- Create JSON from SST and GFS
 # gfs_filepath = "data/gfs/gfs_20250312_06z"

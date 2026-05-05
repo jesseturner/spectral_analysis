@@ -1,6 +1,6 @@
 # Fitting a logistic regression to the training set and plotting the weight by wavelength.
 
-from modules_cris import cris_utils as c_utils
+from readers import cris_utils as c_utils
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LogisticRegression
