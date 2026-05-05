@@ -1,15 +1,6 @@
-import os
 import xarray as xr
 import h5py
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import cartopy.crs as ccrs
 import numpy as np
-
-def _plt_save(fig_dir, fig_name):
-    os.makedirs(f"{fig_dir}", exist_ok=True)
-    plt.savefig(f"{fig_dir}/{fig_name}.png", dpi=200, bbox_inches='tight')
-    plt.close()
 
 def print_viirs_file_metadata(file_path):
     with h5py.File(file_path, "r") as f:
@@ -116,45 +107,6 @@ def _apply_scale_and_offset(file_path, band, da):
     
     return clean_da
 
-
-def plot_viirs_data(da, plot_dir, plot_name, plot_title, extent=None, pin_coords=None):
-    """
-    extent: [west, east, south, north]
-    pin_coords: (latitude, longitude)
-    """
-    projection=ccrs.PlateCarree(central_longitude=0)
-    fig,ax=plt.subplots(1, figsize=(12,12), subplot_kw={'projection': projection})
-    
-    cmap = mcolors.LinearSegmentedColormap.from_list(
-        "custom_cmap",
-        [(0, "#06BA63"), (0.5, "black"), (1, "white")]
-    )
-    norm = mcolors.TwoSlopeNorm(vmin=-6, vcenter=0, vmax=1.5)
-
-    pcm = plt.pcolormesh(da["Longitude"], da["Latitude"], da, cmap=cmap, norm=norm, shading="nearest")
-
-    clb = plt.colorbar(pcm, shrink=0.6, pad=0.02, ax=ax)
-    clb.ax.tick_params(labelsize=15)
-    clb.set_label('(K)', fontsize=15)
-
-    if pin_coords:
-        ax.plot(pin_coords[1], pin_coords[0], 
-            marker='o', 
-            markersize=12,
-            markerfacecolor='red',
-            markeredgecolor='white',
-            markeredgewidth=1.5, 
-            transform=ccrs.PlateCarree())
-        
-        _print_value_at_point(da, pin_coords)
-
-    if extent: ax.set_extent(extent, crs=ccrs.PlateCarree())
-    ax.set_title(plot_title, fontsize=20, pad=10)
-    ax.coastlines(resolution='50m', color='black', linewidth=1)
-
-    _plt_save(plot_dir, plot_name)
-    return
-
 def open_dnb_radiance(file_path):
     with h5py.File(file_path, 'r') as f:
         bt = f['All_Data']['VIIRS-DNB-SDR_All']['Radiance'][()]
@@ -174,29 +126,3 @@ def open_dnb_radiance(file_path):
     da = _replace_viirs_fill_values(da)
 
     return da
-
-def plot_viirs_srf(srf_file):
-    """
-    Using sensor response function file downloaded from https://ncc.nesdis.noaa.gov/VIIRS/VIIRSSpectralResponseFunctions.php
-    """
-    srf = np.loadtxt(srf_file)
-    x = srf[:, 0]/1000
-    y = srf[:, 1]
-    band_str = f'VIIRS Band {srf_file.split("_")[7]}'
-
-    plt.plot(x, y, color='black', linewidth=1)
-    plt.xlabel('Wavelength (µm)')
-    plt.ylabel('Response')
-    plt.title(f'{band_str} \n NG Band-Averaged RSRs')
-
-    _plt_save("VIIRS_spectral_response_functions", f'srf_{band_str.lower().replace(" ", "_")}')
-    return
-
-def _print_value_at_point(da, pin_coords):
-    dist = ((da['Latitude'] - pin_coords[0])**2 + (da['Longitude'] - pin_coords[1])**2)**0.5
-    y_idx, x_idx = np.unravel_index(dist.argmin(), dist.shape)
-    pin_value = da.isel(y=y_idx, x=x_idx).item()
-    selected_lat = da['Latitude'].isel(y=y_idx, x=x_idx).item()
-    selected_lon = da['Longitude'].isel(y=y_idx, x=x_idx).item()
-    print(f"Value at ({selected_lat:.2f}, {selected_lon:.2f}): {pin_value:.2f} K")
-    return
