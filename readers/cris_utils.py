@@ -40,8 +40,10 @@ def isolate_target_point(ds, target_lat, target_lon):
     atrack_idx, xtrack_idx, fov_idx = np.unravel_index(abs_diff.argmin(), abs_diff.shape)
     ds_target = ds.isel(atrack=atrack_idx, xtrack=xtrack_idx, fov=fov_idx)
 
-    print(f"Using lat/lon of {ds_target['lat'].values:.2f}, {ds_target['lon'].values:.2f}, fov of {fov_idx}")
-    return ds_target
+    actual_lat = f"{ds_target['lat'].values:.2f}"
+    actual_lon = f"{ds_target['lon'].values:.2f}"
+    print(f"Using lat/lon of {actual_lat}, {actual_lon}, fov of {fov_idx}")
+    return ds_target, actual_lat, actual_lon
 
 def planck_radiance(wnum, T):
     
@@ -68,26 +70,20 @@ def radiance_to_brightness_temp(radiance, wnum):
     T_B = numerator / denominator    
     return T_B
 
-def get_brightness_temperature(ds):
-    wnum_lw = ds['wnum_lw'].values
-    wnum_mw = ds['wnum_mw'].values
-    wnum_sw = ds['wnum_sw'].values
-
-    wnum = np.concatenate((wnum_lw, wnum_mw, wnum_sw))
-    wl = 10000 / wnum
+def get_brightness_temperature(ds, spectra_sel):
+    """
+    :param ds: From open_cris_data() or isolate_target_point()
+    :param spectra_sel: "lw", "mw", or "sw"
+    """
+    wnum = ds[f'wnum_{spectra_sel}'].values
     
-    TB_lw = radiance_to_brightness_temp(ds['rad_lw'], wnum_lw)
-    TB_mw = radiance_to_brightness_temp(ds['rad_mw'], wnum_mw)
-    TB_sw = radiance_to_brightness_temp(ds['rad_sw'], wnum_sw)
-    TB = np.concatenate((TB_lw, TB_mw, TB_sw))
+    TB = radiance_to_brightness_temp(ds[f'rad_{spectra_sel}'], wnum)
 
-    data = {
+    df = pd.DataFrame({
         "Wavenumber (cm-1)": wnum, 
-        "Wavelength (um)": wl, 
+        "Wavelength (um)": 10_000 / wnum, 
         "Brightness Temperature (K)": TB
-    }
-
-    df = pd.DataFrame(data)
+    })
 
     return df
 
