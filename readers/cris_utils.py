@@ -1,11 +1,8 @@
 import earthaccess, os
 import xarray as xr
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 import pandas as pd
+import re
 
 def download_cris_data(date_start, date_end, lon_west, lat_south, lon_east, lat_north, cris_dir="CrIS_data"):
     """
@@ -87,3 +84,54 @@ def get_brightness_temperature(ds, spectra_sel):
 
     return df
 
+def create_cris_da(cris_files, fov_sel, wnum_sel):
+    print("Creating CrIS dataset...")
+
+    ds = xr.open_mfdataset(
+        cris_files,
+        combine="nested",
+        concat_dim="atrack")
+    
+    da_cris = select_cris_channel(ds, fov_sel=fov_sel, wnum_sel=wnum_sel)
+
+    start_dt = extract_datetime_from_filename_cris(cris_files[0])
+    end_dt   = extract_datetime_from_filename_cris(cris_files[-1])
+    if start_dt and end_dt:
+        datetime_str = f"{start_dt} - {end_dt}"
+    else:
+        datetime_str = "Unknown - File format unexpected."
+
+    return da_cris, datetime_str
+
+def extract_datetime_from_filename_cris(filename):
+    match = re.search(r'CRIS.(\d{8})T(\d{4})', filename)
+
+    if not match:
+        return None
+
+    date_part = match.group(1)
+    time_part = match.group(2)
+
+    date_formatted = f"{date_part[:4]}-{date_part[4:6]}-{date_part[6:]}"
+    time_formatted = f"{time_part[:2]}:{time_part[2:4]}"
+
+    return f"{date_formatted} {time_formatted}"
+
+def select_cris_channel(ds, fov_sel, wnum_sel):
+    
+    ds_fov = ds.sel(fov=fov_sel)
+
+    if 648.8 <= wnum_sel <= 1096:
+        ds_sel = ds_fov.sel(wnum_lw=wnum_sel, method='nearest')
+        return ds_sel['rad_lw']
+
+    elif 1209 <= wnum_sel <= 1751:
+        ds_sel = ds_fov.sel(wnum_mw=wnum_sel, method='nearest')
+        return ds_sel['rad_mw']
+
+    elif 2154 <= wnum_sel <= 2551:
+        ds_sel = ds_fov.sel(wnum_sw=wnum_sel, method='nearest')
+        return ds_sel['rad_sw']
+
+    else:
+        raise ValueError("Wavenumber out of range")
