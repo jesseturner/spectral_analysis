@@ -34,6 +34,7 @@ filepath_list_sat_time = [
 latitudes = clavrx.opening_clavrx(filepath_list_sat_time, dataset='latitude')
 longitudes = clavrx.opening_clavrx(filepath_list_sat_time, dataset='longitude')
 cloud_mask = clavrx.opening_clavrx(filepath_list_sat_time, dataset='cloud_mask')
+cloud_type = clavrx.opening_clavrx(filepath_list_sat_time, dataset='cloud_type')
 
 #--- Create the dataset with CLAVR-x
 
@@ -46,6 +47,7 @@ ds = xr.Dataset(
         "longitude": (("y", "x"), longitudes),
     },
 )
+ds["clavrx_cloud_type"] = (("y", "x"), cloud_type)
 
 #--- Access the CrIS data
 
