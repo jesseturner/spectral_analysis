@@ -98,7 +98,12 @@ rad2_flat = rad2.reshape(-1, nchan)
 tree = cKDTree(source_points)
 
 distances, indices = tree.query(target_points)
+# convert to km if your lat/lon are degrees
+# rough conversion: 1 deg ≈ 111 km
+dist_km = distances * 111.0
 matched_rad = rad2_flat[indices]
+# mask anything farther than 1 km
+matched_rad[dist_km > 10.0, :] = np.nan
 matched_rad = matched_rad.reshape(ny, nx, nchan)
 
 print("Creating dataset of CrIS on CLAVR-x grid...")
