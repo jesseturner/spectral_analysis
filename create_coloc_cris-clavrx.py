@@ -6,17 +6,24 @@ import os
 import glob
 import re
 import xarray as xr
+import numpy as np
+from scipy.spatial import cKDTree
+from pathlib import Path
 
-#--- Access the CLAVR-x data
+#--- Setting the date and time range
 
 today_date_str = datetime.now().strftime("%Y_%m_%d")
 clavrx_dir = "/mnt/overcastnas1/LEO_clavrx/JPSS_global/"
-clavrx_date_str = "20250312"  # YYYYMMDD
-start_time = "0634" # HHmm
-end_time = "0638" # HHmm
+clavrx_date_str = "20260604"  # YYYYMMDD
+start_time = "0625" # HHmm
+end_time = "0640" # HHmm
 sat_str = "j01"
 clavrx_date = datetime.strptime(clavrx_date_str, "%Y%m%d")
 clavrx_julian_str = clavrx_date.strftime("%Y%j")
+start_dt = datetime.strptime(f"{clavrx_date_str}{start_time}", "%Y%m%d%H%M")
+end_dt = datetime.strptime(f"{clavrx_date_str}{end_time}", "%Y%m%d%H%M")
+
+#--- Access the CLAVR-x data
 
 clavrx_pattern = os.path.join(clavrx_dir, f"{clavrx_julian_str}/*.hdf")
 filepath_list = glob.glob(clavrx_pattern)
@@ -50,17 +57,25 @@ ds = xr.Dataset(
 ds["clavrx_cloud_type"] = (("y", "x"), cloud_type)
 
 #--- Access the CrIS data
+cris_dir = "/mnt/data1/jturner/cris/from_earthaccess"
 
-cris_dir = "data/cris/from_earthaccess"
-cris_date = "20250312" #YYYYMMDD
-cris_pattern = os.path.join(cris_dir, f"SNDR.J1.CRIS.{cris_date}*")
+#------ Get files in time range
+cris_files = []
+all_cris_files = glob.glob(f"{cris_dir}/*")
+pattern = re.compile(r"\.(\d{8}T\d{4})\.")
+for fname in all_cris_files:
+    match = pattern.search(fname)
+    if match:
+        file_dt = datetime.strptime(match.group(1), "%Y%m%dT%H%M")
 
-cris_files = glob.glob(cris_pattern)
+        if start_dt <= file_dt <= end_dt:
+            cris_files.append(fname)
+
 cris_files.sort() 
 print(f"{len(cris_files)} CrIS files found...")
 if not cris_files:
     print("CrIS files not found, downloading...")
-    date_obj = datetime.strptime(cris_date, "%Y%m%d")
+    date_obj = datetime.strptime(clavrx_date_str, "%Y%m%d")
     sel_day_formatted = date_obj.strftime("%Y-%m-%d")
     next_day_formatted = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
     cris_files = cris.download_cris_data(sel_day_formatted, next_day_formatted, cris_dir=cris_dir)
@@ -70,9 +85,6 @@ cris_ds = xr.open_mfdataset(
         cris_files,
         combine="nested",
         concat_dim="atrack")
-
-import numpy as np
-from scipy.spatial import cKDTree
 
 print("Creating target grid (CLAVR-x)...")
 lat1 = ds["latitude"].values   # (y, x)
@@ -102,7 +114,7 @@ distances, indices = tree.query(target_points)
 # rough conversion: 1 deg ≈ 111 km
 dist_km = distances * 111.0
 matched_rad = rad2_flat[indices]
-# mask anything farther than 1 km
+# mask anything farther than 10 km
 matched_rad[dist_km > 10.0, :] = np.nan
 matched_rad = matched_rad.reshape(ny, nx, nchan)
 
@@ -117,5 +129,14 @@ ds["rad_lw_cris"] = xr.DataArray(
     },
 )
 
+ds.attrs.update({
+    "start_time": start_dt.isoformat(),
+    "end_time": end_dt.isoformat(),
+    "sat": sat_str,
+})
+
 today_date_str = datetime.now().strftime("%Y_%m_%d")
-ds.to_netcdf(f"data/processed_datasets/coloc_cris-clavrx_{today_date_str}.nc")
+outfile = Path(f"data/processed_datasets/coloc_cris-clavrx_{today_date_str}.nc")
+if outfile.exists():
+    outfile.unlink()
+ds.to_netcdf(outfile)

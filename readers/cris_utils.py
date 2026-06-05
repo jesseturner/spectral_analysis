@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import re
 
-def download_cris_data(date_start, date_end, lon_west, lat_south, lon_east, lat_north, cris_dir="CrIS_data"):
+def download_cris_data(date_start, date_end, lon_west=None, lat_south=None, lon_east=None, lat_north=None, cris_dir="/mnt/data1/jturner/cris/from_earthaccess"):
     """
     date_start and date_end format: "2025-06-25"
     coordinate format: -105.31
@@ -19,11 +19,17 @@ def download_cris_data(date_start, date_end, lon_west, lat_south, lon_east, lat_
     #------ Suomi NPP Full Spectral Resolution 10.5067/ZCRSHBM5HB23
     #------ NOAA-20 / JPSS-1 Full Spectral Resolution 10.5067/LVEKYTNSRNKP
     #------ NOAA-21 / JPSS-2 Full Spectral Resolution 
-    results = earthaccess.search_data(
-        doi='10.5067/LVEKYTNSRNKP',
-        temporal=(date_start, date_end), 
-        bounding_box=(lon_west, lat_south, lon_east, lat_north)
-    )
+    if lon_west and lat_south and lon_east and lat_north:
+        results = earthaccess.search_data(
+            doi='10.5067/LVEKYTNSRNKP',
+            temporal=(date_start, date_end), 
+            bounding_box=(lon_west, lat_south, lon_east, lat_north)
+        )
+    else: 
+        results = earthaccess.search_data(
+            doi='10.5067/LVEKYTNSRNKP',
+            temporal=(date_start, date_end), 
+        )
     os.makedirs(f"{cris_dir}", exist_ok=True)
     files = earthaccess.download(results, cris_dir)
     return
